@@ -1,30 +1,24 @@
+// src/components/example-country-card.tsx
 import { Box, Divider, Flex, Paper, Text } from "@mantine/core";
 import { motion } from "framer-motion";
 import CountUp from "react-countup";
-import { Country } from "../data/data";
+import { Country } from "../data/countries";
 import { convertDistance, getCompassDirection, getDistance } from "geolib";
+import { directionMap } from "../helpers/directionMap";
 
-type TextWithAnimationProps = {
-  children: React.ReactNode;
-};
+type TextWithAnimationProps = { children: React.ReactNode };
 
 const TextWithAnimation = ({ children }: TextWithAnimationProps) => (
-  <motion.div
-    initial={{ opacity: 0 }}
-    animate={{ opacity: 1 }}
-    transition={{ duration: 0.5 }}
-  >
+  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }}>
     {children}
   </motion.div>
 );
 
-type AnimatedTextProps = {
-  text: string;
-};
+type AnimatedTextProps = { text: string };
 
 const AnimatedText = ({ text }: AnimatedTextProps) => (
   <TextWithAnimation>
-    <Text>{text}</Text>
+    <Text lineClamp={1}>{text}</Text>
   </TextWithAnimation>
 );
 
@@ -33,61 +27,49 @@ type CountryCardProps = {
   country: Country;
 };
 
-export function ExampleCountryCard({
-  guessCountry,
-  country,
-}: CountryCardProps) {
-  const guessCountryLatAndLong = {
-    latitude: guessCountry.latitude,
-    longitude: guessCountry.longitude,
-  };
+export function ExampleCountryCard({ guessCountry, country }: CountryCardProps) {
+  const guessLL = { latitude: guessCountry.latitude, longitude: guessCountry.longitude };
+  const targetLL = { latitude: country.latitude, longitude: country.longitude };
 
-  const countryLatAndLong = {
-    latitude: country.latitude,
-    longitude: country.longitude,
-  };
+  const distance = convertDistance(getDistance(guessLL, targetLL), "km");
+  const direction = getCompassDirection(guessLL, targetLL);
+  // Match real card formula (closer = higher %)
+  const proximity = 100 - (distance / 20000) * 100;
 
-  const distance = convertDistance(
-    getDistance(guessCountryLatAndLong, countryLatAndLong),
-    "km"
-  );
-
-  const direction = getCompassDirection(
-    guessCountryLatAndLong,
-    countryLatAndLong
-  );
-
-  const proximity = (distance / 20000) * 100;
   return (
     <Paper
-      w={"100%"}
+      w="100%"
       shadow="xs"
       withBorder
       h={36}
       px={24}
-      style={{
-        textAlign: "center",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-      }}
+      style={{ textAlign: "center", display: "flex", alignItems: "center", justifyContent: "center" }}
     >
-      <Flex justify={"space-between"} align={"center"} w={"100%"}>
+      <Flex justify="space-between" align="center" w="100%">
         {guessCountry && (
           <>
-            <Box w={"35%"}>
+            <Box w="35%">
               <AnimatedText text={guessCountry.name} />
             </Box>
+
             <Divider orientation="vertical" />
-            <Text w={"20%"}>
-              <CountUp start={0} end={distance} duration={1} /> km
+
+            <Text w="20%">
+              <CountUp start={0} end={Math.round(distance)} duration={1} /> km
             </Text>
-            <Divider orientation="vertical" />{" "}
-            <Box w={"15%"}>
-              <AnimatedText text={direction} />
-            </Box>
+
             <Divider orientation="vertical" />
-            <Text w={"15%"}>
+
+            {/* Use the same arrow/emoji logic as CountryCard */}
+            <Box w="15%">
+              <AnimatedText
+                text={guessCountry === country ? "🎉" : directionMap[direction] || "🧭"}
+              />
+            </Box>
+
+            <Divider orientation="vertical" />
+
+            <Text w="15%">
               <CountUp start={0} end={Math.floor(proximity)} duration={1} /> %
             </Text>
           </>

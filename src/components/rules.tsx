@@ -1,13 +1,45 @@
 import { ActionIcon, Anchor, Divider, Flex, Modal, Text } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { IconQuestionMark } from '@tabler/icons-react';
-import { countries } from '../data/data';
+import { countries } from '../data/countries';
 import { ExampleCountryCard } from './example-country-card';
-import { getCompassDirection, getDistance } from 'geolib';
+import { convertDistance, getCompassDirection, getDistance } from 'geolib';
 import { directionMap } from '../helpers/directionMap';
 
 export function Rules() {
   const [opened, { open, close }] = useDisclosure(false);
+
+  const distance1 = convertDistance(
+    getDistance(
+      {
+        latitude: countries[2].latitude,
+        longitude: countries[2].longitude,
+      },
+      {
+        latitude: countries[0].latitude,
+        longitude: countries[0].longitude,
+      }
+    ),
+    'km'
+  ).toFixed(0);
+
+  const distance2 = convertDistance(
+    getDistance(
+      {
+        latitude: countries[5].latitude,
+        longitude: countries[5].longitude,
+      },
+      {
+        latitude: countries[0].latitude,
+        longitude: countries[0].longitude,
+      }
+    ),
+    'km'
+  ).toFixed(0);
+
+    const proximity1 = Math.floor(100 - (Number(distance1) / 20000) * 100)
+  const proximity2 = Math.floor(100 - (Number(distance2) / 20000) * 100)
+
   return (
     <>
       <Modal
@@ -25,13 +57,15 @@ export function Rules() {
           <Text size="sm">
             Guess the <span>country</span> in 6 guesses.
           </Text>
-
           <Text size="sm">
             Each guess must be a valid country or territory.
           </Text>
           <Text size="sm">
-            After each guess, you will have the distance, the direction and the
-            proximity from your guess to the target location.
+            Before your first guess you’ll see one statistic about the country.
+          </Text>
+          <Text size="sm">
+            After each guess, you’ll see one additional statistic, plus feedback
+            on distance, direction and proximity to the target.
           </Text>
           <Divider />
           <Text fw={500} size="sm">
@@ -43,17 +77,7 @@ export function Rules() {
               country={countries[0]}
             />
             <Text size="sm">
-              Your guess {countries[2].name} is{' '}
-              {getDistance(
-                {
-                  latitude: countries[2].latitude,
-                  longitude: countries[2].longitude,
-                },
-                {
-                  latitude: countries[0].latitude,
-                  longitude: countries[0].longitude,
-                }
-              ).toFixed(2)}{' '}
+              Your guess {countries[2].name} is {distance1}
               km away from the target location, the target location is in the
               {
                 directionMap[
@@ -69,7 +93,7 @@ export function Rules() {
                   )
                 ]
               }{' '}
-              direction and you have 71% of proximity!
+              direction and you have {proximity1}% of proximity!
             </Text>
           </Flex>
 
@@ -79,17 +103,7 @@ export function Rules() {
           />
           <Text size="sm">
             Your second guess <Text span fw={500} />
-            {countries[5].name} is getting closer!
-            {getDistance(
-              {
-                latitude: countries[5].latitude,
-                longitude: countries[5].longitude,
-              },
-              {
-                latitude: countries[0].latitude,
-                longitude: countries[0].longitude,
-              }
-            ).toFixed(2)}{' '}
+            {countries[5].name} is getting closer! {distance2}
             km away,{' '}
             {
               directionMap[
@@ -105,7 +119,7 @@ export function Rules() {
                 )
               ]
             }{' '}
-            and 92%!
+            and {proximity2}%!
           </Text>
 
           <ExampleCountryCard

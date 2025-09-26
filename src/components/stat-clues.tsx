@@ -1,0 +1,93 @@
+// src/components/stat-clues.tsx
+import { Alert, Badge, Box, Card, Flex, Text } from '@mantine/core';
+import { Country } from '../data/countries';
+import type { CountryStats } from '../types';
+
+type StatCluesProps = {
+  country: Country;
+  guessCount: number;
+  gameEnded?: boolean; // reveal all stats at game end
+  statsByCode?: Record<string, CountryStats> | null; // <-- NEW
+};
+
+export function StatClues({
+  country,
+  guessCount,
+  gameEnded,
+  statsByCode,
+}: StatCluesProps) {
+  const stats = statsByCode?.[country.code] ?? null;
+
+  // Build clues in the order you want to reveal them.
+  // Skip any that are null/undefined.
+  const clues = buildClues(stats);
+
+  // Show 1 stat initially, then +1 per guess. If game ended, reveal all.
+  const revealCount = gameEnded ? clues.length : Math.min(1 + guessCount, clues.length);
+
+  const isLoading = statsByCode == null; // fetching/cached not ready
+  const hasNoClues = !isLoading && clues.length === 0;
+
+  return (
+    <Card w="100%" withBorder shadow="xs" p="md">
+      <Flex direction="column" gap={8}>
+        <Flex align="center" justify="space-between">
+          <Text fw={600}>Statistical clues</Text>
+          <Badge variant="light">
+            {Math.min(revealCount, clues.length)} / {clues.length}
+          </Badge>
+        </Flex>
+
+        {isLoading && (
+          <Alert variant="light" color="blue" mt={4}>
+            Fetching latest stats…
+          </Alert>
+        )}
+
+        {hasNoClues && (
+          <Alert variant="light" color="yellow" mt={4}>
+            No stats available (yet).
+          </Alert>
+        )}
+
+        {!isLoading && clues.length > 0 && (
+          <Flex direction="column" gap={6} mt={4}>
+            {clues.slice(0, revealCount).map((s, i) => (
+              <Box key={i}>
+                <Text size="sm">
+                  <Text span fw={600}>{s.label}: </Text>
+                  {s.value}
+                </Text>
+              </Box>
+            ))}
+          </Flex>
+        )}
+      </Flex>
+    </Card>
+  );
+}
+
+// ---- helpers ----
+function buildClues(stats: CountryStats | null | undefined): { label: string; value: string }[] {
+  if (!stats) return [];
+
+  const out: { label: string; value: string }[] = [];
+
+  // Order of reveal (tweak as you like)
+  if (isNum(stats.population)) out.push({ label: 'Population', value: fmtInt(stats.population) });
+  if (isNum(stats.GDPPerCapita)) out.push({ label: 'GDP per capita (EUR)', value: fmtInt(stats.GDPPerCapita) });
+  if (isNum(stats.lifeExpectancy)) out.push({ label: 'Life expectancy (years)', value: stats.lifeExpectancy.toFixed(1) });
+  if (isNum(stats.unemployment)) out.push({ label: 'Unemployment (%)', value: stats.unemployment.toFixed(1) });
+  if (isNum(stats.GDP)) out.push({ label: 'GDP (million EUR)', value: fmtInt(stats.GDP) });
+  if (isNum(stats.area)) out.push({ label: 'Area (km²)', value: fmtInt(stats.area) });
+
+  return out;
+}
+
+function isNum(v: unknown): v is number {
+  return typeof v === 'number' && Number.isFinite(v);
+}
+
+function fmtInt(n: number) {
+  return new Intl.NumberFormat(undefined, { maximumFractionDigits: 0 }).format(n);
+}

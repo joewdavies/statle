@@ -1,7 +1,7 @@
 import { Box, Divider, Flex, Text } from '@mantine/core';
 import { motion } from 'framer-motion';
 import { convertDistance, getCompassDirection, getDistance } from 'geolib';
-import { Country } from '../data/data';
+import { Country } from '../data/countries';
 import CountUp from 'react-countup';
 import { directionMap } from '../helpers/directionMap';
 

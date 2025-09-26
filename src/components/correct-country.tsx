@@ -1,6 +1,6 @@
 import { Badge, Button, Flex } from '@mantine/core';
 import { GameStatus } from '../constants';
-import { Country } from '../data/data';
+import { Country } from '../data/countries';
 import { resetGame } from '../helpers/resetGame';
 
 type CorrectCountryProps = {
@@ -24,7 +24,7 @@ export function CorrectCountry({ country, gameStatus }: CorrectCountryProps) {
         gap={8}
         direction={'row'}
       >
-        <Button
+        {/* <Button
           size="md"
           onClick={() => {
             window.open(
@@ -34,8 +34,8 @@ export function CorrectCountry({ country, gameStatus }: CorrectCountryProps) {
           }}
         >
           Wikipedia
-        </Button>
-        <Button
+        </Button> */}
+        {/* <Button
           size="md"
           onClick={() => {
             window.open(
@@ -45,7 +45,7 @@ export function CorrectCountry({ country, gameStatus }: CorrectCountryProps) {
           }}
         >
           Google Maps
-        </Button>
+        </Button> */}
         <Button size="md" onClick={resetGame}>
           Play again
         </Button>

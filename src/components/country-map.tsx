@@ -1,5 +1,5 @@
 import { useMantineColorScheme } from "@mantine/core";
-import { Country } from "../data/data";
+import { Country } from "../data/countries";
 
 export function CountryMap({ country }: { country: Country }) {
   const colorScheme = useMantineColorScheme();
