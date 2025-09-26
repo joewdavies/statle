@@ -1,4 +1,4 @@
-import { Flex } from '@mantine/core';
+import { Flex,Text } from '@mantine/core';
 import { useEffect, useState } from 'react';
 import './App.css';
 import { CardItem } from './components/card-item';
@@ -58,9 +58,9 @@ function App() {
   return (
     <Flex align="center" direction={'column'} gap={32}>
       <Navbar />
-      <text>
+      <Text>
         Guess the country!
-      </text>
+      </Text>
 
       <StatClues
         country={initialCountry}

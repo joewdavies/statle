@@ -19,7 +19,7 @@ function chunk<T>(arr: T[], size: number): T[][] {
 }
 
 async function fetchJSON(url: string) {
-    console.log("[Eurostat] GET", url); // <— see which chunk you’re inspecting
+
   const u = new URL(url);
   // Cache-buster only when we MISS the local cache
   u.searchParams.set("_", String(Date.now()));
@@ -115,7 +115,6 @@ const indexStats = function (response: any): Record<string, number> {
 function buildDatasetUrl(base: string, geos: string[]) {
   const u = new URL(base);
   for (const g of geos) u.searchParams.append("geo", g);
-  console.log("[Eurostat] building URL with geos:", geos); // <— shows CH in the batch (or not)
   return u.toString();
 }
 
@@ -177,8 +176,7 @@ export async function getAllStats(
     }
   }
 
-  const codes = countries.map(c => c.code); // Use EL, XK, etc.
-  console.log(`Fetching stats for ${codes} countries…`);
+  const codes = countries.map(c => c.code);
 
   // Dataset bases WITHOUT &geo
   const bases = {
