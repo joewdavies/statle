@@ -1,7 +1,7 @@
 // src/components/stat-clues.tsx
 import { Alert, Badge, Box, Card, Flex, Text } from '@mantine/core';
 import { Country } from '../data/countries';
-import type { CountryStats } from '../types';
+import type { CountryStats } from '../data/stats';
 
 type StatCluesProps = {
   country: Country;

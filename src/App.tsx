@@ -12,7 +12,7 @@ import { countries, countriesMap } from './data/countries';
 import { getRandomCountry } from './helpers/getRandomCountry';
 
 // NEW: types + Eurostat service
-import type { CountryStats } from './types';
+import type { CountryStats } from './data/stats';
 import { getAllStats } from './services/eurostat';
 
 function App() {
@@ -58,6 +58,9 @@ function App() {
   return (
     <Flex align="center" direction={'column'} gap={32}>
       <Navbar />
+      <text>
+        Guess the country!
+      </text>
 
       <StatClues
         country={initialCountry}

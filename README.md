@@ -4,6 +4,8 @@ STATLE is a guessing game where players identify a country based on statistics. 
 
 ## Features
 
-- **Guess the Country**: Based on a map image.
-- **Clue System**: Get hints on your guesses.
-- **React & Mantine UI**: Built with React and Mantine for a modern interface.
+- **Guess the Country**: Based on statistics.
+- **Clue System**: Get hints after each guess.
+- **React & Mantine UI**: Built with React and Mantine.
+
+Heavily based on https://github.com/costidotdev/worldle
