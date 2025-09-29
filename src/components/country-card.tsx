@@ -1,4 +1,4 @@
-import { Box, Divider, Flex, Text, Grid, Card } from '@mantine/core';
+import { Box, Divider, Flex, Text, Card } from '@mantine/core';
 import { convertDistance, getCompassDirection, getDistance } from 'geolib';
 import { Country } from '../data/countries';
 import CountUp from 'react-countup';
