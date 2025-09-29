@@ -2,6 +2,7 @@ import { Badge, Button, Flex, Image } from '@mantine/core';
 import { GameStatus } from '../constants';
 import { Country } from '../data/countries';
 import { resetGame } from '../helpers/resetGame';
+import ConfettiExplosion from 'react-confetti-explosion';
 
 type CorrectCountryProps = {
   country: Country;
@@ -10,18 +11,21 @@ type CorrectCountryProps = {
 
 export function CorrectCountry({ country, gameStatus }: CorrectCountryProps) {
   const code = country.code.toLowerCase();
-  const flagUrl = `https://flagcdn.com/w160/${code}.png`; // 160px wide
+  const flagUrl = code == 'el' ? `https://flagcdn.com/w160/gr.png` : `https://flagcdn.com/w160/${code}.png`; // 160px wide, expection for greece (uses GR code)
 
   return (
     <Flex direction="column" gap={16} align="center">
       {gameStatus === GameStatus.Won && (
-        <Image
-          src={flagUrl}
-          alt={`${country.name} flag`}
-          width={120}
-          radius="sm"
-          style={{ boxShadow: '0 2px 6px rgba(0, 0, 0, 0.15)' }}
-        />
+        <>
+          <ConfettiExplosion />
+          <Image
+            src={flagUrl}
+            alt={`${country.name} flag`}
+            width={120}
+            radius="sm"
+            style={{ boxShadow: '0 2px 6px rgba(0, 0, 0, 0.15)' }}
+          />
+        </>
       )}
 
       <Badge

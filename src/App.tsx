@@ -1,9 +1,9 @@
-import { Flex,Text } from '@mantine/core';
+// src/App.tsx
+import { Flex, Text } from '@mantine/core';
 import { useEffect, useState } from 'react';
 import './App.css';
 import { CardItem } from './components/card-item';
 import { CorrectCountry } from './components/correct-country';
-// import { CountryMap } from './components/country-map'; // ← not used anymore
 import { StatClues } from './components/stat-clues';
 import { Navbar } from './components/navbar';
 import { SelectCountry } from './components/select-country';
@@ -11,7 +11,9 @@ import { GameStatus, MAX_GUESSES } from './constants';
 import { countries, countriesMap } from './data/countries';
 import { getRandomCountry } from './helpers/getRandomCountry';
 
-// NEW: types + Eurostat service
+// NEW: bring in the header that matches CountryCard’s grid
+import { CountryCardHeader } from './components/country-card'; // ← from country-card.tsx
+
 import type { CountryStats } from './data/stats';
 import { getAllStats } from './services/eurostat';
 
@@ -23,21 +25,15 @@ function App() {
 
   const [value, setValue] = useState<string>('');
   const [guesses, setGuesses] = useState<string[]>(
-    JSON.parse(
-      localStorage.getItem('guesses') ||
-        JSON.stringify(Array(MAX_GUESSES).fill(''))
-    )
+    JSON.parse(localStorage.getItem('guesses') || JSON.stringify(Array(MAX_GUESSES).fill('')))
   );
   const [guessCount, setGuessCount] = useState<number>(
     JSON.parse(localStorage.getItem('guessCount') || JSON.stringify(0))
   );
   const [gameStatus, setGameStatus] = useState<GameStatus>(
-    JSON.parse(
-      localStorage.getItem('gameStatus') || JSON.stringify(GameStatus.Playing)
-    )
+    JSON.parse(localStorage.getItem('gameStatus') || JSON.stringify(GameStatus.Playing))
   );
 
-  // NEW: fetched stats (daily-cached in localStorage by the service)
   const [statsByCode, setStatsByCode] = useState<Record<string, CountryStats> | null>(null);
 
   useEffect(() => {
@@ -47,26 +43,25 @@ function App() {
     localStorage.setItem('gameStatus', JSON.stringify(gameStatus));
   }, [guesses, guessCount, gameStatus, initialCountry?.code]);
 
-  // NEW: fetch Eurostat stats once
   useEffect(() => {
     (async () => {
-      const all = await getAllStats(countries, { force: true }); // bypasses cache
+      const all = await getAllStats(countries, { force: true });
       setStatsByCode(all);
     })();
   }, []);
 
+  // Helper: do we have any non-empty guesses?
+  const hasAnyGuess = guesses.some(g => g && g.trim().length > 0);
+
   return (
-    <Flex align="center" direction={'column'} gap={32}>
+    <Flex align="center" direction="column" gap={20}>
       <Navbar />
-      <Text>
-        Guess the country!
-      </Text>
+      <Text>Guess the country!</Text>
 
       <StatClues
         country={initialCountry}
         guessCount={guessCount}
         gameEnded={gameStatus !== GameStatus.Playing}
-        // NEW: pass fetched stats down; your StatClues should accept this prop
         statsByCode={statsByCode}
       />
 
@@ -89,10 +84,14 @@ function App() {
         <CorrectCountry country={initialCountry} gameStatus={gameStatus} />
       )}
 
-      <Flex direction={'column'} gap={8} w={'100%'} align={'center'}>
+      {/* Header + guess list */}
+      <Flex direction="column" gap={8} w="100%" align="center">
+        {/* Render header once when there’s at least one row to show */}
+        {hasAnyGuess && <CountryCardHeader />}
+
         {guesses.length === 0 && <h1>No guesses</h1>}
         {guesses.map((guess, index) => {
-          const guessCountry = countries.find((country) => country.name === guess);
+          const guessCountry = countries.find((c) => c.name === guess);
           if (gameStatus === GameStatus.Won && index >= guessCount) return null;
           return (
             <CardItem

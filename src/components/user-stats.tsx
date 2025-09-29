@@ -2,12 +2,12 @@ import { ActionIcon, Modal } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { IconChartBar } from "@tabler/icons-react";
 
-export function Statistics() {
+export function UserStats() {
   const [opened, { open, close }] = useDisclosure(false);
 
   return (
     <>
-      <Modal opened={opened} onClose={close} title="Coming Soon" centered>
+      <Modal opened={opened} onClose={close} title="Coming Soon!" centered>
         {/* <Flex direction={"row"} gap={48} align={"center"} justify={"center"}>
           <Text size="xs" ta={"center"}>
             <Text size="xl" fw={700} span>

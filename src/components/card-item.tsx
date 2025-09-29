@@ -21,6 +21,7 @@ export const CardItem = ({
   const isActive = index === guessCount;
   const borderColor = isActive ? "var(--mantine-color-blue-6)" : "";
   const displayText = guess === "" ? `Guess ${index + 1} / ${MAX_GUESSES}` : "";
+  const isCorrect = guess === country.name;
 
   return (
     <Card
@@ -31,7 +32,8 @@ export const CardItem = ({
       h={24}
       px={24}
       style={{
-        borderColor: borderColor,
+        background: isCorrect ? 'var(--mantine-color-green-0)' : 'transparent',
+        border: isCorrect ? '1px solid var(--mantine-color-green-4)' : borderColor,
         textAlign: "center",
         display: "flex",
         alignItems: "center",

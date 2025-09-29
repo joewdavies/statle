@@ -3,14 +3,14 @@ import { IconBrandGithub } from "@tabler/icons-react";
 import { Logo } from "./logo";
 import { ModeToggle } from "./mode-toggle";
 import { Rules } from "./rules";
-import { Statistics } from "./statistics";
+import { UserStats } from "./user-stats";
 
 export function Navbar() {
   return (
     <Flex justify={"space-between"} align="center" w={"100%"}>
       <Flex gap={16}>
         <Rules />
-        <Statistics />
+        <UserStats />
       </Flex>
       <Logo />
       <Flex gap={16}>
