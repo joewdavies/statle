@@ -1,7 +1,7 @@
 // src/components/stat-clues.tsx
 import { Alert, Badge, Box, Card, Flex, Text } from '@mantine/core';
-import { Country } from '../data/countries';
-import type { CountryStats } from '../data/stats';
+import { Country } from '../data/countries/countries';
+import type { CountryStats } from '../data/stats/stats';
 
 type StatCluesProps = {
   country: Country;
@@ -32,7 +32,7 @@ export function StatClues({
     <Card w="100%" withBorder shadow="xs" p="md">
       <Flex direction="column" gap={8}>
         <Flex align="center" justify="space-between">
-          <Text fw={600}>Statistical clues</Text>
+          <Text fw={600}>Clues</Text>
           <Badge variant="light">
             {Math.min(revealCount, clues.length)} / {clues.length}
           </Badge>
@@ -80,6 +80,12 @@ function buildClues(stats: CountryStats | null | undefined): { label: string; va
   if (isNum(stats.unemployment)) out.push({ label: 'Unemployment (%)', value: stats.unemployment.toFixed(1) });
   if (isNum(stats.GDP)) out.push({ label: 'GDP (million EUR)', value: fmtInt(stats.GDP) });
   if (isNum(stats.area)) out.push({ label: 'Area (km²)', value: fmtInt(stats.area) });
+  if (isNum(stats.goats)) out.push({ label: 'Goat population', value: fmtInt(stats.goats) });
+  if (stats.carSide) out.push({ label: 'Drives on the', value: stats.carSide });
+  if (isNum(stats.forestArea)) out.push({ label: 'Forest area (km²)', value: fmtInt(stats.forestArea) });
+  if (isNum(stats.precipitation)) out.push({ label: 'Annual precipitation (mm)', value: fmtInt(stats.precipitation) });
+  //if (stats.currencies) out.push({ label: 'Currency', value: Object.values(stats.currencies).map(c => c.name).join(', ') });
+
 
   return out;
 }

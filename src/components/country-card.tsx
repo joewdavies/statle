@@ -1,6 +1,6 @@
 import { Box, Divider, Flex, Text, Card } from '@mantine/core';
 import { convertDistance, getCompassDirection, getDistance } from 'geolib';
-import { Country } from '../data/countries';
+import { Country } from '../data/countries/countries';
 import CountUp from 'react-countup';
 import { directionMap } from '../helpers/directionMap';
 

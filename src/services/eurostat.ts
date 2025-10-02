@@ -1,5 +1,6 @@
 // src/services/eurostat.ts
-import type { Country, CountryStats } from "../data/stats";
+import { Country } from "../data/countries/countries";
+import type { CountryStats } from "../data/stats/stats";
 
 /**
  * Batched Eurostat service using YOUR indexStats function,

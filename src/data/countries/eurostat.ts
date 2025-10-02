@@ -1,11 +1,8 @@
-export type Country = {
-  code: string;
-  latitude: number;
-  longitude: number;
-  name: string;
-};
+// eurostat scope
 
-export const countries: Country[] = [
+import { Country } from "./countries";
+
+export const eurostatCountries: Country[] = [
   // --- EU Member States ---
   { code: "AT", latitude: 47.516231, longitude: 14.550072, name: "Austria" },
   { code: "BE", latitude: 50.503887, longitude: 4.469936, name: "Belgium" },
@@ -53,7 +50,3 @@ export const countries: Country[] = [
   { code: "GE", latitude: 42.315407, longitude: 43.356892, name: "Georgia" },
   { code: "XK", latitude: 42.602636, longitude: 20.902977, name: "Kosovo" }, // not in your old list, add manually
 ];
-
-export const countriesMap: Map<Country["code"], Country> = new Map(
-  countries.map((country) => [country.code, country])
-);

@@ -8,14 +8,14 @@ import { StatClues } from './components/stat-clues';
 import { Navbar } from './components/navbar';
 import { SelectCountry } from './components/select-country';
 import { GameStatus, MAX_GUESSES } from './constants';
-import { countries, countriesMap } from './data/countries';
+import { countries, countriesMap } from './data/countries/countries';
 import { getRandomCountry } from './helpers/getRandomCountry';
 
 // NEW: bring in the header that matches CountryCard’s grid
 import { CountryCardHeader } from './components/country-card'; // ← from country-card.tsx
 
-import type { CountryStats } from './data/stats';
-import { getAllStats } from './services/eurostat';
+// stats
+import { stats } from './data/stats/stats';
 
 function App() {
   const storedCountryCode = localStorage.getItem('country');
@@ -34,8 +34,6 @@ function App() {
     JSON.parse(localStorage.getItem('gameStatus') || JSON.stringify(GameStatus.Playing))
   );
 
-  const [statsByCode, setStatsByCode] = useState<Record<string, CountryStats> | null>(null);
-
   useEffect(() => {
     localStorage.setItem('country', initialCountry.code);
     localStorage.setItem('guesses', JSON.stringify(guesses));
@@ -43,12 +41,13 @@ function App() {
     localStorage.setItem('gameStatus', JSON.stringify(gameStatus));
   }, [guesses, guessCount, gameStatus, initialCountry?.code]);
 
-  useEffect(() => {
-    (async () => {
-      const all = await getAllStats(countries, { force: true });
-      setStatsByCode(all);
-    })();
-  }, []);
+  // statistical data
+  // Either static:
+  const statsByCode = stats; // synchronous, no state
+
+  // Or dynamic:
+  //const statsByCode = useCountryStats(true); // set true to bypass cache
+
 
   // Helper: do we have any non-empty guesses?
   const hasAnyGuess = guesses.some(g => g && g.trim().length > 0);

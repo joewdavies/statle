@@ -1,6 +1,6 @@
 import { Card, Text } from "@mantine/core";
 import { MAX_GUESSES } from "../constants";
-import { Country } from "../data/countries";
+import { Country } from "../data/countries/countries";
 import { CountryCard } from "./country-card";
 
 type PaperItemProps = {

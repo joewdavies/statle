@@ -1,6 +1,6 @@
 import { Badge, Button, Flex, Image } from '@mantine/core';
 import { GameStatus } from '../constants';
-import { Country } from '../data/countries';
+import { Country } from '../data/countries/countries';
 import { resetGame } from '../helpers/resetGame';
 import ConfettiExplosion from 'react-confetti-explosion';
 
@@ -21,9 +21,8 @@ export function CorrectCountry({ country, gameStatus }: CorrectCountryProps) {
           <Image
             src={flagUrl}
             alt={`${country.name} flag`}
-            width={120}
             radius="sm"
-            style={{ boxShadow: '0 2px 6px rgba(0, 0, 0, 0.15)' }}
+            style={{ boxShadow: '0 2px 6px rgba(0, 0, 0, 0.15)', width: '120px' }}
           />
         </>
       )}

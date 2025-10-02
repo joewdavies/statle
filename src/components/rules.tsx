@@ -1,10 +1,10 @@
 import { ActionIcon, Anchor, Divider, Flex, Modal, Text } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { IconQuestionMark } from '@tabler/icons-react';
-import { countries } from '../data/countries';
 import { ExampleCountryCard } from './example-country-card';
 import { convertDistance, getCompassDirection, getDistance } from 'geolib';
 import { directionMap } from '../helpers/directionMap';
+import { countries } from '../data/countries/countries';
 
 export function Rules() {
   const [opened, { open, close }] = useDisclosure(false);

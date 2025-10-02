@@ -4,7 +4,7 @@ import { IconSearch } from '@tabler/icons-react';
 import { useCallback, useEffect, useRef } from 'react';
 import ConfettiExplosion from 'react-confetti-explosion';
 import { GameStatus, MAX_GUESSES } from '../constants';
-import { Country } from '../data/countries';
+import { Country } from '../data/countries/countries';
 import useFocusOnKey from '../hooks/useFocusOnKey';
 
 type SelectCountryProps = {
