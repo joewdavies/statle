@@ -90,7 +90,7 @@ function buildClues(stats: CountryStats | null | undefined): { label: string; va
   return out;
 }
 
-function formatter(num, locale = "en") {
+function formatter(num:any, locale = "en") {
   if (num === null || num === undefined) return "";
 
   return new Intl.NumberFormat(locale, {
