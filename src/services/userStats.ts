@@ -46,7 +46,7 @@ function readRaw(): HistoryFile {
   try {
     const parsed = JSON.parse(raw);
     if (parsed?.v === 1 && Array.isArray(parsed.items)) return parsed as HistoryFile;
-  } catch {}
+  } catch { }
   // If corrupted, reset:
   return { v: 1, items: [] };
 }
@@ -70,9 +70,7 @@ export const UserStatsService = {
   /** Replace or append a game by date (one game per day/seed). */
   upsert(game: GameResult) {
     const f = readRaw();
-    const idx = f.items.findIndex((g) => g.date === game.date);
-    if (idx >= 0) f.items[idx] = game;
-    else f.items.push(game);
+    f.items.push(game);      // ← no replacing by date
     writeRaw(f);
   },
 
@@ -107,7 +105,7 @@ export const UserStatsService = {
   },
 
   /** Aggregate stats for UI. */
-  getStats(maxGuesses: number) {
+  getUserStats(maxGuesses: number) {
     const list = UserStatsService.getAll();
     const played = list.length;
     const wins = list.filter((g) => g.result === "won").length;

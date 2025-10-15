@@ -15,7 +15,7 @@ export function useUserStats(maxGuesses: number) {
     return () => window.removeEventListener("storage", onStorage);
   }, []);
 
-  const stats = useMemo(() => UserStatsService.getStats(maxGuesses), [history, maxGuesses]);
+  const userStats = useMemo(() => UserStatsService.getUserStats(maxGuesses), [history, maxGuesses]);
 
   const refresh = useCallback(() => setHistory(UserStatsService.getAll()), []);
   const upsert = useCallback((g: GameResult) => {
@@ -27,5 +27,5 @@ export function useUserStats(maxGuesses: number) {
     refresh();
   }, [refresh]);
 
-  return { history, stats, upsert, clear, refresh };
+  return { history, userStats, upsert, clear, refresh };
 }

@@ -6,9 +6,9 @@ import { MAX_GUESSES } from "../constants";
 
 export function UserStats() {
   const [opened, { open, close }] = useDisclosure(false);
-  const { history, stats, clear } = useUserStats(MAX_GUESSES);
+  const { history, userStats, clear } = useUserStats(MAX_GUESSES);
 
-  const distMax = Math.max(1, ...stats.guessDistribution);
+  const distMax = Math.max(1, ...userStats.guessDistribution);
 
   return (
     <>
@@ -17,25 +17,25 @@ export function UserStats() {
           <Group grow>
             <Card withBorder>
               <Flex direction="column" align="center" gap={4}>
-                <Text size="xl" fw={700}>{stats.played}</Text>
+                <Text size="xl" fw={700}>{userStats.played}</Text>
                 <Text size="xs" c="dimmed">Played</Text>
               </Flex>
             </Card>
             <Card withBorder>
               <Flex direction="column" align="center" gap={4}>
-                <Text size="xl" fw={700}>{Math.round(stats.winRate * 100)}%</Text>
+                <Text size="xl" fw={700}>{Math.round(userStats.winRate * 100)}%</Text>
                 <Text size="xs" c="dimmed">Win rate</Text>
               </Flex>
             </Card>
             <Card withBorder>
               <Flex direction="column" align="center" gap={4}>
-                <Text size="xl" fw={700}>{stats.currentStreak}</Text>
+                <Text size="xl" fw={700}>{userStats.currentStreak}</Text>
                 <Text size="xs" c="dimmed">Current streak</Text>
               </Flex>
             </Card>
             <Card withBorder>
               <Flex direction="column" align="center" gap={4}>
-                <Text size="xl" fw={700}>{stats.maxStreak}</Text>
+                <Text size="xl" fw={700}>{userStats.maxStreak}</Text>
                 <Text size="xs" c="dimmed">Max streak</Text>
               </Flex>
             </Card>
@@ -45,7 +45,7 @@ export function UserStats() {
             <Flex direction="column" gap={10}>
               <Text fw={600}>Guess distribution</Text>
               <Flex direction="column" gap={8}>
-                {stats.guessDistribution.map((count, i) => (
+                {userStats.guessDistribution.map((count, i) => (
                   <Flex key={i} align="center" gap={12}>
                     <Text w={24} ta="right">{i + 1}</Text>
                     <Progress value={(count / distMax) * 100} w="100%" />
