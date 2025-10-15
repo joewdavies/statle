@@ -10,6 +10,7 @@ import { SelectCountry } from './components/select-country';
 import { GameStatus, MAX_GUESSES } from './constants';
 import { countries, countriesMap } from './data/countries/countries';
 import { getRandomCountry } from './helpers/getRandomCountry';
+import { UserStatsService } from "./services/userStats";
 
 // NEW: bring in the header that matches CountryCard’s grid
 import { CountryCardHeader } from './components/country-card'; // ← from country-card.tsx
@@ -40,6 +41,28 @@ function App() {
     localStorage.setItem('guessCount', JSON.stringify(guessCount));
     localStorage.setItem('gameStatus', JSON.stringify(gameStatus));
   }, [guesses, guessCount, gameStatus, initialCountry?.code]);
+
+  // upsert into history whenever the game ends
+  useEffect(() => {
+    if (gameStatus === GameStatus.Playing) return;
+
+    const record = UserStatsService.buildRecord({
+      countryCode: initialCountry.code,
+      countryName: initialCountry.name,
+      result: gameStatus === GameStatus.Won ? "won" : "lost",
+      // keep only the guesses actually used, and drop empties
+      guesses: guesses.filter(Boolean).slice(0, guessCount),
+    });
+
+    UserStatsService.upsert(record);
+  }, [
+    gameStatus,
+    guessCount,
+    guesses,
+    initialCountry.code,
+    initialCountry.name,
+  ]);
+
 
   // statistical data
   // Either static:

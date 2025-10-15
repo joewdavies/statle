@@ -78,7 +78,7 @@ function buildClues(stats: CountryStats | null | undefined): { label: string; va
   if (isNum(stats.GDPPerCapita)) out.push({ label: 'GDP per capita (EUR)', value: fmtInt(stats.GDPPerCapita) });
   if (isNum(stats.lifeExpectancy)) out.push({ label: 'Life expectancy (years)', value: stats.lifeExpectancy.toFixed(1) });
   if (isNum(stats.unemployment)) out.push({ label: 'Unemployment (%)', value: stats.unemployment.toFixed(1) });
-  if (isNum(stats.GDP)) out.push({ label: 'GDP (million EUR)', value: fmtInt(stats.GDP) });
+  if (isNum(stats.GDP)) out.push({ label: 'GDP (EUR)', value: formatter.format(stats.GDP) });
   if (isNum(stats.area)) out.push({ label: 'Area (km²)', value: fmtInt(stats.area) });
   if (isNum(stats.goats)) out.push({ label: 'Goat population', value: fmtInt(stats.goats) });
   if (stats.carSide) out.push({ label: 'Drives on the', value: stats.carSide });
@@ -89,6 +89,11 @@ function buildClues(stats: CountryStats | null | undefined): { label: string; va
 
   return out;
 }
+
+const formatter = new Intl.NumberFormat(undefined, {
+  notation: "compact", // "compact" gives "1M" / "1 million"
+  compactDisplay: "long" // "short" = "1M", "long" = "1 million"
+})
 
 function isNum(v: unknown): v is number {
   return typeof v === 'number' && Number.isFinite(v);
