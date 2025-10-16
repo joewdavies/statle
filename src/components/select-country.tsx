@@ -20,6 +20,21 @@ type SelectCountryProps = {
   setGameStatus: (gameStatus: GameStatus) => void;
 };
 
+// Put these near the top of the file (outside the component)
+const normalize = (s: string) =>
+  s
+    .normalize('NFD')                // split accents
+    .replace(/[\u0300-\u036f]/g, '') // remove accents
+    .toLowerCase();
+
+// Optional: aliases you want matched by typing (doesn't change what’s displayed/selected)
+const COUNTRY_ALIASES: Record<string, string[]> = {
+  Türkiye: ['Turkey', 'Turkiye', 'Republic of Türkiye'],
+  Czechia: ['Czech Republic', 'Cesko'],
+  Slovakia: ['Slovak Republic'],
+  // add more as you like…
+};
+
 export function SelectCountry({
   countries,
   country,
@@ -34,6 +49,8 @@ export function SelectCountry({
 }: SelectCountryProps) {
   const btnRef = useRef<HTMLButtonElement>(null);
   const autoCompleteRef = useRef<HTMLInputElement>(null);
+
+
 
   const handleCountrySubmit = useCallback(() => {
     if (!value) {
@@ -120,6 +137,17 @@ export function SelectCountry({
     setValue(newValue);
   }
 
+  const autoItems = countries.map((c) => {
+    const aliases = COUNTRY_ALIASES[c.name] ?? [];
+    return {
+      value: c.name,                                   // what gets inserted on select
+      // a hidden searchable field with normalized name + aliases + code
+      keywords: [c.name, ...aliases, c.code ?? '']
+        .map(normalize)
+        .join(' '),
+    };
+  });
+
   return (
     <>
       {gameStatus === GameStatus.Won && <ConfettiExplosion />}
@@ -131,7 +159,7 @@ export function SelectCountry({
         w={'100%'}
       >
         <Autocomplete
-          data={countries.map((country) => country.name)}
+          data={autoItems}
           aria-label="Country"
           placeholder="Select country"
           radius="md"
@@ -145,6 +173,22 @@ export function SelectCountry({
           flex={2}
           inputSize="md"
           leftSection={<IconSearch size={18} />}
+          // key bit: custom filter that is accent/alias aware
+          filter={({ options, search, limit }) => {
+            const q = normalize(search.trim());
+
+            const filtered = options.filter((item: any) => {
+              return (
+                normalize(item.value).includes(q) ||
+                (item.keywords && item.keywords.includes(q))
+              );
+            });
+
+            // Respect Mantine’s built-in limit behavior
+            return filtered.slice(0, limit);
+          }}
+          // (Optional) show more hits
+          limit={200}
         />
         <Button size="md" ref={btnRef} onClick={handleCountrySubmit}>
           Submit

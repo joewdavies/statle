@@ -3,6 +3,7 @@ import { useDisclosure } from "@mantine/hooks";
 import { IconChartBar } from "@tabler/icons-react";
 import { useUserStats } from "../hooks/useUserStats";
 import { MAX_GUESSES } from "../constants";
+import { WorldMap } from './world-map';
 
 export function UserStats() {
   const [opened, { open, close }] = useDisclosure(false);
@@ -40,6 +41,13 @@ export function UserStats() {
               </Flex>
             </Card>
           </Group>
+
+          <Card withBorder>
+            <div style={{ textAlign: 'center' }}>
+              <Text>Countries You’ve Guessed Correctly</Text>
+              <WorldMap />
+            </div>
+          </Card>
 
           <Card withBorder>
             <Flex direction="column" gap={10}>
@@ -84,7 +92,7 @@ export function UserStats() {
           </Card>
 
           <Text size="xs" c="dimmed" ta="center">
-            Data saved on this device. <Text span c="blue" style={{cursor:'pointer'}} onClick={clear}>Reset</Text>
+            Data saved on this device. <Text span c="blue" style={{ cursor: 'pointer' }} onClick={clear}>Reset</Text>
           </Text>
         </Flex>
       </Modal>

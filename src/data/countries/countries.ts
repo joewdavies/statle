@@ -10,7 +10,9 @@ export type Country = {
   name: string;
 };
 
-export const countries = [...eurostatCountries, ...restOfWorldCountries] as Country[];
+export const countries = [...eurostatCountries, ...restOfWorldCountries]
+  .sort((a, b) => a.name.localeCompare(b.name, 'en', { sensitivity: 'base' })) as Country[];
+  
 export const countriesMap: Map<string, Country> = new Map(
   countries.map((c) => [c.code, c])
 );
