@@ -1,15 +1,15 @@
 import { Badge, Button, Flex, Image } from '@mantine/core';
 import { GameStatus } from '../constants';
 import { Country } from '../data/countries/countries';
-import { resetGame } from '../helpers/resetGame';
 import ConfettiExplosion from 'react-confetti-explosion';
 
 type CorrectCountryProps = {
   country: Country;
   gameStatus: GameStatus;
+  onPlayAgain: () => void;  
 };
 
-export function CorrectCountry({ country, gameStatus }: CorrectCountryProps) {
+export function CorrectCountry({ country, gameStatus, onPlayAgain }: CorrectCountryProps) {
   const code = country.code.toLowerCase();
   const flagUrl = code == 'el' ? `https://flagcdn.com/w160/gr.png` : `https://flagcdn.com/w160/${code}.png`; // 160px wide, expection for greece (uses GR code)
 
@@ -35,7 +35,7 @@ export function CorrectCountry({ country, gameStatus }: CorrectCountryProps) {
       </Badge>
 
       <Flex w="100%" justify="center" align="center" gap={8} direction="row">
-        <Button size="md" onClick={resetGame}>
+        <Button size="md" onClick={onPlayAgain}>
           Play again
         </Button>
       </Flex>

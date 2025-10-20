@@ -6,7 +6,7 @@ function hasStats(code: string): code is keyof typeof stats {
 }
 
 export function getRandomCountry(): Country {
-  const minClues = 5;
+  const minClues = 3;
 
   // keep only countries whose code exists in `stats` and has ≥ minClues non-null values
   const validCountries = countries.filter((c) => {

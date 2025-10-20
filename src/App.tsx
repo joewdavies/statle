@@ -1,4 +1,3 @@
-// src/App.tsx
 import { Flex, Text } from '@mantine/core';
 import { useEffect, useState } from 'react';
 import './App.css';
@@ -10,19 +9,25 @@ import { SelectCountry } from './components/select-country';
 import { GameStatus, MAX_GUESSES } from './constants';
 import { countries, countriesMap } from './data/countries/countries';
 import { getRandomCountry } from './helpers/getRandomCountry';
-import { UserStatsService } from "./services/userStats";
+import { useUserStats } from './hooks/useUserStats';
+import { CountryCardHeader } from './components/country-card';
 
-// NEW: bring in the header that matches CountryCard’s grid
-import { CountryCardHeader } from './components/country-card'; // ← from country-card.tsx
+// reset helper that accepts setters
+import { resetGame as resetGameHelper } from './helpers/resetGame';
 
 // stats
 import { stats } from './data/stats/stats';
+import { UserStatsService } from './services/userStats';
 
 function App() {
+  // 1) Read any stored country just once for initial value
   const storedCountryCode = localStorage.getItem('country');
-  const initialCountry = storedCountryCode
+  const bootCountry = storedCountryCode
     ? countriesMap.get(storedCountryCode)!
     : getRandomCountry();
+
+  // 2) ✅ Keep country in state (so we can swap it without reloading)
+  const [country, setCountry] = useState(bootCountry);
 
   const [value, setValue] = useState<string>('');
   const [guesses, setGuesses] = useState<string[]>(
@@ -35,42 +40,43 @@ function App() {
     JSON.parse(localStorage.getItem('gameStatus') || JSON.stringify(GameStatus.Playing))
   );
 
+  // 3) Persist current round to localStorage whenever it changes
   useEffect(() => {
-    localStorage.setItem('country', initialCountry.code);
+    localStorage.setItem('country', country.code);
     localStorage.setItem('guesses', JSON.stringify(guesses));
     localStorage.setItem('guessCount', JSON.stringify(guessCount));
     localStorage.setItem('gameStatus', JSON.stringify(gameStatus));
-  }, [guesses, guessCount, gameStatus, initialCountry?.code]);
+  }, [country.code, guesses, guessCount, gameStatus]);
 
-  // upsert into history whenever the game ends
+  // 4) When the game ends, upsert to history using the *current* state country
+  const { upsert: upsertUserStats } = useUserStats(MAX_GUESSES);
   useEffect(() => {
     if (gameStatus === GameStatus.Playing) return;
 
     const record = UserStatsService.buildRecord({
-      countryCode: initialCountry.code,
-      countryName: initialCountry.name,
+      countryCode: country.code,
+      countryName: country.name,
       result: gameStatus === GameStatus.Won ? "won" : "lost",
-      // keep only the guesses actually used, and drop empties
       guesses: guesses.filter(Boolean).slice(0, guessCount),
     });
 
-    UserStatsService.upsert(record);
-  }, [
-    gameStatus,
-    guessCount,
-    guesses,
-    initialCountry.code,
-    initialCountry.name,
-  ]);
+    upsertUserStats(record);
+  }, [gameStatus, guessCount, guesses, country.code, country.name]);
 
+  // statistical data (static for now)
+  const statsByCode = stats;
 
-  // statistical data
-  // Either static:
-  const statsByCode = stats; // synchronous, no state
-
-  // Or dynamic:
-  //const statsByCode = useCountryStats(true); // set true to bypass cache
-
+  // 5) Fast, no-reload reset wired to your helper
+  const onPlayAgain = () =>
+    resetGameHelper({
+      setCountry,
+      setGuesses,
+      setGuessCount,
+      setGameStatus,
+      setInputValue: setValue,
+      maxGuesses: MAX_GUESSES,
+      // rng: getRandomCountry, // optional override
+    });
 
   // Helper: do we have any non-empty guesses?
   const hasAnyGuess = guesses.some(g => g && g.trim().length > 0);
@@ -80,8 +86,9 @@ function App() {
       <Navbar />
       <Text>Guess the country!</Text>
 
+      {/* ✅ pass the stateful country */}
       <StatClues
-        country={initialCountry}
+        country={country}
         guessCount={guessCount}
         gameEnded={gameStatus !== GameStatus.Playing}
         statsByCode={statsByCode}
@@ -90,7 +97,7 @@ function App() {
       {gameStatus === GameStatus.Playing && (
         <SelectCountry
           countries={countries}
-          country={initialCountry}
+          country={country}
           value={value}
           setValue={setValue}
           guesses={guesses}
@@ -103,14 +110,12 @@ function App() {
       )}
 
       {gameStatus !== GameStatus.Playing && (
-        <CorrectCountry country={initialCountry} gameStatus={gameStatus} />
+        <CorrectCountry country={country} gameStatus={gameStatus} onPlayAgain={onPlayAgain} />
       )}
 
       {/* Header + guess list */}
       <Flex direction="column" gap={8} w="100%" align="center">
-        {/* Render header once when there’s at least one row to show */}
         {hasAnyGuess && <CountryCardHeader />}
-
         {guesses.length === 0 && <h1>No guesses</h1>}
         {guesses.map((guess, index) => {
           const guessCountry = countries.find((c) => c.name === guess);
@@ -122,7 +127,7 @@ function App() {
               guessCount={guessCount}
               guess={guess}
               guessCountry={guessCountry}
-              country={initialCountry}
+              country={country}
             />
           );
         })}
