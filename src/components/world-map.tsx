@@ -24,7 +24,7 @@ export function WorldMap() {
             // Convert TopoJSON → GeoJSON
             const worldGeoJSON: any = feature(
                 worldTopoJSON as any,
-                (worldTopoJSON as any).objects.CNTR_RG_20M_2020_4326
+                (worldTopoJSON as any).objects.CNTR_RG_60M_2024_4326
             );
 
             // 🧊 Remove Antarctica (ISO = "AQ")
@@ -65,7 +65,7 @@ export function WorldMap() {
                 .attr('fill', (d: any) => fillColor(d.id || d.properties.ISO_A3 || d.properties.iso_a3));
 
             countries.append('title')
-                .text((d: any) => d.properties.na || d.properties.CNTR_NAME);
+                .text((d: any) => d.properties.NAME_ENGL || d.properties.CNTR_NAME);
 
         }
 
