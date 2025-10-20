@@ -6,12 +6,6 @@ function hasStats(code: string): code is keyof typeof stats {
   return Object.prototype.hasOwnProperty.call(stats, code);
 }
 
-import { countries } from '../data/countries';
-import type { Country } from '../data/countries';
-import { stats } from '../data/stats/stats';
-import { hasStats } from '../helpers/hasStats';
-import { UserStatsService } from '../services/userStats';
-
 export function getRandomCountry(): Country {
   const minClues = 3;
 
