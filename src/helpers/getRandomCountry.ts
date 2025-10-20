@@ -1,5 +1,6 @@
 import { countries, Country } from "../data/countries/countries";
 import { stats } from "../data/stats/stats";
+import { UserStatsService } from '../services/userStats';
 
 function hasStats(code: string): code is keyof typeof stats {
   return Object.prototype.hasOwnProperty.call(stats, code);
