@@ -1,5 +1,6 @@
 import { countries, Country } from "../data/countries/countries";
 import { stats } from "../data/stats/stats";
+import { UserStatsService } from '../services/userStats';
 
 function hasStats(code: string): code is keyof typeof stats {
   return Object.prototype.hasOwnProperty.call(stats, code);
@@ -8,18 +9,34 @@ function hasStats(code: string): code is keyof typeof stats {
 export function getRandomCountry(): Country {
   const minClues = 3;
 
-  // keep only countries whose code exists in `stats` and has ≥ minClues non-null values
-  const validCountries = countries.filter((c) => {
+  // already-active country (avoid repeating immediately)
+  const lastCountryCode = localStorage.getItem('country');
+
+  // build a Set of previously played country codes from history
+  const playedCodes = new Set(UserStatsService.getAll().map(g => g.countryCode));
+
+  // primary pool: valid + not played + not the current one
+  const validUnplayed = countries.filter((c) => {
+    if (c.code === lastCountryCode) return false;
+    if (playedCodes.has(c.code)) return false;
     if (!hasStats(c.code)) return false;
+
     const s = stats[c.code];
-    const filled = Object.values(s).filter(v => v !== null && v !== undefined).length;
+    const filled = Object.values(s).filter(v => v != null).length;
     return filled >= minClues;
   });
 
-  // fallback if none (shouldn't happen, but keeps TS happy and avoids runtime errors)
-  const pool = validCountries.length ? validCountries : countries.filter(c => hasStats(c.code));
+  // graceful fallbacks so the game never breaks
+  let pool = validUnplayed;
+  if (!pool.length) {
+    // allow repeats, but still require stats and avoid current
+    const anyValid = countries.filter(c => hasStats(c.code) && c.code !== lastCountryCode);
+    pool = anyValid.length ? anyValid : countries;
+  }
 
-  return pool[Math.floor(Math.random() * pool.length)];
+  const chosen = pool[Math.floor(Math.random() * pool.length)];
+  localStorage.setItem('country', chosen.code); // keep your existing localStorage flow
+  return chosen;
 }
 
 export function getDailyCountry() {
