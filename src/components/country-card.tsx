@@ -1,8 +1,9 @@
 import { Box, Divider, Flex, Text, Card } from '@mantine/core';
-import { convertDistance, getCompassDirection, getDistance } from 'geolib';
+import { convertDistance, getDistance } from 'geolib';
 import { Country } from '../data/countries/countries';
 import CountUp from 'react-countup';
 import { directionMap } from '../helpers/directionMap';
+import { getCompassDirection } from '../services/geo';
 
 
 export function CountryCardHeader() {

@@ -32,12 +32,10 @@ export function WorldMap() {
                 (f: any) => f.id !== 'AQ' && f.properties.ISO3_CODE !== 'ATA'
             );
 
-            const projection =
-                geoNaturalEarth1()
-                    .fitSize([width, height], {
-                        type: 'Sphere',
-                    });
-
+            const projection = geoNaturalEarth1()
+                .scale(width/5) // increase this value to zoom in
+                .translate([width / 2, height / 1.6]); // center the map
+ 
             const path = geoPath(projection);
 
             // Correctly guessed countries

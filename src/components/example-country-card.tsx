@@ -3,8 +3,9 @@ import { Box, Divider, Flex, Paper, Text } from "@mantine/core";
 import { motion } from "framer-motion";
 import CountUp from "react-countup";
 import { Country } from "../data/countries/countries";
-import { convertDistance, getCompassDirection, getDistance } from "geolib";
+import { convertDistance, getDistance } from "geolib";
 import { directionMap } from "../helpers/directionMap";
+import { getCompassDirection } from "../services/geo";
 
 type TextWithAnimationProps = { children: React.ReactNode };
 
