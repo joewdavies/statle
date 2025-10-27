@@ -17,7 +17,38 @@ import { resetGame as resetGameHelper } from './helpers/resetGame';
 
 // stats
 import { stats } from './data/stats/stats';
-import { UserStatsService } from './services/userStats';
+import { GameResult, UserStatsService } from './services/userStats';
+
+
+// 🧹 one-time cleanup of *exact* duplicates (same content; keep latest finishedAt)
+const sortByDateAscLocal = (a: GameResult, b: GameResult) =>
+  a.date !== b.date ? a.date.localeCompare(b.date) : a.finishedAt - b.finishedAt;
+
+(function dedupeStatleHistoryV1() {
+  const KEY = "statleHistory.v1";
+  const raw = localStorage.getItem(KEY);
+  if (!raw) return;
+  try {
+    const file = JSON.parse(raw) as { v: 1; items: GameResult[] };
+    if (file?.v !== 1 || !Array.isArray(file.items)) return;
+
+    const keyOf = (g: GameResult) =>
+      [g.date, g.countryCode, g.countryName, g.result, g.guessCount, ...g.guesses].join("§");
+
+    const byKey: Record<string, GameResult> = {};
+    for (const g of file.items) {
+      const k = keyOf(g);
+      const prev = byKey[k];
+      if (!prev || g.finishedAt > prev.finishedAt) byKey[k] = g;
+    }
+
+    const deduped = Object.values(byKey).sort(sortByDateAscLocal);
+    if (deduped.length !== file.items.length) {
+      localStorage.setItem(KEY, JSON.stringify({ v: 1, items: deduped }));
+      console.info(`🧹 Statle: deduped exact duplicates (${file.items.length} → ${deduped.length})`);
+    }
+  } catch {}
+})();
 
 function App() {
   // 1) Read any stored country just once for initial value
@@ -61,7 +92,7 @@ function App() {
     });
 
     upsertUserStats(record);
-  }, [gameStatus, guessCount, guesses, country.code, country.name]);
+  }, [gameStatus, guessCount, guesses, country.code, country.name, upsertUserStats]);
 
   // statistical data (static for now)
   const statsByCode = stats;

@@ -60,6 +60,18 @@ function sortByDateAsc(a: GameResult, b: GameResult) {
   return a.finishedAt - b.finishedAt;
 }
 
+function equalGameContent(a: GameResult, b: GameResult) {
+  return (
+    a.date === b.date &&
+    a.countryCode === b.countryCode &&
+    a.countryName === b.countryName &&
+    a.result === b.result &&
+    a.guessCount === b.guessCount &&
+    a.guesses.length === b.guesses.length &&
+    a.guesses.every((v, i) => v === b.guesses[i])
+  );
+}
+
 export const UserStatsService = {
   /** Return full history (sorted ascending by date). */
   getAll(): GameResult[] {
@@ -67,10 +79,31 @@ export const UserStatsService = {
     return [...f.items].sort(sortByDateAsc);
   },
 
-  /** Replace or append a game by date (one game per day/seed). */
+  /** Append a game; if an *identical* game already exists, keep the one with the latest finishedAt. */
   upsert(game: GameResult) {
     const f = readRaw();
-    f.items.push(game);      // ← no replacing by date
+
+    // Find an existing *identical* record (ignoring finishedAt)
+    const idx = f.items.findIndex(g => equalGameContent(g, game));
+    if (idx >= 0) {
+      // keep the one with the newer finishedAt
+      if (game.finishedAt > f.items[idx].finishedAt) {
+        f.items[idx] = game;
+      }
+      writeRaw(f);
+      return;
+    }
+
+    // Optional tiny debounce: if the *last* game has same content except finishedAt
+    const last = f.items[f.items.length - 1];
+    if (last && equalGameContent(last, game)) {
+      if (game.finishedAt > last.finishedAt) f.items[f.items.length - 1] = game;
+      writeRaw(f);
+      return;
+    }
+
+    // Otherwise, append
+    f.items.push(game);
     writeRaw(f);
   },
 
@@ -111,7 +144,7 @@ export const UserStatsService = {
     const wins = list.filter((g) => g.result === "won").length;
     const winRate = played ? wins / played : 0;
 
-    // streaks (contiguous wins if you play multiple same-day entries they still count in order)
+    // streaks across *all* games, including multiple per day
     let current = 0;
     let max = 0;
     for (const g of list) {
@@ -122,7 +155,7 @@ export const UserStatsService = {
         current = 0;
       }
     }
-    // current streak is the tail run of wins from end:
+    // tail wins
     let tail = 0;
     for (let i = list.length - 1; i >= 0; i--) {
       if (list[i].result === "won") tail += 1;
@@ -140,10 +173,10 @@ export const UserStatsService = {
     return {
       played,
       wins,
-      winRate,           // 0..1
+      winRate,
       currentStreak: tail,
       maxStreak: max,
-      guessDistribution: dist, // length maxGuesses
+      guessDistribution: dist,
       lastGame: list[list.length - 1] ?? null,
     };
   },

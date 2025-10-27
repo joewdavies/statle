@@ -1,13 +1,61 @@
 // src/components/stat-clues.tsx
-import { Alert, Badge, Box, Card, Flex, Text } from '@mantine/core';
+import { Alert, Badge, Box, Card, Flex, Group, Text } from '@mantine/core';
 import { Country } from '../data/countries/countries';
 import type { CountryStats } from '../data/stats/stats';
+
+// ⬇️ Tabler icons (add/remove as you like)
+import {
+  IconUsers,
+  IconCurrencyEuro,
+  IconHeartbeat,
+  IconBriefcaseOff,
+  IconCoins,
+  IconRulerMeasure,
+  IconSteeringWheel,
+  IconTrees,
+  IconCloudRain,
+} from '@tabler/icons-react';
+
+import { GiGoat } from "react-icons/gi";
 
 type StatCluesProps = {
   country: Country;
   guessCount: number;
   gameEnded?: boolean; // reveal all stats at game end
   statsByCode?: Record<string, CountryStats> | null; // <-- NEW
+};
+
+// Keys for safer icon mapping
+type ClueKey =
+  | 'population'
+  | 'gdpPerCapita'
+  | 'lifeExpectancy'
+  | 'unemployment'
+  | 'gdp'
+  | 'area'
+  | 'goats'
+  | 'carSide'
+  | 'forestArea'
+  | 'precipitation';
+
+type Clue = {
+  key: ClueKey;
+  label: string;
+  value: string;
+};
+
+// Icon map (size 16 keeps it tidy with Text size="sm")
+const clueIcons: Record<ClueKey, JSX.Element> = {
+  population: <IconUsers size={16} />,
+  gdpPerCapita: <IconCurrencyEuro size={16} />,
+  lifeExpectancy: <IconHeartbeat size={16} />,
+  unemployment: <IconBriefcaseOff size={16} />,
+  gdp: <IconCoins size={16} />,
+  area: <IconRulerMeasure size={16} />,
+  goats: <GiGoat size={16} />,
+  carSide: <IconSteeringWheel size={16} />,
+  forestArea: <IconTrees size={16} />,
+  precipitation: <IconCloudRain size={16} />,
 };
 
 export function StatClues({
@@ -54,10 +102,13 @@ export function StatClues({
           <Flex direction="column" gap={6} mt={4}>
             {clues.slice(0, revealCount).map((s, i) => (
               <Box key={i}>
-                <Text size="sm">
-                  <Text span fw={600}>{s.label}: </Text>
-                  {s.value}
-                </Text>
+                <Group gap="xs" wrap="nowrap">
+                  {clueIcons[s.key]}
+                  <Text size="sm">
+                    <Text span fw={600}>{s.label}: </Text>
+                    {s.value}
+                  </Text>
+                </Group>
               </Box>
             ))}
           </Flex>
@@ -68,31 +119,28 @@ export function StatClues({
 }
 
 // ---- helpers ----
-function buildClues(stats: CountryStats | null | undefined): { label: string; value: string }[] {
+function buildClues(stats: CountryStats | null | undefined): Clue[] {
   if (!stats) return [];
 
-  const out: { label: string; value: string }[] = [];
+  const out: Clue[] = [];
 
   // Order of reveal (tweak as you like)
-  if (isNum(stats.population)) out.push({ label: 'Population', value: fmtInt(stats.population) });
-  if (isNum(stats.GDPPerCapita)) out.push({ label: 'GDP per capita (EUR)', value: fmtInt(stats.GDPPerCapita) });
-  if (isNum(stats.lifeExpectancy)) out.push({ label: 'Life expectancy (years)', value: stats.lifeExpectancy.toFixed(1) });
-  if (isNum(stats.unemployment)) out.push({ label: 'Unemployment (%)', value: stats.unemployment.toFixed(1) });
-  if (isNum(stats.GDP)) out.push({ label: 'GDP (EUR)', value: formatter(stats.GDP) });
-  if (isNum(stats.area)) out.push({ label: 'Area (km²)', value: fmtInt(stats.area) });
-  if (isNum(stats.goats)) out.push({ label: 'Goat population', value: fmtInt(stats.goats) });
-  if (stats.carSide) out.push({ label: 'Drives on the', value: stats.carSide });
-  if (isNum(stats.forestArea)) out.push({ label: 'Forest area (km²)', value: fmtInt(stats.forestArea) });
-  if (isNum(stats.precipitation)) out.push({ label: 'Annual precipitation (mm)', value: fmtInt(stats.precipitation) });
-  //if (stats.currencies) out.push({ label: 'Currency', value: Object.values(stats.currencies).map(c => c.name).join(', ') });
-
+  if (isNum(stats.population)) out.push({ key: 'population', label: 'Population', value: fmtInt(stats.population) });
+  if (isNum(stats.GDPPerCapita)) out.push({ key: 'gdpPerCapita', label: 'GDP per capita (EUR)', value: fmtInt(stats.GDPPerCapita) });
+  if (isNum(stats.lifeExpectancy)) out.push({ key: 'lifeExpectancy', label: 'Life expectancy (years)', value: stats.lifeExpectancy.toFixed(1) });
+  if (isNum(stats.unemployment)) out.push({ key: 'unemployment', label: 'Unemployment (%)', value: stats.unemployment.toFixed(1) });
+  if (isNum(stats.GDP)) out.push({ key: 'gdp', label: 'GDP (EUR)', value: formatter(stats.GDP) });
+  if (isNum(stats.area)) out.push({ key: 'area', label: 'Area (km²)', value: fmtInt(stats.area) });
+  if (isNum(stats.goats)) out.push({ key: 'goats', label: 'Goat population', value: fmtInt(stats.goats) });
+  if (stats.carSide) out.push({ key: 'carSide', label: 'Drives on the', value: stats.carSide });
+  if (isNum(stats.forestArea)) out.push({ key: 'forestArea', label: 'Forest area (km²)', value: fmtInt(stats.forestArea) });
+  if (isNum(stats.precipitation)) out.push({ key: 'precipitation', label: 'Annual precipitation (mm)', value: fmtInt(stats.precipitation) });
 
   return out;
 }
 
-function formatter(num:any, locale = "en") {
+function formatter(num: any, locale = "en") {
   if (num === null || num === undefined) return "";
-
   return new Intl.NumberFormat(locale, {
     notation: "compact",
     compactDisplay: "long",
