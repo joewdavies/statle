@@ -1,9 +1,10 @@
-import { ActionIcon, Card, Flex, Group, Modal, Progress, Table, Text } from "@mantine/core";
+import { ActionIcon, Card, Flex, Group, Modal, Progress, Table, Text, Image } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { IconChartBar } from "@tabler/icons-react";
 import { useUserStats } from "../hooks/useUserStats";
 import { MAX_GUESSES } from "../constants";
 import { WorldMap } from './world-map';
+import { getFlagURL } from "../helpers/getFlagURL";
 
 export function UserStats() {
   const [opened, { open, close }] = useDisclosure(false);
@@ -76,10 +77,20 @@ export function UserStats() {
                 </Table.Tr>
               </Table.Thead>
               <Table.Tbody>
-                {[...history].slice(-10).reverse().map((g) => (
+                {[...history].reverse().map((g) => (
                   <Table.Tr key={`${g.date}-${g.finishedAt}`}>
                     <Table.Td>{g.date}</Table.Td>
-                    <Table.Td>{g.countryName}</Table.Td>
+                    <Table.Td>
+                      <Flex gap={12}>
+                        {g.countryName}
+                        <Image
+                          src={getFlagURL(g.countryCode)}
+                          alt={`${g.countryName} flag`}
+                          radius="sm"
+                          style={{ boxShadow: '0 2px 6px rgba(0, 0, 0, 0.15)', width: '30px' }}
+                        />
+                      </Flex>
+                    </Table.Td>
                     <Table.Td>{g.result === "won" ? "✅ Won" : "❌ Lost"}</Table.Td>
                     <Table.Td>{g.guessCount}</Table.Td>
                   </Table.Tr>
