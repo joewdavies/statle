@@ -23,14 +23,17 @@ const countriesByCode: Record<string, any> = Object.fromEntries(
 function pad2(n: number) {
   return String(n).padStart(2, '0');
 }
-function formatDateDot(d = new Date()) {
-  return `${pad2(d.getDate())}.${pad2(d.getMonth() + 1)}.${d.getFullYear()}`;
+function formatDate(d = new Date()) {
+  return `${pad2(d.getDate())}/${pad2(d.getMonth() + 1)}/${d.getFullYear()}`;
 }
 function clamp(n: number, min: number, max: number) {
   return Math.max(min, Math.min(max, n));
 }
 function toRad(deg: number) {
   return (deg * Math.PI) / 180;
+}
+function toDeg(rad: number) {
+  return (rad * 180) / Math.PI;
 }
 
 // Haversine distance in kilometers
@@ -46,6 +49,27 @@ function haversineKm(a: { latitude: number; longitude: number }, b: { latitude: 
     Math.cos(φ1) * Math.cos(φ2) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
   const c = 2 * Math.atan2(Math.sqrt(s), Math.sqrt(1 - s));
   return R * c;
+}
+
+// Bearing (degrees 0..360 from North) from point A to B
+function bearingDeg(a: { latitude: number; longitude: number }, b: { latitude: number; longitude: number }) {
+  const φ1 = toRad(a.latitude);
+  const φ2 = toRad(b.latitude);
+  const λ1 = toRad(a.longitude);
+  const λ2 = toRad(b.longitude);
+  const y = Math.sin(λ2 - λ1) * Math.cos(φ2);
+  const x = Math.cos(φ1) * Math.sin(φ2) - Math.sin(φ1) * Math.cos(φ2) * Math.cos(λ2 - λ1);
+  const θ = Math.atan2(y, x);
+  const deg = (toDeg(θ) + 360) % 360;
+  return deg;
+}
+
+// 8-wind arrow by bearing
+function bearingToArrow(deg: number) {
+  // N, NE, E, SE, S, SW, W, NW centered on 0/45/90...
+  const dirs = ['⬆️', '↗️', '➡️', '↘️', '⬇️', '↙️', '⬅️', '↖️'] as const;
+  const idx = Math.round(deg / 45) % 8;
+  return dirs[idx];
 }
 
 // ----------------------------- visuals -----------------------------
@@ -79,7 +103,7 @@ export function ShareResult() {
   const last = userStats?.lastGame;
 
   const text = useMemo(() => {
-    const date = formatDateDot(new Date());
+    const date = formatDate(new Date());
     const triesStr = last
       ? `${Math.max(1, last.guessCount ?? 0)}/${MAX_GUESSES}`
       : `${MAX_GUESSES}/${MAX_GUESSES}`;
@@ -96,46 +120,52 @@ export function ShareResult() {
         resolveCountry(last.countryName);
 
       if (target?.latitude != null && target?.longitude != null && Array.isArray(last.guesses)) {
-        for (const g of last.guesses as string[]) {
+        const tLL = { latitude: target.latitude, longitude: target.longitude };
+
+        last.guesses.forEach((g, i) => {
           const guess = resolveCountry(g);
           if (guess?.latitude != null && guess?.longitude != null) {
-            const km = haversineKm(
-              { latitude: guess.latitude, longitude: guess.longitude },
-              { latitude: target.latitude, longitude: target.longitude }
-            );
-            // Worldle-style proximity: 0 km -> 100%, ~20,000 km -> 0%
+            const gLL = { latitude: guess.latitude, longitude: guess.longitude };
+            const km = haversineKm(gLL, tLL);
+            // 0 km -> 100%, ~20,000 km -> 0%
             const proximity = clamp(100 - (km / 20000) * 100, 0, 100);
             bestProximity = Math.max(bestProximity, proximity);
 
-            const bar = proximityBar5(proximity); // 🟩 and ⬜ only
-            attemptLines.push(bar);
+            // Build bar
+            let line = proximityBar5(proximity); // 🟩 and ⬜ only
+
+            // If this is the winning guess, replace with full greens + 🎉 (no arrow)
+            const isLastGuess = i === last.guessCount - 1;
+            if (last.result === 'won' && isLastGuess) {
+              line = '🟩🟩🟩🟩🟩🎉';
+            } else {
+              // For incorrect guesses, append a direction arrow towards the target
+              const deg = bearingDeg(gLL, tLL);
+              const arrow = bearingToArrow(deg);
+              line += arrow;
+            }
+
+            attemptLines.push(line);
           } else {
-            // Unresolvable guess → show 0/5
+            // Unresolvable guess → show 0/5 with no arrow
             attemptLines.push('⬜⬜⬜⬜⬜');
           }
-        }
-      }
-
-      // Ensure exactly N lines: if won, replace final attempt with full greens + 🎉
-      if (last?.result === 'won' && attemptLines.length > 0) {
-        attemptLines[attemptLines.length - 1] = '🟩🟩🟩🟩🟩🎉';
-        bestProximity = 100; // explicit
+        });
       }
     }
 
     // Header % is best proximity; if won it's 100%
     const headerPct = last?.result === 'won' ? 100 : Math.round(bestProximity);
 
-    const header = `Statle (${date}) ${triesStr} (${headerPct}%)`;
+    const header = `[statle](https://joewdavies.github.io/statle) (${date}) ${triesStr} (${headerPct}%)`;
     const streakLine = `🔥 Current Win Streak: ${streak}`;
-    const footer = `https://joewdavies.github.io/statle`;
+    // Markdown footer link instead of a raw URL
 
     return [
       header,
       streakLine,
       ...attemptLines,
       '',
-      footer,
     ].join('\n');
   }, [last, userStats]);
 
@@ -230,3 +260,5 @@ export function ShareResult() {
 }
 
 export default ShareResult;
+
+
