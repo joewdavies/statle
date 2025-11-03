@@ -87,7 +87,7 @@ export function UserStats() {
                           src={getFlagURL(g.countryCode)}
                           alt={`${g.countryName} flag`}
                           radius="sm"
-                          style={{ boxShadow: '0 2px 6px rgba(0, 0, 0, 0.15)', width: '30px' }}
+                          style={{ boxShadow: '0 2px 6px rgba(0, 0, 0, 0.15)', maxHeight: '20px', width: '30px' }}
                         />
                       </Flex>
                     </Table.Td>

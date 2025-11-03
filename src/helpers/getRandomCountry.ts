@@ -7,7 +7,7 @@ function hasStats(code: string): code is keyof typeof stats {
 }
 
 export function getRandomCountry(): Country {
-  const minClues = 3;
+  const minClues = 2;
 
   // already-active country (avoid repeating immediately)
   const lastCountryCode = localStorage.getItem('country');

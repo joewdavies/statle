@@ -3,18 +3,19 @@ import { GameStatus } from '../constants';
 import { Country } from '../data/countries/countries';
 import ConfettiExplosion from 'react-confetti-explosion';
 import { getFlagURL } from '../helpers/getFlagURL';
+import { ShareResult } from './share-result';
 
 type CorrectCountryProps = {
   country: Country;
   gameStatus: GameStatus;
-  onPlayAgain: () => void;  
+  onPlayAgain: () => void;
 };
 
 export function CorrectCountry({ country, gameStatus, onPlayAgain }: CorrectCountryProps) {
-  const flagUrl = getFlagURL(country.code)
+  const flagUrl = getFlagURL(country.code);
 
   return (
-    <Flex direction="column" gap={16} align="center">
+    <Flex direction="column" gap={8} align="center"> {/* reduced from 16 → 8 */}
       {gameStatus === GameStatus.Won && (
         <>
           <ConfettiExplosion />
@@ -22,7 +23,10 @@ export function CorrectCountry({ country, gameStatus, onPlayAgain }: CorrectCoun
             src={flagUrl}
             alt={`${country.name} flag`}
             radius="sm"
-            style={{ boxShadow: '0 2px 6px rgba(0, 0, 0, 0.15)', width: '120px' }}
+            style={{
+              boxShadow: '0 2px 6px rgba(0, 0, 0, 0.15)',
+              width: '120px',
+            }}
           />
         </>
       )}
@@ -34,10 +38,12 @@ export function CorrectCountry({ country, gameStatus, onPlayAgain }: CorrectCoun
         Country: {country.name}
       </Badge>
 
-      <Flex w="100%" justify="center" align="center" gap={8} direction="row">
+      {/* Stack the buttons vertically */}
+      <Flex direction="column" align="center" gap={6} mt="sm">
         <Button size="md" onClick={onPlayAgain}>
           Play again
         </Button>
+        <ShareResult />
       </Flex>
     </Flex>
   );
