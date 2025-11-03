@@ -1,16 +1,74 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
-    <link rel="manifest" href="/site.webmanifest" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Statle</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="x-ua-compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title>Statle — Daily country guessing game</title>
+  <meta name="description"
+    content="Statle is a daily country guessing game. One country per day for everyone. Share your results with proximity blocks and direction arrows." />
+  <link rel="canonical" href="https://joewdavies.github.io/statle/" />
+
+  <!-- Icons / PWA -->
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+  <link rel="manifest" href="/site.webmanifest" />
+  <meta name="theme-color" content="#0ea5e9" />
+
+  <!-- Basic SEO -->
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1" />
+  <meta name="author" content="Joe Davies" />
+  <meta name="application-name" content="Statle" />
+
+  <!-- Open Graph (WhatsApp, Facebook, Slack, iMessage use these) -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Statle" />
+  <meta property="og:locale" content="en_GB" />
+  <meta property="og:title" content="Statle — Daily country guessing game" />
+  <meta property="og:description"
+    content="One shared country per day. Guess in up to 6 tries, then share your result." />
+  <meta property="og:url" content="https://joewdavies.github.io/statle/" />
+  <!-- 👇 Host a 1200×630 image at this path (PNG or JPG, <300 KB recommended) -->
+  <meta property="og:image" content="https://joewdavies.github.io/statle/og-image.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:type" content="image/png" />
+
+  <!-- Twitter (X) cards -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Statle — Daily country guessing game" />
+  <meta name="twitter:description"
+    content="One shared country per day. Guess in up to 6 tries, then share your result." />
+  <meta name="twitter:image" content="https://joewdavies.github.io/statle/og-image.png" />
+  <!-- Optional: your handle
+  <meta name="twitter:site" content="@yourhandle" />
+  -->
+
+  <!-- Structured data (JSON-LD) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Statle",
+    "url": "https://joewdavies.github.io/statle/",
+    "applicationCategory": "Game",
+    "operatingSystem": "Any",
+    "description": "Daily country guessing game. One shared answer per day.",
+    "inLanguage": "en",
+    "creator": {
+      "@type": "Person",
+      "name": "Joe Davies"
+    }
+  }
+  </script>
+</head>
+
+<body>
+  <div id="root"></div>
+  <script type="module" src="/src/main.tsx"></script>
+</body>
+
 </html>

@@ -66,15 +66,13 @@ function bearingDeg(a: { latitude: number; longitude: number }, b: { latitude: n
 
 // 8-wind arrow by bearing
 function bearingToArrow(deg: number) {
-  // N, NE, E, SE, S, SW, W, NW centered on 0/45/90...
   const dirs = ['⬆️', '↗️', '➡️', '↘️', '⬇️', '↙️', '⬅️', '↖️'] as const;
   const idx = Math.round(deg / 45) % 8;
   return dirs[idx];
 }
 
 // ----------------------------- visuals -----------------------------
-// Green (🟩) + white (⬜) 5-cell bar based on proximity %.
-// Round to nearest 20% so users clearly see it's "out of 5".
+// Green (🟩) + white (⬜) 5-cell bar based on proximity % (rounded to nearest 20%).
 function proximityBar5(proximityPct: number) {
   const p = clamp(proximityPct, 0, 100);
   const greens = Math.round(p / 20); // 0..5
@@ -87,13 +85,8 @@ function resolveCountry(token?: string) {
   const code = token.toUpperCase?.();
   const name = token.toLowerCase?.();
 
-  // Prefer a code match
   if (code && countriesByCode[code]) return countriesByCode[code];
-
-  // Otherwise try by name (case-insensitive)
-  const byName = countries.find(
-    (c: any) => c.name?.toLowerCase?.() === name
-  );
+  const byName = countries.find((c: any) => c.name?.toLowerCase?.() === name);
   return byName || null;
 }
 
@@ -112,7 +105,7 @@ export function ShareResult() {
 
     // Attempt lines + best proximity tracking
     const attemptLines: string[] = [];
-    let bestProximity = 0; // we take the MAX achieved
+    let bestProximity = 0;
 
     if (last?.countryCode || last?.countryName) {
       const target =
@@ -127,15 +120,13 @@ export function ShareResult() {
           if (guess?.latitude != null && guess?.longitude != null) {
             const gLL = { latitude: guess.latitude, longitude: guess.longitude };
             const km = haversineKm(gLL, tLL);
-            // 0 km -> 100%, ~20,000 km -> 0%
             const proximity = clamp(100 - (km / 20000) * 100, 0, 100);
             bestProximity = Math.max(bestProximity, proximity);
 
-            // Build bar
-            let line = proximityBar5(proximity); // 🟩 and ⬜ only
+            let line = proximityBar5(proximity);
 
             // If this is the winning guess, replace with full greens + 🎉 (no arrow)
-            const isLastGuess = i === last.guessCount - 1;
+            const isLastGuess = i === (last.guessCount ?? 0) - 1;
             if (last.result === 'won' && isLastGuess) {
               line = '🟩🟩🟩🟩🟩🎉';
             } else {
@@ -147,7 +138,6 @@ export function ShareResult() {
 
             attemptLines.push(line);
           } else {
-            // Unresolvable guess → show 0/5 with no arrow
             attemptLines.push('⬜⬜⬜⬜⬜');
           }
         });
@@ -157,16 +147,12 @@ export function ShareResult() {
     // Header % is best proximity; if won it's 100%
     const headerPct = last?.result === 'won' ? 100 : Math.round(bestProximity);
 
-    const header = `[statle](https://joewdavies.github.io/statle) (${date}) ${triesStr} (${headerPct}%)`;
+    // ❌ No markdown here; many targets won't render it.
+    const header = `Statle (${date}) ${triesStr} (${headerPct}%)`;
     const streakLine = `🔥 Current Win Streak: ${streak}`;
-    // Markdown footer link instead of a raw URL
+    const footer = `https://joewdavies.github.io/statle`;
 
-    return [
-      header,
-      streakLine,
-      ...attemptLines,
-      '',
-    ].join('\n');
+    return [header, streakLine, ...attemptLines, '', footer].join('\n');
   }, [last, userStats]);
 
   const [modalOpen, setModalOpen] = useState(false);
@@ -260,5 +246,3 @@ export function ShareResult() {
 }
 
 export default ShareResult;
-
-
