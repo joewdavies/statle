@@ -186,7 +186,7 @@ export function ShareResult() {
     <>
       <Tooltip label="Share or copy result" withArrow>
         <Button onClick={share} leftSection={<IconShare3 size={18} />}>
-          Share
+          Share result
         </Button>
       </Tooltip>
 
