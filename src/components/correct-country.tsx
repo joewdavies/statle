@@ -8,14 +8,20 @@ import { ShareResult } from './share-result';
 type CorrectCountryProps = {
   country: Country;
   gameStatus: GameStatus;
-  onPlayAgain: () => void;
+  onPlayAgain?: () => void;     // ← made optional for daily mode
+  dailyMode?: boolean;
 };
 
-export function CorrectCountry({ country, gameStatus, onPlayAgain }: CorrectCountryProps) {
+export function CorrectCountry({
+  country,
+  gameStatus,
+  onPlayAgain,
+  dailyMode = true,
+}: CorrectCountryProps) {
   const flagUrl = getFlagURL(country.code);
 
   return (
-    <Flex direction="column" gap={8} align="center"> {/* reduced from 16 → 8 */}
+    <Flex direction="column" gap={8} align="center">
       {gameStatus === GameStatus.Won && (
         <>
           <ConfettiExplosion />
@@ -23,10 +29,7 @@ export function CorrectCountry({ country, gameStatus, onPlayAgain }: CorrectCoun
             src={flagUrl}
             alt={`${country.name} flag`}
             radius="sm"
-            style={{
-              boxShadow: '0 2px 6px rgba(0, 0, 0, 0.15)',
-              width: '120px',
-            }}
+            style={{ boxShadow: '0 2px 6px rgba(0, 0, 0, 0.15)', width: '120px' }}
           />
         </>
       )}
@@ -38,13 +41,23 @@ export function CorrectCountry({ country, gameStatus, onPlayAgain }: CorrectCoun
         Country: {country.name}
       </Badge>
 
-      {/* Stack the buttons vertically */}
+      {/* Buttons stacked vertically; tighter spacing */}
       <Flex direction="column" align="center" gap={6} mt="sm">
-        <Button size="md" onClick={onPlayAgain}>
-          Play again
-        </Button>
+        {/* Daily mode: block replay; else show Play again if handler provided */}
+        {dailyMode ? (
+          <Button size="md" disabled>
+            Come back tomorrow
+          </Button>
+        ) : onPlayAgain ? (
+          <Button size="md" onClick={onPlayAgain}>
+            Play again
+          </Button>
+        ) : null}
+
         <ShareResult />
       </Flex>
     </Flex>
   );
 }
+
+export default CorrectCountry;
