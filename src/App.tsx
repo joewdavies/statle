@@ -10,21 +10,21 @@ import { GameStatus, MAX_GUESSES } from './constants';
 import { countries } from './data/countries/countries';
 import { useUserStats } from './hooks/useUserStats';
 import { CountryCardHeader } from './components/country-card';
-import { dailyIndex, todayKeyUTC, finishedKeyFor, stateKeyFor } from './helpers/daily';
+import {
+  todayKeyLocal,
+  finishedKeyFor,
+  stateKeyFor,
+  msUntilLocalReset,
+} from './helpers/daily';
 
 // stats
 import { stats } from './data/stats/stats';
 import { GameResult, UserStatsService } from './services/userStats';
 
-// Build a stable ordering so today's index is deterministic forever
-const STABLE_COUNTRIES = [...countries].sort((a, b) =>
-  (a.code || '').localeCompare(b.code || '')
-);
+import { getDailyCountry } from "./helpers/getRandomCountry";
 
-// Compute today's keys/answer (UTC)
-const todayKey = todayKeyUTC();
-const answerIndex = dailyIndex(STABLE_COUNTRIES.length);
-const todaysCountry = STABLE_COUNTRIES[answerIndex];
+const todaysCountry = getDailyCountry();
+const todayKey = todayKeyLocal();
 
 // Storage keys for today
 const TODAY_STATE_KEY = stateKeyFor(todayKey);
@@ -55,7 +55,9 @@ const sortByDateAscLocal = (a: GameResult, b: GameResult) =>
     const deduped = Object.values(byKey).sort(sortByDateAscLocal);
     if (deduped.length !== file.items.length) {
       localStorage.setItem(KEY, JSON.stringify({ v: 1, items: deduped }));
-      console.info(`🧹 Statle: deduped exact duplicates (${file.items.length} → ${deduped.length})`);
+      console.info(
+        `🧹 Statle: deduped exact duplicates (${file.items.length} → ${deduped.length})`
+      );
     }
   } catch {}
 })();
@@ -70,6 +72,7 @@ type PersistedRound = {
 function App() {
   // ==== Load today's persisted state (if any) ====
   const persisted: PersistedRound | null = useMemo(() => {
+    if (typeof window === 'undefined') return null;
     try {
       const raw = localStorage.getItem(TODAY_STATE_KEY);
       return raw ? (JSON.parse(raw) as PersistedRound) : null;
@@ -78,7 +81,8 @@ function App() {
     }
   }, []);
 
-  const finishedVal = typeof window !== 'undefined' ? localStorage.getItem(TODAY_FINISHED_KEY) : null;
+  const finishedVal =
+    typeof window !== 'undefined' ? localStorage.getItem(TODAY_FINISHED_KEY) : null;
 
   // ==== Country is always today's country in daily mode ====
   const [country] = useState(todaysCountry);
@@ -97,6 +101,7 @@ function App() {
 
   // ==== Persist today's round to per-day key ====
   useEffect(() => {
+    if (typeof window === 'undefined') return;
     const payload: PersistedRound = {
       guesses,
       guessCount,
@@ -111,11 +116,13 @@ function App() {
   useEffect(() => {
     if (gameStatus === GameStatus.Playing) return;
 
-    // Mark finished for today so user can't replay
-    if (gameStatus === GameStatus.Won) {
-      localStorage.setItem(TODAY_FINISHED_KEY, 'won');
-    } else if (gameStatus === GameStatus.Lost) {
-      localStorage.setItem(TODAY_FINISHED_KEY, 'lost');
+    if (typeof window !== 'undefined') {
+      // Mark finished for today so user can't replay
+      if (gameStatus === GameStatus.Won) {
+        localStorage.setItem(TODAY_FINISHED_KEY, 'won');
+      } else if (gameStatus === GameStatus.Lost) {
+        localStorage.setItem(TODAY_FINISHED_KEY, 'lost');
+      }
     }
 
     // Record today’s result in user stats/history
@@ -124,20 +131,20 @@ function App() {
       countryName: country.name,
       result: gameStatus === GameStatus.Won ? 'won' : 'lost',
       guesses: guesses.filter(Boolean).slice(0, guessCount),
-      // date is set inside buildRecord to "today" already; if you need UTC date string use todayKey
     });
     upsertUserStats(record);
   }, [gameStatus, guessCount, guesses, country.code, country.name, upsertUserStats]);
 
-  // ==== Optional: refresh app when UTC day rolls over ====
+  // ==== Refresh app at LOCAL midnight ====
   useEffect(() => {
-    const id = setInterval(() => {
-      const keyNow = todayKeyUTC();
-      if (keyNow !== todayKey) {
-        window.location.reload();
-      }
-    }, 60_000);
-    return () => clearInterval(id);
+    if (typeof window === 'undefined') return;
+
+    const ms = msUntilLocalReset();
+    const id = window.setTimeout(() => {
+      window.location.reload();
+    }, ms + 1000); // small buffer
+
+    return () => clearTimeout(id);
   }, []);
 
   // statistical data (static for now)
@@ -174,8 +181,16 @@ function App() {
       )}
 
       {gameStatus !== GameStatus.Playing && (
-        // In daily mode, CorrectCountry should disable/hide “Play again”
-        <CorrectCountry country={country} gameStatus={gameStatus} dailyMode />
+        // If you add a `dailyMode` prop to CorrectCountry, wire it here;
+        // for now we keep onPlayAgain behaviour unchanged.
+        <CorrectCountry
+          country={country}
+          gameStatus={gameStatus}
+          onPlayAgain={() => {
+            // In strict daily mode you probably want this disabled or to just noop.
+            // For now we do nothing to avoid replaying the same daily.
+          }}
+        />
       )}
 
       {/* Header + guess list */}
