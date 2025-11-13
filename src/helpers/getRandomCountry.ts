@@ -6,6 +6,38 @@ function hasStats(code: string): code is keyof typeof stats {
   return Object.prototype.hasOwnProperty.call(stats, code);
 }
 
+function xmur3(str: string) {
+  let h = 1779033703 ^ str.length;
+  for (let i = 0; i < str.length; i++) {
+    h = Math.imul(h ^ str.charCodeAt(i), 3432918353);
+    h = h << 13 | h >>> 19;
+  }
+  return () => {
+    h = Math.imul(h ^ (h >>> 16), 2246822507);
+    h = Math.imul(h ^ (h >>> 13), 3266489909);
+    return (h ^= h >>> 16) >>> 0;
+  };
+}
+
+function sfc32(a: number) {
+  return () => {
+    a >>>= 0;
+    let t = (a += 0x9e3779b9);
+    t = Math.imul(t ^ (t >>> 15), 1 | t);
+    t ^= t + Math.imul(t ^ (t >>> 7), 61 | t);
+    return (t ^ (t >>> 14)) >>> 0;
+  };
+}
+
+export function getDailyCountry() {
+  const d = new Date();
+  const key = `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
+  const seed = xmur3(key)();
+  const rand = sfc32(seed)() / 2 ** 32;
+  const index = Math.floor(rand * countries.length);
+  return countries[index];
+}
+
 export function getRandomCountry(): Country {
   const minClues = 2;
 
@@ -37,11 +69,4 @@ export function getRandomCountry(): Country {
   const chosen = pool[Math.floor(Math.random() * pool.length)];
   localStorage.setItem('country', chosen.code); // keep your existing localStorage flow
   return chosen;
-}
-
-export function getDailyCountry() {
-  const today = new Date();
-  const seed = today.getFullYear() * 1000 + today.getMonth() * 50 + today.getDate();
-  const index = seed % countries.length;
-  return countries[index];
 }
