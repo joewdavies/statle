@@ -136,9 +136,10 @@ function buildClues(stats: CountryStats | null | undefined): Clue[] {
   if (isNum(stats.forestArea)) out.push({ key: 'forestArea', label: 'Forest area (km²)', value: formatter(stats.forestArea) });
   if (isNum(stats.precipitation)) out.push({ key: 'precipitation', label: 'Annual precipitation (mm)', value: formatter(stats.precipitation) });
   if (isNum(stats.co2)) out.push({ key: 'co2', label: 'CO2 per capita (metric tons)', value: formatter(stats.co2) });
-  if (isNum(stats.landlocked)) out.push({ key: 'landlocked', label: 'Landlocked', value: stats.landlocked ? "Yes" : "No" });
+  if (stats.landlocked === true)
+    out.push({ key: 'landlocked', label: 'Landlocked', value: "Yes" });
   if (isNum(stats.corruption)) out.push({ key: 'corruption', label: 'Control of corruption (WGI)', value: 'better than ' + formatter(stats.corruption) + '% of countries' });
-  if (isNum(stats.tax)) out.push({ key: 'tax', label: 'Top Income Tax Rate (%)', value: stats.tax.toFixed(1) });
+  if (isNum(stats.tax)) out.push({ key: 'tax', label: 'Tax revenue (% of GDP)', value: stats.tax.toFixed(1) });
   if (isNum(stats.wheat)) out.push({ key: 'wheat', label: 'Wheat Production (metric tons)', value: formatterCompact(stats.wheat) });
   if (isNum(stats.airPassengers)) out.push({ key: 'airPassengers', label: 'Air Passengers (millions)', value: formatterCompact(stats.airPassengers) });
 
