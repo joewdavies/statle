@@ -14,6 +14,7 @@ import {
   IconSteeringWheel,
   IconTrees,
   IconCloudRain,
+  IconPlane,
 } from '@tabler/icons-react';
 
 import { GiGoat } from "react-icons/gi";
@@ -26,26 +27,7 @@ type StatCluesProps = {
 };
 
 // Keys for safer icon mapping
-type ClueKey =
-  | 'population'
-  | 'gdpPerCapita'
-  | 'lifeExpectancy'
-  | 'unemployment'
-  | 'gdp'
-  | 'area'
-  | 'goats'
-  | 'carSide'
-  | 'forestArea'
-  | 'precipitation';
-
-type Clue = {
-  key: ClueKey;
-  label: string;
-  value: string;
-};
-
-// Icon map (size 16 keeps it tidy with Text size="sm")
-const clueIcons: Record<ClueKey, JSX.Element> = {
+const clueIcons = {
   population: <IconUsers size={16} />,
   gdpPerCapita: <IconCurrencyEuro size={16} />,
   lifeExpectancy: <IconHeartbeat size={16} />,
@@ -56,6 +38,21 @@ const clueIcons: Record<ClueKey, JSX.Element> = {
   carSide: <IconSteeringWheel size={16} />,
   forestArea: <IconTrees size={16} />,
   precipitation: <IconCloudRain size={16} />,
+  co2: <IconCloudRain size={16} />, // TODO: swap for a nicer CO2 icon if you want
+  corruption: <IconBriefcaseOff size={16} />, // TODO: swap for a nicer corruption icon if you want
+  landlocked: <IconRulerMeasure size={16} />,
+  tax: <IconCoins size={16} />,
+  wheat: <IconRulerMeasure size={16} />,
+  airPassengers: <IconPlane size={16} />,
+} as const;
+
+// Keys for safer icon mapping, derived from the icon map
+type ClueKey = keyof typeof clueIcons;
+
+type Clue = {
+  key: ClueKey;
+  label: string;
+  value: string;
 };
 
 export function StatClues({
@@ -125,21 +122,30 @@ function buildClues(stats: CountryStats | null | undefined): Clue[] {
   const out: Clue[] = [];
 
   // Order of reveal (tweak as you like)
-  if (isNum(stats.population)) out.push({ key: 'population', label: 'Population', value: fmtInt(stats.population) });
-  if (isNum(stats.GDPPerCapita)) out.push({ key: 'gdpPerCapita', label: 'GDP per capita (EUR)', value: fmtInt(stats.GDPPerCapita) });
+  if (isNum(stats.population)) out.push({ key: 'population', label: 'Population', value: formatter(stats.population) });
+  if (isNum(stats.gdpPerCapita)) out.push({ key: 'gdpPerCapita', label: 'GDP per capita (US$)', value: formatter(stats.gdpPerCapita) });
   if (isNum(stats.lifeExpectancy)) out.push({ key: 'lifeExpectancy', label: 'Life expectancy (years)', value: stats.lifeExpectancy.toFixed(1) });
   if (isNum(stats.unemployment)) out.push({ key: 'unemployment', label: 'Unemployment (%)', value: stats.unemployment.toFixed(1) });
-  if (isNum(stats.GDP)) out.push({ key: 'gdp', label: 'GDP (EUR)', value: formatter(stats.GDP) });
-  if (isNum(stats.area)) out.push({ key: 'area', label: 'Area (km²)', value: fmtInt(stats.area) });
-  if (isNum(stats.goats)) out.push({ key: 'goats', label: 'Goat population', value: fmtInt(stats.goats) });
+  if (isNum(stats.gdp)) out.push({ key: 'gdp', label: 'GDP (US$)', value: formatterCompact(stats.gdp) });
+
+
+  if (isNum(stats.area)) out.push({ key: 'area', label: 'Area (km²)', value: formatter(stats.area) });
+  // first 6 are clues, the rest are just info for the nerds
+  if (isNum(stats.goats)) out.push({ key: 'goats', label: 'Goat population', value: formatter(stats.goats) });
   if (stats.carSide) out.push({ key: 'carSide', label: 'Drives on the', value: stats.carSide });
-  if (isNum(stats.forestArea)) out.push({ key: 'forestArea', label: 'Forest area (km²)', value: fmtInt(stats.forestArea) });
-  if (isNum(stats.precipitation)) out.push({ key: 'precipitation', label: 'Annual precipitation (mm)', value: fmtInt(stats.precipitation) });
+  if (isNum(stats.forestArea)) out.push({ key: 'forestArea', label: 'Forest area (km²)', value: formatter(stats.forestArea) });
+  if (isNum(stats.precipitation)) out.push({ key: 'precipitation', label: 'Annual precipitation (mm)', value: formatter(stats.precipitation) });
+  if (isNum(stats.co2)) out.push({ key: 'co2', label: 'CO2 per capita (metric tons)', value: formatter(stats.co2) });
+  if (isNum(stats.landlocked)) out.push({ key: 'landlocked', label: 'Landlocked', value: stats.landlocked ? "Yes" : "No" });
+  if (isNum(stats.corruption)) out.push({ key: 'corruption', label: 'Control of corruption (WGI)', value: formatter(stats.corruption) + '%' });
+  if (isNum(stats.tax)) out.push({ key: 'tax', label: 'Top Income Tax Rate (%)', value: stats.tax.toFixed(1) });
+  if (isNum(stats.wheat)) out.push({ key: 'wheat', label: 'Wheat Production (metric tons)', value: formatterCompact(stats.wheat) });
+  if (isNum(stats.airPassengers)) out.push({ key: 'airPassengers', label: 'Air Passengers (millions)', value: formatterCompact(stats.airPassengers) });
 
   return out;
 }
 
-function formatter(num: any, locale = "en") {
+function formatterCompact(num: any, locale = "en") {
   if (num === null || num === undefined) return "";
   return new Intl.NumberFormat(locale, {
     notation: "compact",
@@ -152,6 +158,6 @@ function isNum(v: unknown): v is number {
   return typeof v === 'number' && Number.isFinite(v);
 }
 
-function fmtInt(n: number) {
+function formatter(n: number) {
   return new Intl.NumberFormat(undefined, { maximumFractionDigits: 0 }).format(n);
 }

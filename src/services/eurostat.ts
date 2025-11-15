@@ -185,8 +185,8 @@ export async function getAllStats(
     population: "https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/demo_pjan?format=JSON&sex=T&age=TOTAL&lang=EN",
     lifeExpectancy: "https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/tps00205?format=JSON&unit=YR&sex=T&age=Y_LT1&lang=EN",
     unemployment:   "https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/lfst_r_lfu3rt?format=JSON&lang=EN&isced11=TOTAL&sex=T&age=Y_GE25",
-    GDP:            "https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/nama_10r_3gdp?format=JSON&lang=EN&unit=MIO_EUR",
-    GDPPerCapita:   "https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/nama_10r_3gdp?format=JSON&lang=EN&unit=EUR_HAB",
+    gdp:            "https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/nama_10r_3gdp?format=JSON&lang=EN&unit=MIO_EUR",
+    gdpPerCapita:   "https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/nama_10r_3gdp?format=JSON&lang=EN&unit=EUR_HAB",
   };
 
   // Fetch all six datasets in parallel (each internally batched)
@@ -195,8 +195,8 @@ export async function getAllStats(
     fetchDatasetForGeos(bases.population,     codes),
     fetchDatasetForGeos(bases.lifeExpectancy, codes),
     fetchDatasetForGeos(bases.unemployment,   codes),
-    fetchDatasetForGeos(bases.GDP,            codes),
-    fetchDatasetForGeos(bases.GDPPerCapita,   codes),
+    fetchDatasetForGeos(bases.gdp,            codes),
+    fetchDatasetForGeos(bases.gdpPerCapita,   codes),
   ]);
 
   // Merge per code
@@ -207,8 +207,8 @@ export async function getAllStats(
       population:     asNumOrNull(popMap[code]),
       lifeExpectancy: asNumOrNull(leMap[code]),
       unemployment:   asNumOrNull(unempMap[code]),
-      GDP:            asNumOrNull(gdpMap[code]),
-      GDPPerCapita:   asNumOrNull(gdpPcMap[code]),
+      gdp:            asNumOrNull(gdpMap[code]),
+      gdpPerCapita:   asNumOrNull(gdpPcMap[code]),
     };
   }
 

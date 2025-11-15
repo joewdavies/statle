@@ -9,13 +9,19 @@ export type CountryStats = {
   population?: number | null | undefined;
   lifeExpectancy?: number | null | undefined;
   unemployment?: number | null | undefined;
-  GDP?: number | null | undefined;
-  GDPPerCapita?: number | null | undefined;
+  gdp?: number | null | undefined;
+  gdpPerCapita?: number | null | undefined;
   goats?: number | null | undefined;
   carSide?: string | undefined;
   currencies?: Record<string, { name: string; symbol: string }> | undefined;
   forestArea?: number | null | undefined;
   precipitation?: number | null | undefined;
+  co2?: number | null | undefined;
+  wheat?: number | null | undefined;
+  tax?: number | null | undefined;
+  corruption?: number | null | undefined;
+  landlocked?: boolean | null | undefined;
+  airPassengers?: number | null | undefined;
 };
 
 // Optional convenience
