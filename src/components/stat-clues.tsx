@@ -16,6 +16,9 @@ import {
   IconCloudRain,
   IconPlane,
   IconLock,
+  IconWheat,
+  IconCloud,
+  IconCurrencyDollar,
 } from '@tabler/icons-react';
 
 import { GiGoat } from "react-icons/gi";
@@ -30,7 +33,7 @@ type StatCluesProps = {
 // Keys for safer icon mapping
 const clueIcons = {
   population: <IconUsers size={16} />,
-  gdpPerCapita: <IconCurrencyEuro size={16} />,
+  gdpPerCapita: <IconCurrencyDollar size={16} />,
   lifeExpectancy: <IconHeartbeat size={16} />,
   unemployment: <IconBriefcaseOff size={16} />,
   gdp: <IconCoins size={16} />,
@@ -39,11 +42,11 @@ const clueIcons = {
   carSide: <IconSteeringWheel size={16} />,
   forestArea: <IconTrees size={16} />,
   precipitation: <IconCloudRain size={16} />,
-  co2: <IconCloudRain size={16} />, // TODO: swap for a nicer CO2 icon if you want
+  co2: <IconCloud size={16} />, // TODO: swap for a nicer CO2 icon if you want
   corruption: <IconBriefcaseOff size={16} />, // TODO: swap for a nicer corruption icon if you want
   landlocked: <IconLock size={16} />,
   tax: <IconCoins size={16} />,
-  wheat: <IconRulerMeasure size={16} />,
+  wheat: <IconWheat size={16} />,
   airPassengers: <IconPlane size={16} />,
 } as const;
 
