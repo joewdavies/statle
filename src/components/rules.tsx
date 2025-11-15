@@ -145,6 +145,9 @@ export function Rules() {
               Worldle by Teuteuf
             </Anchor>
           </Text>
+          <Text>
+            Data sources: Eurostat, World Bank, REST countries.
+          </Text>
         </Flex>
       </Modal>
       <ActionIcon onClick={open} size={'lg'} variant="default">
