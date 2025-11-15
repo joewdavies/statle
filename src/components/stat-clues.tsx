@@ -141,7 +141,7 @@ function buildClues(stats: CountryStats | null | undefined): Clue[] {
   if (isNum(stats.corruption)) out.push({ key: 'corruption', label: 'Control of corruption (WGI)', value: 'better than ' + formatter(stats.corruption) + '% of countries' });
   if (isNum(stats.tax)) out.push({ key: 'tax', label: 'Tax revenue (% of GDP)', value: stats.tax.toFixed(1) });
   if (isNum(stats.wheat)) out.push({ key: 'wheat', label: 'Wheat Production (metric tons)', value: formatterCompact(stats.wheat) });
-  if (isNum(stats.airPassengers)) out.push({ key: 'airPassengers', label: 'Air Passengers (millions)', value: formatterCompact(stats.airPassengers) });
+  if (isNum(stats.airPassengers)) out.push({ key: 'airPassengers', label: 'Air Passengers', value: formatterCompact(stats.airPassengers) });
 
   return out;
 }
