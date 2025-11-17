@@ -105,7 +105,7 @@ export function StatClues({
                 <Group gap="xs" wrap="nowrap">
                   {clueIcons[s.key]}
                   <Text size="sm">
-                    <Text span fw={600}>{s.label}{s.label !== 'landlocked' ? ':' : ''} </Text>
+                    <Text span fw={600}>{s.label}{s.key !== 'landlocked' ? ':' : ''} </Text>
                     {s.value}
                   </Text>
                 </Group>
