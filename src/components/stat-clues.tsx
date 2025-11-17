@@ -126,19 +126,19 @@ function buildClues(stats: CountryStats | null | undefined): Clue[] {
 
   // Order of reveal (tweak as you like)
   if (isNum(stats.population)) out.push({ key: 'population', label: 'Population', value: formatter(stats.population) });
-  if (isNum(stats.gdpPerCapita)) out.push({ key: 'gdpPerCapita', label: 'GDP per capita (US$)', value: formatter(stats.gdpPerCapita) });
-  if (isNum(stats.lifeExpectancy)) out.push({ key: 'lifeExpectancy', label: 'Life expectancy (years)', value: stats.lifeExpectancy.toFixed(1) });
-  if (isNum(stats.unemployment)) out.push({ key: 'unemployment', label: 'Unemployment (%)', value: stats.unemployment.toFixed(1) });
-  if (isNum(stats.gdp)) out.push({ key: 'gdp', label: 'GDP (US$)', value: formatterCompact(stats.gdp) });
+  if (isNum(stats.gdpPerCapita)) out.push({ key: 'gdpPerCapita', label: 'GDP per capita', value: '$' + formatter(stats.gdpPerCapita) });
+  if (isNum(stats.lifeExpectancy)) out.push({ key: 'lifeExpectancy', label: 'Life expectancy', value: stats.lifeExpectancy.toFixed(1) ' years of age' });
+  if (isNum(stats.unemployment)) out.push({ key: 'unemployment', label: 'Unemployment rate', value: stats.unemployment.toFixed(1) + '%' });
+  if (isNum(stats.gdp)) out.push({ key: 'gdp', label: 'GDP', value: '$' + formatterCompact(stats.gdp) });
 
 
-  if (isNum(stats.area)) out.push({ key: 'area', label: 'Area (km²)', value: formatter(stats.area) });
+  if (isNum(stats.area)) out.push({ key: 'area', label: 'Area', value: formatter(stats.area) + ' km²' });
   // first 6 are clues, the rest are just info for the nerds
   if (isNum(stats.goats)) out.push({ key: 'goats', label: 'Goat population', value: formatter(stats.goats) });
   if (stats.carSide) out.push({ key: 'carSide', label: 'Drives on the', value: stats.carSide });
   if (isNum(stats.forestArea)) out.push({ key: 'forestArea', label: 'Forest area (km²)', value: formatter(stats.forestArea) });
-  if (isNum(stats.precipitation)) out.push({ key: 'precipitation', label: 'Annual precipitation (mm)', value: formatter(stats.precipitation) });
-  if (isNum(stats.co2)) out.push({ key: 'co2', label: 'CO2 per capita (metric tons)', value: formatter(stats.co2) });
+  if (isNum(stats.precipitation)) out.push({ key: 'precipitation', label: 'Annual precipitation', value: formatter(stats.precipitation) + ' mm' });
+  if (isNum(stats.co2)) out.push({ key: 'co2', label: 'CO2 per capita', value: formatter(stats.co2) + ' tonnes' });
   if (stats.landlocked === true) out.push({ key: 'landlocked', label: 'Landlocked', value: "" });
   if (isNum(stats.corruption)) out.push({ key: 'corruption', label: 'Control of corruption', value: 'better than ' + formatter(stats.corruption) + '% of countries' });
   if (isNum(stats.tax)) out.push({ key: 'tax', label: 'Tax revenue (% of GDP)', value: stats.tax.toFixed(1) });
