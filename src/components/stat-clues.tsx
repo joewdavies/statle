@@ -136,7 +136,7 @@ function buildClues(stats: CountryStats | null | undefined): Clue[] {
   // first 6 are clues, the rest are just info for the nerds
   if (isNum(stats.goats)) out.push({ key: 'goats', label: 'Goat population', value: formatter(stats.goats) });
   if (stats.carSide) out.push({ key: 'carSide', label: 'Drives on the', value: stats.carSide });
-  if (isNum(stats.forestArea)) out.push({ key: 'forestArea', label: 'Forest area', value: formatter(stats.forestArea) + 'km²' });
+  if (isNum(stats.forestArea)) out.push({ key: 'forestArea', label: 'Forest area', value: formatter(stats.forestArea) + ' km²' });
   if (isNum(stats.precipitation)) out.push({ key: 'precipitation', label: 'Annual precipitation', value: formatter(stats.precipitation) + ' mm' });
   if (isNum(stats.co2)) out.push({ key: 'co2', label: 'CO2 per capita', value: formatter(stats.co2) + ' tonnes' });
   if (stats.landlocked === true) out.push({ key: 'landlocked', label: 'Landlocked', value: "" });
