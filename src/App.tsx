@@ -22,6 +22,7 @@ import { stats } from './data/stats/stats';
 import { GameResult, UserStatsService } from './services/userStats';
 
 import { getDailyCountry } from "./helpers/getRandomCountry";
+import GlobeJourney from './components/globe-journey';
 
 const todaysCountry = getDailyCountry();
 const todayKey = todayKeyLocal();
@@ -59,7 +60,7 @@ const sortByDateAscLocal = (a: GameResult, b: GameResult) =>
         `🧹 Statle: deduped exact duplicates (${file.items.length} → ${deduped.length})`
       );
     }
-  } catch {}
+  } catch { }
 })();
 
 type PersistedRound = {
@@ -181,16 +182,42 @@ function App() {
       )}
 
       {gameStatus !== GameStatus.Playing && (
-        // If you add a `dailyMode` prop to CorrectCountry, wire it here;
-        // for now we keep onPlayAgain behaviour unchanged.
-        <CorrectCountry
-          country={country}
-          gameStatus={gameStatus}
-          onPlayAgain={() => {
-            // In strict daily mode you probably want this disabled or to just noop.
-            // For now we do nothing to avoid replaying the same daily.
-          }}
-        />
+        <>
+          <CorrectCountry
+            country={country}
+            gameStatus={gameStatus}
+            onPlayAgain={() => {
+              // no replay in daily mode
+            }}
+          />
+
+          {/* Globe journey */}
+          <div style={{ width: "100%", maxWidth: 820, margin: "12px auto" }}>
+            <GlobeJourney
+              guesses={guesses
+                .filter(Boolean)
+                .map((g) => {
+                  const found = countries.find((c) => c.name === g);
+                  return found
+                    ? {
+                      code: found.code,
+                      name: found.name,
+                      latitude: found.latitude,
+                      longitude: found.longitude,
+                    }
+                    : null;
+                })
+                .filter(Boolean) as Array<{
+                  code?: string;
+                  name?: string;
+                  latitude: number;
+                  longitude: number;
+                }>}
+              stepDuration={2400}
+              markerRadius={5}
+            />
+          </div>
+        </>
       )}
 
       {/* Header + guess list */}
