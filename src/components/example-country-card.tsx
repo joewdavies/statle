@@ -4,8 +4,7 @@ import { motion } from "framer-motion";
 import CountUp from "react-countup";
 import { Country } from "../data/countries/countries";
 import { convertDistance, getDistance } from "geolib";
-import { directionMap } from "../helpers/directionMap";
-import { getCompassDirection } from "../services/geo";
+import { getCompassDirection, directionMap } from "../services/geo";
 
 type TextWithAnimationProps = { children: React.ReactNode };
 

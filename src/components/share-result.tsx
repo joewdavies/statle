@@ -13,6 +13,8 @@ import { IconShare3, IconClipboard, IconCheck } from '@tabler/icons-react';
 import { MAX_GUESSES } from '../constants';
 import { useUserStats } from '../hooks/useUserStats';
 import { countries } from '../data/countries/countries';
+import { getDistance } from 'geolib';
+import { getCompassDirection, directionMap } from '../services/geo';
 
 // Prebuild a quick lookup by ISO code
 const countriesByCode: Record<string, any> = Object.fromEntries(
@@ -29,49 +31,7 @@ function formatDate(d = new Date()) {
 function clamp(n: number, min: number, max: number) {
   return Math.max(min, Math.min(max, n));
 }
-function toRad(deg: number) {
-  return (deg * Math.PI) / 180;
-}
-function toDeg(rad: number) {
-  return (rad * 180) / Math.PI;
-}
 
-// Haversine distance in kilometers
-function haversineKm(a: { latitude: number; longitude: number }, b: { latitude: number; longitude: number }) {
-  const R = 6371; // km
-  const dLat = toRad(b.latitude - a.latitude);
-  const dLon = toRad(b.longitude - a.longitude);
-  const φ1 = toRad(a.latitude);
-  const φ2 = toRad(b.latitude);
-
-  const s =
-    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos(φ1) * Math.cos(φ2) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
-  const c = 2 * Math.atan2(Math.sqrt(s), Math.sqrt(1 - s));
-  return R * c;
-}
-
-// Bearing (degrees 0..360 from North) from point A to B
-function bearingDeg(a: { latitude: number; longitude: number }, b: { latitude: number; longitude: number }) {
-  const φ1 = toRad(a.latitude);
-  const φ2 = toRad(b.latitude);
-  const λ1 = toRad(a.longitude);
-  const λ2 = toRad(b.longitude);
-  const y = Math.sin(λ2 - λ1) * Math.cos(φ2);
-  const x = Math.cos(φ1) * Math.sin(φ2) - Math.sin(φ1) * Math.cos(φ2) * Math.cos(λ2 - λ1);
-  const θ = Math.atan2(y, x);
-  const deg = (toDeg(θ) + 360) % 360;
-  return deg;
-}
-
-// 8-wind arrow by bearing
-function bearingToArrow(deg: number) {
-  const dirs = ['⬆️', '↗️', '➡️', '↘️', '⬇️', '↙️', '⬅️', '↖️'] as const;
-  const idx = Math.round(deg / 45) % 8;
-  return dirs[idx];
-}
-
-// ----------------------------- visuals -----------------------------
 // Green (🟩) + white (⬜) 5-cell bar based on proximity % (rounded to nearest 20%).
 function proximityBar5(proximityPct: number) {
   const p = clamp(proximityPct, 0, 100);
@@ -112,14 +72,26 @@ export function ShareResult() {
         resolveCountry(last.countryCode) ||
         resolveCountry(last.countryName);
 
-      if (target?.latitude != null && target?.longitude != null && Array.isArray(last.guesses)) {
+      if (
+        target?.latitude != null &&
+        target?.longitude != null &&
+        Array.isArray(last.guesses)
+      ) {
         const tLL = { latitude: target.latitude, longitude: target.longitude };
 
         last.guesses.forEach((g, i) => {
+          // g can be a country name or code
           const guess = resolveCountry(g);
           if (guess?.latitude != null && guess?.longitude != null) {
             const gLL = { latitude: guess.latitude, longitude: guess.longitude };
-            const km = haversineKm(gLL, tLL);
+
+            // use geolib for distance (meters -> km)
+            const meters = getDistance(
+              { latitude: gLL.latitude, longitude: gLL.longitude },
+              { latitude: tLL.latitude, longitude: tLL.longitude }
+            );
+            const km = meters / 1000;
+
             const proximity = clamp(100 - (km / 20000) * 100, 0, 100);
             bestProximity = Math.max(bestProximity, proximity);
 
@@ -131,8 +103,12 @@ export function ShareResult() {
               line = '🟩🟩🟩🟩🟩🎉';
             } else {
               // For incorrect guesses, append a direction arrow towards the target
-              const deg = bearingDeg(gLL, tLL);
-              const arrow = bearingToArrow(deg);
+              const directionKey = getCompassDirection(
+                { latitude: gLL.latitude, longitude: gLL.longitude },
+                { latitude: tLL.latitude, longitude: tLL.longitude },
+                8
+              );
+              const arrow = directionMap[directionKey] ?? '🧭';
               line += arrow;
             }
 
@@ -147,7 +123,7 @@ export function ShareResult() {
     // Header % is best proximity; if won it's 100%
     const headerPct = last?.result === 'won' ? 100 : Math.round(bestProximity);
 
-    // ❌ No markdown here; many targets won't render it.
+    //  No markdown here; many targets won't render it.
     const header = `Statle (${date}) ${triesStr} (${headerPct}%)`;
     const streakLine = `🔥 Current Win Streak: ${streak}`;
     const footer = `https://joewdavies.github.io/statle`;
