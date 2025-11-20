@@ -1,5 +1,3 @@
-import { Country } from "../data/countries/countries";
-
 export const directionMap = {
   N: '⬆️',
   NE: '↗️',
