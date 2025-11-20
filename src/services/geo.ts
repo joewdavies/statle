@@ -1,3 +1,5 @@
+import { Country } from "../data/countries/countries";
+
 export const directionMap = {
   N: '⬆️',
   NE: '↗️',
@@ -59,4 +61,12 @@ export function getCompassDirection(
     ? dirs16[Math.round(bearing / 22.5) % 16]
     : dirs8[Math.round(bearing / 45) % 8]
   );
+}
+
+export function sharesLandBorder(guessCode: string, targetCode: string, stats: any) {
+  const guessBorders = stats[guessCode]?.borders ?? [];
+  const targetBorders = stats[targetCode]?.borders ?? [];
+
+  // check both ways
+  return guessBorders.includes(targetCode) || targetBorders.includes(guessCode);
 }

@@ -2,7 +2,8 @@ import { Box, Divider, Flex, Text, Card } from '@mantine/core';
 import { convertDistance, getDistance } from 'geolib';
 import { Country } from '../data/countries/countries';
 import CountUp from 'react-countup';
-import { getCompassDirection, directionMap } from '../services/geo';
+import { getCompassDirection, directionMap, sharesLandBorder } from '../services/geo';
+import { dataset } from '../data/stats/dataset';
 
 
 export function CountryCardHeader() {
@@ -80,10 +81,14 @@ export function CountryCard({ guessCountry, country }: CountryCardProps) {
     longitude: country.longitude,
   };
 
-  const distance = convertDistance(
-    getDistance(guessCountryLatAndLong, countryLatAndLong),
-    'km'
+  const isBordering = sharesLandBorder(
+    guessCountry.code,
+    country.code,
+    dataset
   );
+  const distance = isBordering
+    ? 1
+    : convertDistance(getDistance(guessCountryLatAndLong, countryLatAndLong), 'km');
 
   const direction = getCompassDirection(
     guessCountryLatAndLong,
