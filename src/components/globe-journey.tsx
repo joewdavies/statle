@@ -44,6 +44,7 @@ export default function GlobeJourney({
     const sphereFill = colorScheme === 'dark' ? '#96ccd6ff' : '#b4e1e9ff';
     const landFill = colorScheme === 'dark' ? '#3a3a3aff' : '#f2f2f2';
     const sphereDropShadow = colorScheme === 'dark' ? 'drop-shadow(0px 0px 6px rgba(150, 150, 150, 0.4))' : 'drop-shadow(0px 0px 6px rgba(200, 249, 255, 0.4))';
+    const lineColor = colorScheme === 'dark' ? '#ffffffff' : '#444444';
 
     useEffect(() => {
         if (!svgRef.current) return;
@@ -148,8 +149,8 @@ export default function GlobeJourney({
                 .join("path")
                 .attr("class", "flight")
                 .attr("fill", "none")
-                .attr("stroke", "rgba(68, 68, 68, 0.5)")
-                .attr("stroke-width", 1.5)
+                .attr("stroke", lineColor)
+                .attr("stroke-width", 1.8)
                 .attr("opacity", 0.7)
                 .attr("d", ([a, b]: any) => {
                     // Use geoInterpolate to sample points along great circle
