@@ -1,4 +1,4 @@
-import { Badge, Button, Flex, Image } from '@mantine/core';
+import { Badge, Flex, Image } from '@mantine/core';
 import { GameStatus } from '../constants';
 import { Country } from '../data/countries/countries';
 import ConfettiExplosion from 'react-confetti-explosion';
@@ -15,8 +15,6 @@ type CorrectCountryProps = {
 export function CorrectCountry({
   country,
   gameStatus,
-  onPlayAgain,
-  dailyMode = true,
 }: CorrectCountryProps) {
   const flagUrl = getFlagURL(country.code);
 
@@ -42,19 +40,9 @@ export function CorrectCountry({
       </Badge>
 
       {/* Buttons stacked vertically; tighter spacing */}
-      <Flex direction="column" align="center" gap={6} mt="sm">
-        {/* Daily mode: block replay; else show Play again if handler provided */}
-        {dailyMode ? (
-          <Button size="md" disabled>
-            Come back tomorrow
-          </Button>
-        ) : onPlayAgain ? (
-          <Button size="md" onClick={onPlayAgain}>
-            Play again
-          </Button>
-        ) : null}
-
+      <Flex direction="column" align="center" gap={6} >
         <ShareResult />
+        {/* <Text>See you tomorrow!</Text> */}
       </Flex>
     </Flex>
   );

@@ -37,7 +37,7 @@ export function Rules() {
     'km'
   ).toFixed(0);
 
-    const proximity1 = Math.floor(100 - (Number(distance1) / 20000) * 100)
+  const proximity1 = Math.floor(100 - (Number(distance1) / 20000) * 100)
   const proximity2 = Math.floor(100 - (Number(distance2) / 20000) * 100)
 
   return (
@@ -81,16 +81,16 @@ export function Rules() {
               km away from the target location, the target location is in the
               {
                 directionMap[
-                  getCompassDirection(
-                    {
-                      latitude: countries[2].latitude,
-                      longitude: countries[2].longitude,
-                    },
-                    {
-                      latitude: countries[0].latitude,
-                      longitude: countries[0].longitude,
-                    }
-                  )
+                getCompassDirection(
+                  {
+                    latitude: countries[2].latitude,
+                    longitude: countries[2].longitude,
+                  },
+                  {
+                    latitude: countries[0].latitude,
+                    longitude: countries[0].longitude,
+                  }
+                )
                 ]
               }{' '}
               direction and you have {proximity1}% of proximity!
@@ -107,16 +107,16 @@ export function Rules() {
             km away,{' '}
             {
               directionMap[
-                getCompassDirection(
-                  {
-                    latitude: countries[5].latitude,
-                    longitude: countries[5].longitude,
-                  },
-                  {
-                    latitude: countries[0].latitude,
-                    longitude: countries[0].longitude,
-                  }
-                )
+              getCompassDirection(
+                {
+                  latitude: countries[5].latitude,
+                  longitude: countries[5].longitude,
+                },
+                {
+                  latitude: countries[0].latitude,
+                  longitude: countries[0].longitude,
+                }
+              )
               ]
             }{' '}
             and {proximity2}%!
@@ -145,7 +145,10 @@ export function Rules() {
             </Anchor>
           </Text>
           <Text>
-            Data sources: Eurostat, World Bank, REST countries.
+            Data sources: Eurostat, World Bank, REST countries.  <Anchor href="https://observablehq.com/d/a1383688270e4c00">
+              {' '}
+              Notebook containing data sources and processing steps.
+            </Anchor>
           </Text>
         </Flex>
       </Modal>

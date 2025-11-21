@@ -22,6 +22,7 @@ export type CountryStats = {
   corruption?: number | null | undefined;
   landlocked?: boolean | null | undefined;
   airPassengers?: number | null | undefined;
+  bribes?: number | null | undefined;
 };
 
 // Optional convenience

@@ -18,6 +18,7 @@ import {
   IconWheat,
   IconCloud,
   IconCurrencyDollar,
+  IconMoneybag,
 } from '@tabler/icons-react';
 
 import { GiGoat } from "react-icons/gi";
@@ -47,6 +48,7 @@ const clueIcons = {
   tax: <IconCoins size={16} />,
   wheat: <IconWheat size={16} />,
   airPassengers: <IconPlane size={16} />,
+  bribes: <IconMoneybag size={16} />,
 } as const;
 
 // Keys for safer icon mapping, derived from the icon map
@@ -104,9 +106,9 @@ export function StatClues({
               <Box key={i}>
                 <Group gap="xs" wrap="nowrap">
                   {clueIcons[s.key]}
-                  <Text size="sm">
-                    <Text span fw={600}>{s.label}{s.key !== 'landlocked' ? ':' : ''} </Text>
-                    {s.value}
+                  <Text size="sm" className='stat-row'>
+                    <Text className='stat-label' span fw={600}>{s.label}{s.key !== 'landlocked' ? ':' : ''} </Text>
+                    <Text className='stat-value' span>{s.value}</Text>
                   </Text>
                 </Group>
               </Box>
@@ -140,10 +142,11 @@ function buildClues(stats: CountryStats | null | undefined): Clue[] {
   if (isNum(stats.precipitation)) out.push({ key: 'precipitation', label: 'Annual precipitation', value: formatter(stats.precipitation) + ' mm' });
   if (isNum(stats.co2)) out.push({ key: 'co2', label: 'CO2 per capita', value: formatter(stats.co2) + ' tonnes' });
   if (stats.landlocked === true) out.push({ key: 'landlocked', label: 'Landlocked', value: "" });
-  if (isNum(stats.corruption)) out.push({ key: 'corruption', label: 'Control of corruption', value: 'better than ' + formatter(stats.corruption) + '% of countries' });
+  if (isNum(stats.corruption)) out.push({ key: 'corruption', label: 'Corruption (percentile)', value: formatter(stats.corruption) });
   if (isNum(stats.tax)) out.push({ key: 'tax', label: 'Tax revenue (% of GDP)', value: stats.tax.toFixed(1) });
   if (isNum(stats.wheat)) out.push({ key: 'wheat', label: 'Wheat Production (metric tons)', value: formatterCompact(stats.wheat) });
   if (isNum(stats.airPassengers)) out.push({ key: 'airPassengers', label: 'Air Passengers', value: formatterCompact(stats.airPassengers) });
+  if (isNum(stats.bribes)) out.push({ key: 'bribes', label: '% of firms that bribe public officials', value: formatterCompact(stats.bribes) });
 
   return out;
 }

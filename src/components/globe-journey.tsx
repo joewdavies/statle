@@ -102,67 +102,86 @@ export default function GlobeJourney({
         const visitedCountries = new Set<string>();
 
         function renderMarkers(idx: number | null = null) {
-            // reset visited if we are back at the start
+            // reset visited on loop start
             if (idx === 0) visitedCountries.clear();
-            if (idx !== null && guesses[idx].code) visitedCountries.add(guesses[idx].code);
+            if (idx !== null && guesses[idx]?.code) visitedCountries.add(guesses[idx].code);
 
-            // add marker
-            markers
-                .selectAll("circle.marker")
-                .data(guesses)
-                .join("circle")
-                .attr("class", "marker")
-                .attr("r", (_d: any, i: any) => (i === idx ? markerRadius * 2 : markerRadius))
-                .attr("cx", (d: any) => {
-                    const p = projection([d.longitude, d.latitude]);
-                    return p ? p[0] : -9999;
+            // Update existing circles or create if missing — key by code to keep stability
+            markers.selectAll("circle.marker")
+                .data(guesses, (d: any) => d.code || `${d.latitude}-${d.longitude}`)
+                .join(
+                    enter => enter.append("circle").attr("class", "marker"),
+                    update => update,
+                    exit => exit.remove()
+                )
+                .attr("r", (_d: any, i: number) => (i === idx ? markerRadius * 2 : markerRadius))
+                .attr("cx", (d: any) => (projection([d.longitude, d.latitude])?.[0] ?? -9999))
+                .attr("cy", (d: any) => (projection([d.longitude, d.latitude])?.[1] ?? -9999))
+                .attr("fill", (d: any) => {
+                    // correct country stays green; visited ones red
+                    if (correctCountry && d.code === correctCountry.code) return "#248b24ff";
+                    return visitedCountries.has(d.code) ? "#ff6b6b" : "#d8d8d8";
                 })
-                .attr("cy", (d: any) => {
-                    const p = projection([d.longitude, d.latitude]);
-                    return p ? p[1] : -9999;
-                })
-                .attr("fill", d => {
-                    if (correctCountry && d.code === correctCountry.code) return "#248b24ff"; // green
-                    return "#ff6b6b"; // red
-                })
-                .attr("stroke", "#fff")
-                .attr("stroke-width", 0.8)
                 .attr("opacity", (d: any) => (isPointVisible(projection, d) ? 1 : 0.25));
 
-            // Update country polygons
+            // Update fill on countries — cheap string checks only
             countries.attr("fill", (d: any) => {
-                const isVisited = visitedCountries.has(d.id);
-                const isActive = idx !== null && guesses[idx].code === d.id;
-                if (isActive && correctCountry && guesses[idx].code === correctCountry.code) return "#248b24ff";
-                if (isVisited) return "#ff6b6b";
+                const activeGuess = idx !== null ? guesses[idx] : null;
+                const isActive = activeGuess && (activeGuess.code === d.id || activeGuess.code === d.properties?.ISO_A3 || activeGuess.code === d.properties?.ISO3_CODE);
+                if (isActive && correctCountry && activeGuess && activeGuess.code === correctCountry.code) return "#248b24ff";
+                if (visitedCountries.has(d.id) || (activeGuess && activeGuess.code === d.id)) return "#ff6b6b";
                 return landFill;
             });
         }
 
         // Curved great-circle flight path
+        // cache interpolators and projected arc samples
+        const arcCache = new Map<string, { interp: (t: number) => [number, number], pts: [number, number][] }>();
+        function cacheKey(a: Guess, b: Guess) {
+            return `${a.latitude},${a.longitude}:${b.latitude},${b.longitude}`;
+        }
         function renderFlights() {
-            flights.selectAll("path.flight")
-                .data(guesses.slice(0, currentIndex.current + 1).map((d, i) => {
-                    if (i === 0) return null;
-                    return [guesses[i - 1], d];
-                }).filter(Boolean))
-                .join("path")
-                .attr("class", "flight")
-                .attr("fill", "none")
+            const pairs: Array<[Guess, Guess]> = [];
+            for (let i = 1; i <= currentIndex.current; i++) {
+                const a = guesses[i - 1];
+                const b = guesses[i];
+                if (a && b) pairs.push([a, b]);
+            }
+
+            const sel = flights
+                .selectAll<SVGPathElement, [Guess, Guess]>("path.flight")
+                .data(pairs, ([a, b]) => cacheKey(a, b));
+
+            sel.join(
+                enter => enter.append("path").attr("class", "flight").attr("fill", "none"),
+                update => update,
+                exit => exit.remove()
+            )
                 .attr("stroke", lineColor)
                 .attr("stroke-width", 1.8)
                 .attr("opacity", 0.7)
-                .attr("d", ([a, b]: any) => {
-                    // Use geoInterpolate to sample points along great circle
-                    const interp = geoInterpolate([a.longitude, a.latitude], [b.longitude, b.latitude]);
-                    const num = 30; // points along the arc
-                    const coords = [];
-                    for (let t = 0; t <= 1; t += 1 / num) {
-                        coords.push(projection(interp(t)) ?? [-9999, -9999]);
+                .attr("d", ([a, b]) => {
+                    const key = cacheKey(a, b);
+                    let cached = arcCache.get(key);
+
+                    // create cache entry if missing
+                    if (!cached) {
+                        const interp = geoInterpolate([a.longitude, a.latitude], [b.longitude, b.latitude]);
+                        cached = { interp, pts: [] };
+                        arcCache.set(key, cached);
+
+                        // sample points once
+                        const N = 30;
+                        const sampled = [];
+                        for (let t = 0; t <= 1; t += 1 / N) {
+                            sampled.push(cached.interp(t));
+                        }
+                        cached.pts = sampled;
                     }
-                    return coords.length > 0
-                        ? `M${coords.map(c => c.join(",")).join(" L")}`
-                        : null;
+
+                    // project cached arc coords
+                    const projected = cached.pts.map(p => projection(p) || [-9999, -9999]);
+                    return `M${projected.map(c => c.join(",")).join(" L")}`;
                 });
         }
 
@@ -254,6 +273,12 @@ export default function GlobeJourney({
                 rotationAnimRef.current = null;
             }
             svg.selectAll("*").remove();
+            // create empty selection containers once so we reuse them
+            flights.selectAll("path.flight").data([]).join("path");
+            markers.selectAll("circle.marker").data(guesses).join("circle")
+                .attr("class", "marker")
+                .attr("stroke", "#fff")
+                .attr("stroke-width", 0.8);
         };
         // re-run if guesses or size changes
     }, [guesses, width, height, stepDuration, rotateDuration, markerRadius, colorScheme]);

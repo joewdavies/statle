@@ -135,6 +135,7 @@ export const dataset = {
         "gdpPerCapita": 8500.60522486719,
         "goats": 22934,
         "airPassengers": 179200,
+        "bribes": 1.654622555,
         "area": 29743,
         "carSide": "right",
         "currencies": {
@@ -163,6 +164,7 @@ export const dataset = {
         "gdpPerCapita": 2122.08368991872,
         "goats": 4711162,
         "airPassengers": 311488,
+        "bribes": 19.12140465,
         "area": 1246700,
         "carSide": "right",
         "currencies": {
@@ -275,6 +277,7 @@ export const dataset = {
         "gdpPerCapita": 7283.83562954872,
         "goats": 605925,
         "airPassengers": 1102455,
+        "bribes": 5.979403496,
         "area": 86600,
         "carSide": "right",
         "currencies": {
@@ -377,6 +380,7 @@ export const dataset = {
         "gdp": 664564181486.953,
         "gdpPerCapita": 55954.6106261018,
         "airPassengers": 5404284.479,
+        "bribes": 5.228816986,
         "area": 30528,
         "carSide": "right",
         "currencies": {
@@ -405,6 +409,7 @@ export const dataset = {
         "gdpPerCapita": 987.321378101867,
         "goats": 16407139,
         "airPassengers": 112940,
+        "bribes": 17.76241112,
         "area": 272967,
         "carSide": "right",
         "currencies": {
@@ -464,6 +469,7 @@ export const dataset = {
         "gdpPerCapita": 30048.2177718844,
         "goats": 23565,
         "airPassengers": 1840268,
+        "bribes": 5.636245251,
         "area": 765,
         "carSide": "right",
         "currencies": {
@@ -512,6 +518,7 @@ export const dataset = {
         "gdp": 21482643720.2743,
         "gdpPerCapita": 1485.38018980894,
         "goats": 2010000,
+        "bribes": 4.713774681,
         "area": 112622,
         "carSide": "right",
         "currencies": {
@@ -656,6 +663,7 @@ export const dataset = {
         "corruption": 91.0377349853516,
         "goats": 44119,
         "airPassengers": 22380,
+        "bribes": 1.772983313,
         "area": 38394,
         "carSide": "left",
         "currencies": {
@@ -771,6 +779,7 @@ export const dataset = {
         "gdpPerCapita": 54282.6176051733,
         "goats": 30122,
         "airPassengers": 24951000,
+        "bribes": 5.354949951,
         "area": 9984670,
         "carSide": "right",
         "currencies": {
@@ -796,6 +805,7 @@ export const dataset = {
         "gdpPerCapita": 647.435704836002,
         "goats": 4112717,
         "airPassengers": 392102.214,
+        "bribes": 25.90929222,
         "area": 2344858,
         "carSide": "right",
         "currencies": {
@@ -858,6 +868,7 @@ export const dataset = {
         "gdpPerCapita": 2482.24894743495,
         "goats": 331200,
         "airPassengers": 157784,
+        "bribes": 26.43828392,
         "area": 342000,
         "carSide": "right",
         "currencies": {
@@ -972,6 +983,7 @@ export const dataset = {
         "gdpPerCapita": 1762.3683508844,
         "goats": 5533489,
         "airPassengers": 177992,
+        "bribes": 21.64389229,
         "area": 475442,
         "carSide": "right",
         "currencies": {
@@ -1002,6 +1014,7 @@ export const dataset = {
         "gdpPerCapita": 13303.1481543868,
         "goats": 133452500,
         "airPassengers": 440301216,
+        "bribes": 0.2877615392,
         "area": 9706961,
         "carSide": "right",
         "currencies": {
@@ -1120,6 +1133,7 @@ export const dataset = {
         "gdpPerCapita": 5272.85253011419,
         "goats": 131737,
         "airPassengers": 76354.068,
+        "bribes": 0.5860511065,
         "area": 4033,
         "carSide": "right",
         "currencies": {
@@ -1142,6 +1156,7 @@ export const dataset = {
         "gdp": 36333022329.4981,
         "gdpPerCapita": 38654.16796875,
         "airPassengers": 103016,
+        "bribes": 3.235013008,
         "area": 9251,
         "carSide": "left",
         "currencies": {
@@ -1165,6 +1180,7 @@ export const dataset = {
         "gdpPerCapita": 31706.6234229743,
         "goats": 28919,
         "airPassengers": 1418032,
+        "bribes": 10.87723541,
         "area": 78865,
         "carSide": "right",
         "currencies": {
@@ -1351,6 +1367,7 @@ export const dataset = {
         "gdpPerCapita": 6874.705739766,
         "goats": 14092,
         "airPassengers": 1534854,
+        "bribes": 12.84390831,
         "area": 276841,
         "carSide": "right",
         "currencies": {
@@ -1466,6 +1483,7 @@ export const dataset = {
         "gdpPerCapita": 35297.0094995565,
         "goats": 2651040,
         "airPassengers": 43440479.727,
+        "bribes": 0.906526804,
         "area": 505992,
         "carSide": "right",
         "currencies": {
@@ -1649,6 +1667,7 @@ export const dataset = {
         "gdpPerCapita": 52636.7865943853,
         "goats": 104000,
         "airPassengers": 26631932,
+        "bribes": 0.618468225,
         "area": 244376,
         "carSide": "left",
         "currencies": {
@@ -1804,6 +1823,7 @@ export const dataset = {
         "gdpPerCapita": 6745.40013244916,
         "goats": 9877,
         "airPassengers": 31268,
+        "bribes": 32.82190704,
         "area": 28051,
         "carSide": "right",
         "currencies": {
@@ -2051,6 +2071,7 @@ export const dataset = {
         "gdp": 577389475009.922,
         "gdpPerCapita": 107316.337306921,
         "airPassengers": 74065210,
+        "bribes": 0.0858573914,
         "area": 70273,
         "carSide": "left",
         "currencies": {
@@ -2075,6 +2096,7 @@ export const dataset = {
         "gdpPerCapita": 54176.6844383302,
         "goats": 116293,
         "airPassengers": 2437207,
+        "bribes": 10.29837704,
         "area": 21937,
         "carSide": "right",
         "currencies": {
@@ -2195,6 +2217,7 @@ export const dataset = {
         "gdpPerCapita": 82703.8579937471,
         "goats": 1621,
         "airPassengers": 1499034,
+        "bribes": 0.8626738787,
         "area": 103000,
         "carSide": "right",
         "currencies": {
@@ -2218,6 +2241,7 @@ export const dataset = {
         "gdpPerCapita": 40226.0472416173,
         "goats": 1065710,
         "airPassengers": 2449339,
+        "bribes": 1.595674634,
         "area": 301336,
         "carSide": "right",
         "currencies": {
@@ -2245,6 +2269,7 @@ export const dataset = {
         "gdp": 19930288337.028,
         "gdpPerCapita": 7019.74634780454,
         "goats": 572246,
+        "bribes": 2.268638849,
         "area": 10991,
         "carSide": "left",
         "currencies": {
@@ -2268,6 +2293,7 @@ export const dataset = {
         "gdpPerCapita": 4618.09592498567,
         "goats": 661266,
         "airPassengers": 1695302,
+        "bribes": 8.2053442,
         "area": 89342,
         "carSide": "right",
         "currencies": {
@@ -2494,6 +2520,7 @@ export const dataset = {
         "co2": 11.0908267863981,
         "corruption": 79.7169799804688,
         "airPassengers": 34020088,
+        "bribes": 1.441454887,
         "area": 100210,
         "carSide": "right",
         "currencies": {
@@ -2543,6 +2570,7 @@ export const dataset = {
         "gdpPerCapita": 14005.3487362345,
         "goats": 2307969,
         "airPassengers": 8765001,
+        "bribes": 12.39131927,
         "area": 2724900,
         "carSide": "right",
         "currencies": {
@@ -2572,6 +2600,7 @@ export const dataset = {
         "gdpPerCapita": 2123.97909411797,
         "goats": 682000,
         "airPassengers": 157293,
+        "bribes": 26.43923378,
         "area": 236800,
         "carSide": "right",
         "currencies": {
@@ -2796,6 +2825,7 @@ export const dataset = {
         "gdpPerCapita": 23367.5986788961,
         "goats": 11480,
         "airPassengers": 1598685,
+        "bribes": 2.984981298,
         "area": 64559,
         "carSide": "right",
         "currencies": {
@@ -2898,6 +2928,7 @@ export const dataset = {
         "gdpPerCapita": 7617.51613089815,
         "goats": 145278,
         "airPassengers": 528581,
+        "bribes": 6.809977055,
         "area": 33847,
         "carSide": "right",
         "currencies": {
@@ -3019,6 +3050,7 @@ export const dataset = {
         "gdp": 26588067731.1692,
         "gdpPerCapita": 1086.1762176779,
         "goats": 27810553,
+        "bribes": 8.481123924,
         "area": 1240192,
         "carSide": "right",
         "currencies": {
@@ -3132,6 +3164,7 @@ export const dataset = {
         "gdpPerCapita": 42347.3073860173,
         "goats": 5530,
         "airPassengers": 597724,
+        "bribes": 2.694349289,
         "area": 316,
         "carSide": "left",
         "currencies": {
@@ -3255,6 +3288,7 @@ export const dataset = {
         "gdpPerCapita": 11867.2586435443,
         "goats": 312571,
         "airPassengers": 4965360.963,
+        "bribes": 4.863255501,
         "area": 330803,
         "carSide": "left",
         "currencies": {
@@ -3313,6 +3347,7 @@ export const dataset = {
         "gdpPerCapita": 4413.1274418646,
         "goats": 1854179,
         "airPassengers": 2245.772,
+        "bribes": 5.901610851,
         "area": 825615,
         "carSide": "left",
         "currencies": {
@@ -3636,6 +3671,7 @@ export const dataset = {
         "gdpPerCapita": 3076.48786186584,
         "goats": 3119,
         "airPassengers": 1039010,
+        "bribes": 43.36698914,
         "area": 462840,
         "carSide": "left",
         "currencies": {
@@ -3895,6 +3931,7 @@ export const dataset = {
         "gdpPerCapita": 13523.7246826854,
         "goats": 202325,
         "airPassengers": 1276465,
+        "bribes": 6.403296471,
         "area": 77589,
         "carSide": "right",
         "currencies": {
@@ -4095,6 +4132,7 @@ export const dataset = {
         "gdp": 610117791237.089,
         "gdpPerCapita": 57723.2345031532,
         "airPassengers": 20067143.633,
+        "bribes": 0.4827078879,
         "area": 450295,
         "carSide": "right",
         "currencies": {
@@ -4144,6 +4182,7 @@ export const dataset = {
         "gdpPerCapita": 34089.3527652778,
         "goats": 25680,
         "airPassengers": 21037,
+        "bribes": 2.417935133,
         "area": 20273,
         "carSide": "right",
         "currencies": {
@@ -4243,6 +4282,7 @@ export const dataset = {
         "gdpPerCapita": 1743.98888384359,
         "goats": 6405242,
         "airPassengers": 359705.738,
+        "bribes": 7.040329933,
         "area": 196722,
         "carSide": "right",
         "currencies": {
@@ -4319,6 +4359,7 @@ export const dataset = {
         "forestArea": 71570,
         "corruption": 0,
         "goats": 17590326,
+        "bribes": 22.81590271,
         "area": 619745,
         "carSide": "right",
         "currencies": {
@@ -4426,6 +4467,7 @@ export const dataset = {
         "gdpPerCapita": 3936.10969242371,
         "goats": 257820,
         "airPassengers": 13338,
+        "bribes": 9.744234085,
         "area": 17364,
         "carSide": "left",
         "currencies": {
@@ -4540,6 +4582,7 @@ export const dataset = {
         "gdpPerCapita": 1341.20229027672,
         "goats": 1950635,
         "airPassengers": 125163.504,
+        "bribes": 4.977510929,
         "area": 143100,
         "carSide": "right",
         "currencies": {
@@ -4592,6 +4635,7 @@ export const dataset = {
         "gdpPerCapita": 8571.60702949432,
         "goats": 2327988,
         "airPassengers": 648370.136,
+        "bribes": 17.21480942,
         "area": 488100,
         "carSide": "right",
         "currencies": {
@@ -4620,6 +4664,7 @@ export const dataset = {
         "gdpPerCapita": 4350.3717971875,
         "goats": 1141107,
         "airPassengers": 1675777,
+        "bribes": 8.616877556,
         "area": 163610,
         "carSide": "right",
         "currencies": {
@@ -4641,6 +4686,7 @@ export const dataset = {
         "forestArea": 89.5,
         "co2": 2.10331080241307,
         "corruption": 45.2830200195312,
+        "bribes": 11.04499054,
         "area": 747,
         "carSide": "left",
         "currencies": {
@@ -4664,6 +4710,7 @@ export const dataset = {
         "gdpPerCapita": 15473.2872636856,
         "goats": 11985845,
         "airPassengers": 69065868,
+        "bribes": 2.516850948,
         "area": 783562,
         "carSide": "right",
         "currencies": {
@@ -4846,6 +4893,7 @@ export const dataset = {
         "gdpPerCapita": 85809.9003846356,
         "goats": 2655000,
         "airPassengers": 666153000,
+        "bribes": 0.5603736639,
         "area": 9525067,
         "carSide": "right",
         "currencies": {
@@ -4871,6 +4919,7 @@ export const dataset = {
         "gdp": 80961511073.5797,
         "gdpPerCapita": 23906.5133029408,
         "goats": 18045,
+        "bribes": 0.8764667511,
         "area": 181034,
         "carSide": "right",
         "currencies": {
@@ -4897,6 +4946,7 @@ export const dataset = {
         "gdpPerCapita": 3161.70010632875,
         "goats": 3629600,
         "airPassengers": 2010914,
+        "bribes": 6.705952168,
         "area": 447400,
         "carSide": "right",
         "currencies": {
