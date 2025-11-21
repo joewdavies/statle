@@ -192,7 +192,7 @@ function App() {
           />
 
           {/* Globe journey */}
-          <div style={{ width: "100%", maxWidth: 820, margin: "12px auto" }}>
+          <Flex style={{ width: "100%", maxWidth: 820, margin: "12px auto" }}>
             <GlobeJourney
               guesses={guesses
                 .filter(Boolean)
@@ -213,10 +213,11 @@ function App() {
                   latitude: number;
                   longitude: number;
                 }>}
+              correctCountry={country} // pass correct country
               stepDuration={2400}
               markerRadius={5}
             />
-          </div>
+          </Flex>
         </>
       )}
 

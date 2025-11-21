@@ -4,9 +4,11 @@ import { select } from "d3-selection";
 import { interpolate } from "d3-interpolate";
 import { easeCubicInOut } from "d3-ease";
 import { timer, now } from "d3-timer";
-import { geoOrthographic, geoPath } from "d3-geo";
+import { geoInterpolate, geoOrthographic, geoPath } from "d3-geo";
 import { feature } from "topojson-client";
 import worldTopoJSON from "../data/world-topo.json";
+import { useMantineColorScheme } from '@mantine/core';
+import { Country } from "../data/countries/countries";
 
 type Guess = {
     code?: string;
@@ -22,6 +24,7 @@ type Props = {
     stepDuration?: number; // ms per step (time between targets)
     rotateDuration?: number; // ms for rotation animation
     markerRadius?: number;
+    correctCountry?: Country;
 };
 
 export default function GlobeJourney({
@@ -31,11 +34,16 @@ export default function GlobeJourney({
     stepDuration = 2400,
     rotateDuration = 900,
     markerRadius = 3,
+    correctCountry,
 }: Props) {
     const svgRef = useRef<SVGSVGElement | null>(null);
     const currentIndex = useRef(0);
     const timerRef = useRef<number | null>(null);
     const rotationAnimRef = useRef<any | null>(null);
+    const { colorScheme } = useMantineColorScheme(); // 'light' or 'dark'
+    const sphereFill = colorScheme === 'dark' ? '#96ccd6ff' : '#b4e1e9ff';
+    const landFill = colorScheme === 'dark' ? '#3a3a3aff' : '#f2f2f2';
+    const sphereDropShadow = colorScheme === 'dark' ? 'drop-shadow(0px 0px 6px rgba(150, 150, 150, 0.4))' : 'drop-shadow(0px 0px 6px rgba(200, 249, 255, 0.4))';
 
     useEffect(() => {
         if (!svgRef.current) return;
@@ -65,10 +73,11 @@ export default function GlobeJourney({
         svg
             .append("path")
             .datum({ type: "Sphere" } as any)
-            .attr("d", path as any)
-            .attr("fill", "#b4e1e9ff")
-            .attr("stroke", "#2b4a66")
-            .attr("stroke-width", 0.8);
+            .attr("d", path as any).attr("class", "sphere")
+            .attr("fill", sphereFill)
+            .attr("stroke", "#a7a7a781")
+            .attr("stroke-width", 0.8)
+            .style("filter", sphereDropShadow);
 
         // Countries
         const countries = svg
@@ -78,14 +87,25 @@ export default function GlobeJourney({
             .data(worldGeoJSON.features)
             .join("path")
             .attr("d", (d: any) => path(d) as string)
-            .attr("fill", "#f2f2f2")
+            .attr("fill", landFill)
             .attr("stroke", "#c7d7e6")
             .attr("stroke-width", 0.25);
 
         // Markers group
         const markers = svg.append("g").attr("class", "markers");
 
+        //flights group
+        const flights = svg.append("g").attr("class", "flights");
+
+        // store which guesses have already been visited
+        const visitedCountries = new Set<string>();
+
         function renderMarkers(idx: number | null = null) {
+            // reset visited if we are back at the start
+            if (idx === 0) visitedCountries.clear();
+            if (idx !== null && guesses[idx].code) visitedCountries.add(guesses[idx].code);
+
+            // add marker
             markers
                 .selectAll("circle.marker")
                 .data(guesses)
@@ -100,10 +120,49 @@ export default function GlobeJourney({
                     const p = projection([d.longitude, d.latitude]);
                     return p ? p[1] : -9999;
                 })
-                .attr("fill", (_d: any, i: any) => { return i == guesses.length - 1 ? "#248b24ff" : "#ff6b6b"; })
+                .attr("fill", d => {
+                    if (correctCountry && d.code === correctCountry.code) return "#248b24ff"; // green
+                    return "#ff6b6b"; // red
+                })
                 .attr("stroke", "#fff")
                 .attr("stroke-width", 0.8)
                 .attr("opacity", (d: any) => (isPointVisible(projection, d) ? 1 : 0.25));
+
+            // Update country polygons
+            countries.attr("fill", (d: any) => {
+                const isVisited = visitedCountries.has(d.id);
+                const isActive = idx !== null && guesses[idx].code === d.id;
+                if (isActive && correctCountry && guesses[idx].code === correctCountry.code) return "#248b24ff";
+                if (isVisited) return "#ff6b6b";
+                return landFill;
+            });
+        }
+
+        // Curved great-circle flight path
+        function renderFlights() {
+            flights.selectAll("path.flight")
+                .data(guesses.slice(0, currentIndex.current + 1).map((d, i) => {
+                    if (i === 0) return null;
+                    return [guesses[i - 1], d];
+                }).filter(Boolean))
+                .join("path")
+                .attr("class", "flight")
+                .attr("fill", "none")
+                .attr("stroke", "rgba(68, 68, 68, 0.5)")
+                .attr("stroke-width", 1.5)
+                .attr("opacity", 0.7)
+                .attr("d", ([a, b]: any) => {
+                    // Use geoInterpolate to sample points along great circle
+                    const interp = geoInterpolate([a.longitude, a.latitude], [b.longitude, b.latitude]);
+                    const num = 30; // points along the arc
+                    const coords = [];
+                    for (let t = 0; t <= 1; t += 1 / num) {
+                        coords.push(projection(interp(t)) ?? [-9999, -9999]);
+                    }
+                    return coords.length > 0
+                        ? `M${coords.map(c => c.join(",")).join(" L")}`
+                        : null;
+                });
         }
 
         function isPointVisible(proj: any, pt: Guess) {
@@ -151,6 +210,7 @@ export default function GlobeJourney({
                 // update world and markers
                 countries.attr("d", (d: any) => path(d) as string);
                 renderMarkers(currentIndex.current);
+                renderFlights();
                 if (t === 1) {
                     if (rotationAnimRef.current) rotationAnimRef.current.stop();
                     rotationAnimRef.current = null;
@@ -195,7 +255,7 @@ export default function GlobeJourney({
             svg.selectAll("*").remove();
         };
         // re-run if guesses or size changes
-    }, [guesses, width, height, stepDuration, rotateDuration, markerRadius]);
+    }, [guesses, width, height, stepDuration, rotateDuration, markerRadius, colorScheme]);
 
     return <svg ref={svgRef} width="100%" height="100%" viewBox={`0 0 ${width} ${height}`} />;
 }
