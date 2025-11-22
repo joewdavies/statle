@@ -23,6 +23,7 @@ import { GameResult, UserStatsService } from './services/userStats';
 
 import { getDailyCountry } from "./helpers/getRandomCountry";
 import GlobeJourney from './components/globe-journey';
+import { CheatDetector } from "./components/cheat-detector";
 
 const todaysCountry = getDailyCountry();
 const todayKey = todayKeyLocal();
@@ -156,6 +157,7 @@ function App() {
 
   return (
     <Flex align="center" direction="column" gap={20}>
+      <CheatDetector threshold={1200} />
       <Navbar />
       <Text>Guess today's country!</Text>
 
