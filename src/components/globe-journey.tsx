@@ -56,6 +56,7 @@ export default function GlobeJourney({
         if (!svgRef.current) return;
         const svg = select(svgRef.current);
         svg.selectAll("*").remove();
+        const root = svg.append("g").attr("class", "root");
 
         const projection = geoOrthographic()
             .scale(Math.min(width, height) / 2.1)
@@ -73,7 +74,7 @@ export default function GlobeJourney({
 
 
         // Background sphere
-        const sphere = svg
+        const sphere = root
             .append("path")
             .datum({ type: "Sphere" })
             .attr("class", "sphere")
@@ -84,7 +85,7 @@ export default function GlobeJourney({
             .style("filter", sphereDropShadow);
 
         // Countries
-        const countries = svg
+        const countries = root
             .append("g")
             .attr("class", "countries")
             .selectAll("path")
@@ -96,10 +97,10 @@ export default function GlobeJourney({
             .attr("stroke-width", 0.4);
 
         // Markers group
-        const markers = svg.append("g").attr("class", "markers");
+        const markers = root.append("g").attr("class", "markers");
 
         //flights group
-        const flights = svg.append("g").attr("class", "flights");
+        const flights = root.append("g").attr("class", "flights");
 
         // store which guesses have already been visited
         const visitedCountries = new Set<string>();
@@ -217,7 +218,7 @@ export default function GlobeJourney({
         }
 
         // draw initially
-        svg.attr("viewBox", `0 0 ${width} ${height}`).attr("preserveAspectRatio", "xMidYMid meet");
+        root.attr("viewBox", `0 0 ${width} ${height}`).attr("preserveAspectRatio", "xMidYMid meet");
         renderMarkers(0);
 
         // rotation helper — interpolates projection.rotate
@@ -330,7 +331,7 @@ export default function GlobeJourney({
 
             // Zoom behavior
             const zoomBehavior = zoom()
-                .wheelDelta(() => 0)     // ensures mobile pinch uses default behavior
+                //.wheelDelta(() => 0)     // ensures mobile pinch uses default behavior
                 .filter(event => {
                     // Allow:
                     // - touch pinch
@@ -350,7 +351,7 @@ export default function GlobeJourney({
                 });
 
             // Apply both drag and zoom behaviors to the SVG
-            svg.call(dragBehavior as any).call(zoomBehavior as any);
+            root.call(dragBehavior as any).call(zoomBehavior as any);
 
             draggingEnabled.current = true;
         }
@@ -359,8 +360,8 @@ export default function GlobeJourney({
             if (!draggingEnabled.current) return;
 
             // Remove the drag and zoom behaviors
-            svg.on('.drag', null); // Remove drag behavior
-            svg.on('.zoom', null); // Remove zoom behavior
+            root.on('.drag', null); // Remove drag behavior
+            root.on('.zoom', null); // Remove zoom behavior
             dragBehaviorRef.current = null;
             draggingEnabled.current = false;
         }
@@ -373,7 +374,7 @@ export default function GlobeJourney({
                 rotationAnimRef.current = null;
             }
             // remove drag handlers
-            try { svg.on('.drag', null); } catch { }
+            try { root.on('.drag', null); } catch { }
             svg.selectAll("*").remove();
         };
         // re-run if guesses or size changes
