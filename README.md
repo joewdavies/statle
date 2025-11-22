@@ -2,6 +2,13 @@
 
 STATLE is a guessing game where players identify a country based on statistics. You have 6 chances to guess the country, with more clues provided after each guess.
 
+<p align="center">
+  <a href="https://joewdavies.github.io/statle/">
+    <img src="https://raw.githubusercontent.com/joewdavies/statle/master/public/statle.png" />
+  </a>
+</p>
+
+
 ## Features
 
 - **Guess the Country**: Based on statistics.
