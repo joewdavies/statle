@@ -330,7 +330,7 @@ export default function GlobeJourney({
 
             // Zoom behavior
             const zoomBehavior = zoom()
-                //.wheelDelta(() => 0)     // ensures mobile pinch uses default behavior
+                .wheelDelta(() => 0)     // ensures mobile pinch uses default behavior
                 .filter(event => {
                     // Allow:
                     // - touch pinch
