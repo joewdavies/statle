@@ -157,7 +157,7 @@ function App() {
 
   return (
     <Flex align="center" direction="column" gap={20}>
-      <CheatDetector threshold={1200} />
+      {gameStatus === GameStatus.Playing && (<CheatDetector threshold={1200} />)}
       <Navbar />
       <Text>Guess today's country!</Text>
 
@@ -216,8 +216,6 @@ function App() {
                   longitude: number;
                 }>}
               correctCountry={country} // pass correct country
-              stepDuration={2400}
-              markerRadius={5}
             />
           </Flex>
         </>

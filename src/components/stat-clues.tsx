@@ -19,6 +19,7 @@ import {
   IconCloud,
   IconCurrencyDollar,
   IconMoneybag,
+  IconSunElectricity,
 } from '@tabler/icons-react';
 
 import { GiGoat } from "react-icons/gi";
@@ -46,9 +47,10 @@ const clueIcons = {
   corruption: <IconBriefcaseOff size={16} />, // TODO: swap for a nicer corruption icon if you want
   landlocked: <IconLock size={16} />,
   tax: <IconCoins size={16} />,
-  wheat: <IconWheat size={16} />,
+  cereal: <IconWheat size={16} />,
   airPassengers: <IconPlane size={16} />,
   bribes: <IconMoneybag size={16} />,
+  electricity: <IconSunElectricity size={16} />,
 } as const;
 
 // Keys for safer icon mapping, derived from the icon map
@@ -144,9 +146,10 @@ function buildClues(stats: CountryStats | null | undefined): Clue[] {
   if (stats.landlocked === true) out.push({ key: 'landlocked', label: 'Landlocked', value: "" });
   if (isNum(stats.corruption)) out.push({ key: 'corruption', label: 'Corruption (percentile)', value: formatter(stats.corruption) });
   if (isNum(stats.tax)) out.push({ key: 'tax', label: 'Tax revenue (% of GDP)', value: stats.tax.toFixed(1) });
-  if (isNum(stats.wheat)) out.push({ key: 'wheat', label: 'Wheat Production (metric tons)', value: formatterCompact(stats.wheat) });
+  if (isNum(stats.cereal)) out.push({ key: 'cereal', label: 'Cereal production', value: formatterCompact(stats.cereal) + ' tonnes' });
   if (isNum(stats.airPassengers)) out.push({ key: 'airPassengers', label: 'Air Passengers', value: formatterCompact(stats.airPassengers) });
-  if (isNum(stats.bribes)) out.push({ key: 'bribes', label: '% of firms that bribe public officials', value: formatterCompact(stats.bribes) });
+  if (isNum(stats.bribes)) out.push({ key: 'bribes', label: '% of firms that bribe public officials', value: formatter(stats.bribes) });
+  if (isNum(stats.electricity)) out.push({ key: 'electricity', label: 'Access to electricity', value: formatter(stats.electricity) + '% of population' });
 
   return out;
 }

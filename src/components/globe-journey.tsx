@@ -9,6 +9,9 @@ import { feature } from "topojson-client";
 import worldTopoJSON from "../data/world-topo.json";
 import { useMantineColorScheme } from '@mantine/core';
 import { Country } from "../data/countries/countries";
+import { drag } from "d3-drag";
+//import 'd3-transition';
+import { zoom } from "d3-zoom"; // Import D3's zoom behavior
 
 type Guess = {
     code?: string;
@@ -31,20 +34,23 @@ export default function GlobeJourney({
     guesses = [],
     width = 700,
     height = 500,
-    stepDuration = 2400,
-    rotateDuration = 900,
-    markerRadius = 3,
+    stepDuration = 900,
+    rotateDuration = 1400,
+    markerRadius = 2,
     correctCountry,
 }: Props) {
     const svgRef = useRef<SVGSVGElement | null>(null);
     const currentIndex = useRef(0);
-    const timerRef = useRef<number | null>(null);
     const rotationAnimRef = useRef<any | null>(null);
     const { colorScheme } = useMantineColorScheme(); // 'light' or 'dark'
     const sphereFill = colorScheme === 'dark' ? '#96ccd6ff' : '#b4e1e9ff';
     const landFill = colorScheme === 'dark' ? '#3a3a3aff' : '#f2f2f2';
     const sphereDropShadow = colorScheme === 'dark' ? 'drop-shadow(0px 0px 6px rgba(150, 150, 150, 0.4))' : 'drop-shadow(0px 0px 6px rgba(200, 249, 255, 0.4))';
-    const lineColor = colorScheme === 'dark' ? '#ffffffff' : '#444444';
+    const lineColor = colorScheme === 'dark' ? '#ffffffff' : '#505050ff';
+    const countryStroke = colorScheme === 'dark' ? '#666666' : '#c7d7e6';
+    const markerStroke = colorScheme === 'dark' ? '#ffffffff' : '#6b6b6bff';
+    const dragBehaviorRef = useRef<any | null>(null);
+    const draggingEnabled = useRef(false);
 
     useEffect(() => {
         if (!svgRef.current) return;
@@ -65,16 +71,13 @@ export default function GlobeJourney({
             (worldTopoJSON as any).objects.CNTR_RG_60M_2024_4326
         );
 
-        // Filter Antarctica if present
-        worldGeoJSON.features = worldGeoJSON.features.filter(
-            (f: any) => f.id !== "AQ" && f.properties?.ISO3_CODE !== "ATA"
-        );
 
         // Background sphere
-        svg
+        const sphere = svg
             .append("path")
-            .datum({ type: "Sphere" } as any)
-            .attr("d", path as any).attr("class", "sphere")
+            .datum({ type: "Sphere" })
+            .attr("class", "sphere")
+            .attr("d", path as any)
             .attr("fill", sphereFill)
             .attr("stroke", "#a7a7a781")
             .attr("stroke-width", 0.8)
@@ -89,8 +92,8 @@ export default function GlobeJourney({
             .join("path")
             .attr("d", (d: any) => path(d) as string)
             .attr("fill", landFill)
-            .attr("stroke", "#c7d7e6")
-            .attr("stroke-width", 0.25);
+            .attr("stroke", countryStroke)
+            .attr("stroke-width", 0.4);
 
         // Markers group
         const markers = svg.append("g").attr("class", "markers");
@@ -117,6 +120,8 @@ export default function GlobeJourney({
                 .attr("r", (_d: any, i: number) => (i === idx ? markerRadius * 2 : markerRadius))
                 .attr("cx", (d: any) => (projection([d.longitude, d.latitude])?.[0] ?? -9999))
                 .attr("cy", (d: any) => (projection([d.longitude, d.latitude])?.[1] ?? -9999))
+                .attr("stroke", markerStroke)
+                .attr("stroke-width", 0.8)
                 .attr("fill", (d: any) => {
                     // correct country stays green; visited ones red
                     if (correctCountry && d.code === correctCountry.code) return "#248b24ff";
@@ -159,7 +164,7 @@ export default function GlobeJourney({
             )
                 .attr("stroke", lineColor)
                 .attr("stroke-width", 1.8)
-                .attr("opacity", 0.7)
+                .attr("opacity", 0.5)
                 .attr("d", ([a, b]) => {
                     const key = cacheKey(a, b);
                     let cached = arcCache.get(key);
@@ -216,69 +221,155 @@ export default function GlobeJourney({
         renderMarkers(0);
 
         // rotation helper — interpolates projection.rotate
-        function rotateTo(targetLat: number, targetLon: number, dur = rotateDuration) {
-            const start = projection.rotate() as [number, number, number];
-            const end: [number, number, number] = [-targetLon, -targetLat, 0];
-            const interp = interpolate(start, end);
-            const ease = easeCubicInOut;
-            const t0 = now();
+        function rotateTo(targetLat: number, targetLon: number, dur = rotateDuration): Promise<void> {
+            return new Promise((resolve) => {
+                const start = projection.rotate() as [number, number, number];
+                const end: [number, number, number] = [-targetLon, -targetLat, 0];
+                const interp = interpolate(start, end);
+                const ease = easeCubicInOut;
+                const t0 = now();
 
-            if (rotationAnimRef.current) rotationAnimRef.current.stop();
-            rotationAnimRef.current = timer(() => {
-                const t = Math.min(1, (now() - t0) / Math.max(1, dur));
-                projection.rotate(interp(ease(t)));
-                // update world and markers
-                countries.attr("d", (d: any) => path(d) as string);
-                renderMarkers(currentIndex.current);
-                renderFlights();
-                if (t === 1) {
-                    if (rotationAnimRef.current) rotationAnimRef.current.stop();
+                // stop any existing anim
+                if (rotationAnimRef.current) {
+                    try { rotationAnimRef.current.stop(); } catch { }
                     rotationAnimRef.current = null;
                 }
+
+                rotationAnimRef.current = timer(() => {
+                    const t = Math.min(1, (now() - t0) / Math.max(1, dur));
+                    projection.rotate(interp(ease(t)));
+                    // update world and markers
+                    sphere.attr("d", path as any);
+                    countries.attr("d", (d: any) => path(d));
+                    renderMarkers(currentIndex.current);
+                    renderFlights();
+                    if (t === 1) {
+                        if (rotationAnimRef.current) {
+                            try { rotationAnimRef.current.stop(); } catch { }
+                            rotationAnimRef.current = null;
+                        }
+                        resolve();
+                    }
+                });
             });
         }
+        async function runOnceJourney() {
+            // disable user drag while animating
+            disableUserDrag();
 
-        // start looping through guesses
-        function startLoop() {
-            if (!guesses.length) return;
-            // clear any previous timers
-            if (timerRef.current) {
-                window.clearInterval(timerRef.current);
-                timerRef.current = null;
+            if (!guesses || guesses.length === 0) {
+                // nothing to animate — enable drag immediately
+                enableUserDrag();
+                return;
             }
-            // ensure index starts at 0
-            currentIndex.current = 0;
-            // rotate to first immediately
-            rotateTo(guesses[0].latitude, guesses[0].longitude, rotateDuration);
-            renderMarkers(0);
 
-            timerRef.current = window.setInterval(() => {
-                currentIndex.current = (currentIndex.current + 1) % guesses.length;
-                const g = guesses[currentIndex.current];
-                rotateTo(g.latitude, g.longitude, rotateDuration);
-            }, Math.max(400, stepDuration));
+            // optionally reset visited set
+            visitedCountries.clear();
+
+            for (let i = 0; i < guesses.length; i++) {
+                const g = guesses[i];
+                currentIndex.current = i;
+
+                // wait for rotation to finish
+                await rotateTo(g.latitude, g.longitude, rotateDuration);
+
+                // ensure markers/flights updated after rotation
+                renderMarkers(currentIndex.current);
+                renderFlights();
+
+                // wait a bit at the target: stepDuration minus rotateDuration could be used,
+                // but simpler: wait the provided stepDuration before moving on
+                await wait(stepDuration);
+            }
+
+            // after the last one, enable user drag
+            enableUserDrag();
         }
 
-        // kick off
-        startLoop();
+        runOnceJourney();
+
+        function wait(ms: any) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        function enableUserDrag() {
+            if (draggingEnabled.current) return;
+
+            const initialScale = projection.scale();
+
+            // Drag behavior
+            const dragBehavior = drag()
+                .on("start", () => {
+                    // Cancel any running rotation if user interrupts
+                    if (rotationAnimRef.current) {
+                        try { rotationAnimRef.current.stop(); } catch { }
+                        rotationAnimRef.current = null;
+                    }
+                })
+                .on("drag", (event: any) => {
+                    const rotate = projection.rotate ? (projection.rotate() as [number, number, number]) : [0, 0, 0];
+                    const sensitivity = 0.25;
+                    const newRotate: [number, number, number] = [
+                        rotate[0] + event.dx * sensitivity,
+                        Math.max(-90, Math.min(90, rotate[1] - event.dy * sensitivity)),
+                        0,
+                    ];
+                    projection.rotate(newRotate);
+
+                    // Redraw globe
+                    //sphere.attr("d", path as any);
+                    countries.attr("d", (d: any) => path(d) as string);
+                    renderMarkers(currentIndex.current);
+                    renderFlights();
+                })
+                .on("end", () => {
+                    // Drag behavior ends
+                });
+
+            dragBehaviorRef.current = dragBehavior;
+
+            // Zoom behavior
+            const zoomBehavior = zoom()
+                .scaleExtent([0.3, 6])   // zoom limits
+                .on("zoom", (event: any) => {
+                    const k = event.transform.k;
+
+                    // ignore translate & only scale projection
+                    projection.scale(initialScale * k);
+
+                    // redraw all
+                    sphere.attr("d", path as any);
+                    countries.attr("d", (d: any) => path(d) as string);
+                    renderMarkers(currentIndex.current);
+                    renderFlights();
+                });
+
+            // Apply both drag and zoom behaviors to the SVG
+            svg.call(dragBehavior as any).call(zoomBehavior as any);
+
+            draggingEnabled.current = true;
+        }
+
+        function disableUserDrag() {
+            if (!draggingEnabled.current) return;
+
+            // Remove the drag and zoom behaviors
+            svg.on('.drag', null); // Remove drag behavior
+            svg.on('.zoom', null); // Remove zoom behavior
+            dragBehaviorRef.current = null;
+            draggingEnabled.current = false;
+        }
 
         // cleanup
         return () => {
-            if (timerRef.current) {
-                window.clearInterval(timerRef.current);
-                timerRef.current = null;
-            }
+            // stop rotation anim if running
             if (rotationAnimRef.current) {
-                rotationAnimRef.current.stop();
+                try { rotationAnimRef.current.stop(); } catch { }
                 rotationAnimRef.current = null;
             }
+            // remove drag handlers
+            try { svg.on('.drag', null); } catch { }
             svg.selectAll("*").remove();
-            // create empty selection containers once so we reuse them
-            flights.selectAll("path.flight").data([]).join("path");
-            markers.selectAll("circle.marker").data(guesses).join("circle")
-                .attr("class", "marker")
-                .attr("stroke", "#fff")
-                .attr("stroke-width", 0.8);
         };
         // re-run if guesses or size changes
     }, [guesses, width, height, stepDuration, rotateDuration, markerRadius, colorScheme]);

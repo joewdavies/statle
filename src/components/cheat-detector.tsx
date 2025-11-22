@@ -46,7 +46,7 @@ export function CheatDetector({ threshold = 1000 }: { threshold?: number }) {
             title="No cheating!"
         >
             <Text size="sm" mb="md">
-                You left the page — make sure you're playing fair! No checking maps 😉
+                Mum stop cheating!
             </Text>
 
             <Flex justify="flex-end" gap="md">

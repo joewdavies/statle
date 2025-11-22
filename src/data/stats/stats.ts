@@ -17,12 +17,13 @@ export type CountryStats = {
   forestArea?: number | null | undefined;
   precipitation?: number | null | undefined;
   co2?: number | null | undefined;
-  wheat?: number | null | undefined;
   tax?: number | null | undefined;
   corruption?: number | null | undefined;
   landlocked?: boolean | null | undefined;
   airPassengers?: number | null | undefined;
   bribes?: number | null | undefined;
+  cereal?: number | null | undefined;
+  electricity?: number | null | undefined;
 };
 
 // Optional convenience
