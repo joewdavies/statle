@@ -19,7 +19,7 @@ import {
   IconCloud,
   IconCurrencyDollar,
   IconMoneybag,
-  IconSunElectricity,
+  IconBolt,
 } from '@tabler/icons-react';
 
 import { GiGoat } from "react-icons/gi";
@@ -50,7 +50,7 @@ const clueIcons = {
   cereal: <IconWheat size={16} />,
   airPassengers: <IconPlane size={16} />,
   bribes: <IconMoneybag size={16} />,
-  electricity: <IconSunElectricity size={16} />,
+  electricity: <IconBolt size={16} />,
 } as const;
 
 // Keys for safer icon mapping, derived from the icon map
