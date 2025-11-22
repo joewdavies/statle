@@ -46,12 +46,12 @@ export function CheatDetector({ threshold = 1000 }: { threshold?: number }) {
             title="No cheating!"
         >
             <Text size="sm" mb="md">
-                Mum stop cheating!
+                I noticed you left and came back before finishing the game... interesting...
             </Text>
 
             <Flex justify="flex-end" gap="md">
                 <Button variant="default" onClick={() => setOpen(false)}>
-                    Sorry!
+                    Sorry
                 </Button>
             </Flex>
         </Modal>
