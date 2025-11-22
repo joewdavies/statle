@@ -330,16 +330,21 @@ export default function GlobeJourney({
 
             // Zoom behavior
             const zoomBehavior = zoom()
-                .scaleExtent([0.3, 6])   // zoom limits
+                //.wheelDelta(() => 0)     // ensures mobile pinch uses default behavior
+                .filter(event => {
+                    // Allow:
+                    // - touch pinch
+                    // - mouse wheel
+                    // - ignore double-tap zoom
+                    return (!event.touches || event.touches.length === 2) || event.type === "wheel";
+                })
+                .scaleExtent([0.3, 7])
                 .on("zoom", (event: any) => {
                     const k = event.transform.k;
-
-                    // ignore translate & only scale projection
                     projection.scale(initialScale * k);
 
-                    // redraw all
                     sphere.attr("d", path as any);
-                    countries.attr("d", (d: any) => path(d) as string);
+                    countries.attr("d", (d: any) => path(d));
                     renderMarkers(currentIndex.current);
                     renderFlights();
                 });
@@ -374,5 +379,5 @@ export default function GlobeJourney({
         // re-run if guesses or size changes
     }, [guesses, width, height, stepDuration, rotateDuration, markerRadius, colorScheme]);
 
-    return <svg ref={svgRef} width="100%" height="100%" viewBox={`0 0 ${width} ${height}`} />;
+    return <svg ref={svgRef} width="100%" height="100%" viewBox={`0 0 ${width} ${height}`} style={{ touchAction: "none" }} />;
 }
