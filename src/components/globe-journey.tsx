@@ -380,5 +380,5 @@ export default function GlobeJourney({
         // re-run if guesses or size changes
     }, [guesses, width, height, stepDuration, rotateDuration, markerRadius, colorScheme]);
 
-    return <svg ref={svgRef} width="100%" height="100%" viewBox={`0 0 ${width} ${height}`} style={{ touchAction: "none" }} />;
+    return <svg ref={svgRef} width="100%" height="100%" viewBox={`0 0 ${width} ${height}`} />;
 }
