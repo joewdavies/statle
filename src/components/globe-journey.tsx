@@ -29,6 +29,7 @@ type Props = {
     correctCountry?: Country;
 };
 
+
 export default function GlobeJourney({
     guesses = [],
     width = 700,
@@ -103,6 +104,43 @@ export default function GlobeJourney({
             .style("pointer-events", "all")
             .style("touch-action", "none")
             .style("cursor", "grab");
+
+        const overlayNode = overlay.node();
+
+        // named handlers so we can remove them cleanly on unmount
+        function onTouchStart(e: TouchEvent) { e.preventDefault(); }
+        function onTouchMove(e: TouchEvent) { e.preventDefault(); }
+        function onTouchEnd(e: TouchEvent) {
+            e.preventDefault();
+            // forward to marker under touch if present
+            const touch = e.changedTouches && e.changedTouches[0];
+            if (!touch) return;
+            const el = document.elementFromPoint(touch.clientX, touch.clientY) as HTMLElement | null;
+            const markerEl = el && el.closest ? (el.closest('circle.marker') as HTMLElement | null) : null;
+            if (markerEl) {
+                markerEl.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, clientX: touch.clientX, clientY: touch.clientY }));
+            }
+        }
+
+        function onPointerDown(e: PointerEvent) { e.preventDefault(); }
+        function onPointerUp(e: PointerEvent) {
+            e.preventDefault();
+            // forward to marker under pointer if present
+            const el = document.elementFromPoint(e.clientX, e.clientY) as HTMLElement | null;
+            const markerEl = el && el.closest ? (el.closest('circle.marker') as HTMLElement | null) : null;
+            if (markerEl) {
+                markerEl.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, clientX: e.clientX, clientY: e.clientY }));
+            }
+        }
+
+        if (overlayNode) {
+            overlayNode.addEventListener('touchstart', onTouchStart, { passive: false });
+            overlayNode.addEventListener('touchmove', onTouchMove, { passive: false });
+            overlayNode.addEventListener('touchend', onTouchEnd, { passive: false });
+
+            overlayNode.addEventListener('pointerdown', onPointerDown);
+            overlayNode.addEventListener('pointerup', onPointerUp);
+        }
 
         // remember overlay selection for later removal
         overlayRef.current = overlay;
@@ -292,14 +330,12 @@ export default function GlobeJourney({
             enableUserDrag();
         }
 
-        runOnceJourney();
-
         function wait(ms: any) {
             return new Promise(resolve => setTimeout(resolve, ms));
         }
 
-        let geoZoomInstance: any = null;
 
+        let geoZoomInstance: any = null;
         function enableUserDrag() {
             if (draggingEnabled.current) return;
 
@@ -337,7 +373,6 @@ export default function GlobeJourney({
             try { overlay.on(".zoom", null); } catch (e) { }
             try { overlay.on(".drag", null); } catch (e) { }
             try { overlay.on("pointerdown", null); } catch (e) { }
-            try { overlay.on("pointermove", null); } catch (e) { }
             try { overlay.on("pointerup", null); } catch (e) { }
             try { overlay.on("wheel", null); } catch (e) { }
 
@@ -345,7 +380,8 @@ export default function GlobeJourney({
             draggingEnabled.current = false;
         }
 
-
+        //start animation
+        runOnceJourney();
 
         // cleanup (return from useEffect) — replace your existing cleanup with:
         return () => {
@@ -355,15 +391,28 @@ export default function GlobeJourney({
                 rotationAnimRef.current = null;
             }
 
-            // detach geo handlers if still attached
+            // --- remove DOM event listeners on overlay ---
+            try {
+                const node = overlay.node();
+                if (node) {
+                    node.removeEventListener('touchstart', onTouchStart as EventListener);
+                    node.removeEventListener('touchmove', onTouchMove as EventListener);
+                    node.removeEventListener('touchend', onTouchEnd as EventListener);
+                    node.removeEventListener('pointerdown', onPointerDown as EventListener);
+                    node.removeEventListener('pointerup', onPointerUp as EventListener);
+                }
+            } catch (e) {
+                // ignore
+            }
+
+            // --- remove d3-geo-zoom / d3 event namespaces on overlay ---
             try { overlay.on(".zoom", null); } catch (e) { }
             try { overlay.on(".drag", null); } catch (e) { }
             try { overlay.on("pointerdown", null); } catch (e) { }
-            try { overlay.on("pointermove", null); } catch (e) { }
             try { overlay.on("pointerup", null); } catch (e) { }
             try { overlay.on("wheel", null); } catch (e) { }
 
-            // remove everything
+            // --- remove everything from the SVG ---
             svg.selectAll("*").remove();
         };
 
