@@ -178,6 +178,31 @@ export default function GlobeJourney({
                     return visitedCountries.has(d.code) ? "#ff6b6b" : "#d8d8d8";
                 })
                 .attr("opacity", (d: any) => (isPointVisible(projection, d) ? 1 : 0.25));
+
+            // Update fills on countries so guessed/active/correct states are visible.
+            // We check multiple possible iso fields (id, ISO_A3, ISO3_CODE) to be robust with different topojsons.
+            countries.attr("fill", (d: any) => {
+                const activeGuess = idx !== null ? guesses[idx] : null;
+                const activeCode = activeGuess?.code;
+                const countryCodes = [
+                    d.id,
+                    d.properties?.ISO_A3,
+                    d.properties?.ISO3_CODE,
+                    d.properties?.iso_a3,
+                    d.properties?.ISO3166_1_A3
+                ].filter(Boolean);
+
+                const isActive = activeCode && countryCodes.includes(activeCode);
+
+                // If active guess is the correct country, show green.
+                if (isActive && correctCountry && activeCode === correctCountry.code) return "#248b24ff";
+
+                // If previously visited or is the active guess, show red.
+                if ((d.id && visitedCountries.has(d.id)) || (isActive)) return "#ff6b6b";
+
+                // Default land fill
+                return landFill;
+            });
         }
 
         // Curved great-circle flight path
