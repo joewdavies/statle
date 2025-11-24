@@ -9,9 +9,8 @@ import { feature } from "topojson-client";
 import worldTopoJSON from "../data/world-topo.json";
 import { useMantineColorScheme } from '@mantine/core';
 import { Country } from "../data/countries/countries";
-import { drag } from "d3-drag";
-//import 'd3-transition';
-import { zoom } from "d3-zoom"; // Import D3's zoom behavior
+//@ts-ignore
+import d3GeoZoom from 'd3-geo-zoom';
 
 type Guess = {
     code?: string;
@@ -49,7 +48,7 @@ export default function GlobeJourney({
     const lineColor = colorScheme === 'dark' ? '#ffffffff' : '#505050ff';
     const countryStroke = colorScheme === 'dark' ? '#666666' : '#c7d7e6';
     const markerStroke = colorScheme === 'dark' ? '#ffffffff' : '#6b6b6bff';
-    const dragBehaviorRef = useRef<any | null>(null);
+    const overlayRef = useRef<any | null>(null);
     const draggingEnabled = useRef(false);
 
     useEffect(() => {
@@ -71,7 +70,6 @@ export default function GlobeJourney({
             worldTopoJSON as any,
             (worldTopoJSON as any).objects.CNTR_RG_60M_2024_4326
         );
-
 
         // Background sphere
         const sphere = root
@@ -96,10 +94,23 @@ export default function GlobeJourney({
             .attr("stroke", countryStroke)
             .attr("stroke-width", 0.4);
 
-        // Markers group
+        // interaction overlay (we'll append BEFORE markers so markers render on top)
+        // Use the sphere path for pixel-perfect hit area (the overlay should match the visible circle)
+        const overlay = root.append("path").datum({ type: "Sphere" })
+            .attr("class", "interaction-overlay")
+            .attr("d", path as any)
+            .style("fill", "transparent")
+            .style("pointer-events", "all")
+            .style("touch-action", "none")
+            .style("cursor", "grab");
+
+        // remember overlay selection for later removal
+        overlayRef.current = overlay;
+
+        // Markers group (append after overlay so they sit above it and remain clickable)
         const markers = root.append("g").attr("class", "markers");
 
-        //flights group
+        //flights group (also after overlay)
         const flights = root.append("g").attr("class", "flights");
 
         // store which guesses have already been visited
@@ -129,15 +140,6 @@ export default function GlobeJourney({
                     return visitedCountries.has(d.code) ? "#ff6b6b" : "#d8d8d8";
                 })
                 .attr("opacity", (d: any) => (isPointVisible(projection, d) ? 1 : 0.25));
-
-            // Update fill on countries — cheap string checks only
-            countries.attr("fill", (d: any) => {
-                const activeGuess = idx !== null ? guesses[idx] : null;
-                const isActive = activeGuess && (activeGuess.code === d.id || activeGuess.code === d.properties?.ISO_A3 || activeGuess.code === d.properties?.ISO3_CODE);
-                if (isActive && correctCountry && activeGuess && activeGuess.code === correctCountry.code) return "#248b24ff";
-                if (visitedCountries.has(d.id) || (activeGuess && activeGuess.code === d.id)) return "#ff6b6b";
-                return landFill;
-            });
         }
 
         // Curved great-circle flight path
@@ -244,6 +246,10 @@ export default function GlobeJourney({
                     countries.attr("d", (d: any) => path(d));
                     renderMarkers(currentIndex.current);
                     renderFlights();
+
+                    // overlay must be updated whenever the projection changes
+                    overlay.attr("d", path as any);
+
                     if (t === 1) {
                         if (rotationAnimRef.current) {
                             try { rotationAnimRef.current.stop(); } catch { }
@@ -278,8 +284,7 @@ export default function GlobeJourney({
                 renderMarkers(currentIndex.current);
                 renderFlights();
 
-                // wait a bit at the target: stepDuration minus rotateDuration could be used,
-                // but simpler: wait the provided stepDuration before moving on
+                // wait a bit at the target
                 await wait(stepDuration);
             }
 
@@ -293,90 +298,75 @@ export default function GlobeJourney({
             return new Promise(resolve => setTimeout(resolve, ms));
         }
 
+        let geoZoomInstance: any = null;
+
         function enableUserDrag() {
             if (draggingEnabled.current) return;
 
-            const initialScale = projection.scale();
-
-            // Drag behavior
-            const dragBehavior = drag()
-                .on("start", () => {
-                    // Cancel any running rotation if user interrupts
-                    if (rotationAnimRef.current) {
-                        try { rotationAnimRef.current.stop(); } catch { }
-                        rotationAnimRef.current = null;
-                    }
-                })
-                .on("drag", (event: any) => {
-                    const rotate = projection.rotate ? (projection.rotate() as [number, number, number]) : [0, 0, 0];
-                    const sensitivity = 0.25;
-                    const newRotate: [number, number, number] = [
-                        rotate[0] + event.dx * sensitivity,
-                        Math.max(-90, Math.min(90, rotate[1] - event.dy * sensitivity)),
-                        0,
-                    ];
-                    projection.rotate(newRotate);
-
-                    // Redraw globe
-                    //sphere.attr("d", path as any);
-                    countries.attr("d", (d: any) => path(d) as string);
-                    renderMarkers(currentIndex.current);
-                    renderFlights();
-                })
-                .on("end", () => {
-                    // Drag behavior ends
-                });
-
-            dragBehaviorRef.current = dragBehavior;
-
-            // Zoom behavior
-            const zoomBehavior = zoom()
-                //.wheelDelta(() => 0)     // ensures mobile pinch uses default behavior
-                .filter(event => {
-                    // Allow:
-                    // - touch pinch
-                    // - mouse wheel
-                    // - ignore double-tap zoom
-                    return (!event.touches || event.touches.length === 2) || event.type === "wheel";
-                })
+            // create the geoZoom instance
+            geoZoomInstance = d3GeoZoom()
+                .projection(projection)
                 .scaleExtent([0.3, 7])
-                .on("zoom", (event: any) => {
-                    const k = event.transform.k;
-                    projection.scale(initialScale * k);
+                .onMove(({ scale, rotation }: { scale: number, rotation: [number, number, number] }) => {
+                    // apply changes and redraw
+                    projection.scale(scale);
+                    projection.rotate(rotation);
 
                     sphere.attr("d", path as any);
                     countries.attr("d", (d: any) => path(d));
                     renderMarkers(currentIndex.current);
                     renderFlights();
+
+                    // update overlay path so hit area matches new projection
+                    overlay.attr("d", path as any);
                 });
 
-            // Apply both drag and zoom behaviors to the SVG
-            root.call(dragBehavior as any).call(zoomBehavior as any);
+            // attach to overlay DOM node (globe-only gestures)
+            // geoZoom is a function that expects a DOM node/selection
+            geoZoomInstance(overlay.node());
 
+            // mark enabled
             draggingEnabled.current = true;
         }
 
         function disableUserDrag() {
             if (!draggingEnabled.current) return;
 
-            // Remove the drag and zoom behaviors
-            root.on('.drag', null); // Remove drag behavior
-            root.on('.zoom', null); // Remove zoom behavior
-            dragBehaviorRef.current = null;
+            // remove listeners attached to the overlay by clearing common namespaces / events
+            // d3-geo-zoom attaches pointers + wheel handlers; remove the common ones to be safe:
+            try { overlay.on(".zoom", null); } catch (e) { }
+            try { overlay.on(".drag", null); } catch (e) { }
+            try { overlay.on("pointerdown", null); } catch (e) { }
+            try { overlay.on("pointermove", null); } catch (e) { }
+            try { overlay.on("pointerup", null); } catch (e) { }
+            try { overlay.on("wheel", null); } catch (e) { }
+
+            geoZoomInstance = null;
             draggingEnabled.current = false;
         }
 
-        // cleanup
+
+
+        // cleanup (return from useEffect) — replace your existing cleanup with:
         return () => {
             // stop rotation anim if running
             if (rotationAnimRef.current) {
                 try { rotationAnimRef.current.stop(); } catch { }
                 rotationAnimRef.current = null;
             }
-            // remove drag handlers
-            try { root.on('.drag', null); } catch { }
+
+            // detach geo handlers if still attached
+            try { overlay.on(".zoom", null); } catch (e) { }
+            try { overlay.on(".drag", null); } catch (e) { }
+            try { overlay.on("pointerdown", null); } catch (e) { }
+            try { overlay.on("pointermove", null); } catch (e) { }
+            try { overlay.on("pointerup", null); } catch (e) { }
+            try { overlay.on("wheel", null); } catch (e) { }
+
+            // remove everything
             svg.selectAll("*").remove();
         };
+
         // re-run if guesses or size changes
     }, [guesses, width, height, stepDuration, rotateDuration, markerRadius, colorScheme]);
 
