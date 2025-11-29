@@ -133,7 +133,7 @@ export function Rules() {
             </Text>
             , it's the location to guess! Congrats! 🎉
           </Text>
-          <Text>
+          <Text size="sm">
             Inspired by{' '}
             <Anchor href="https://www.nytimes.com/games/wordle/index.html">
               Wordle{' '}
@@ -144,11 +144,16 @@ export function Rules() {
               Worldle by Teuteuf
             </Anchor>
           </Text>
-          <Text>
+          <Text size="sm">
             Data sources: Eurostat, World Bank, REST countries.  <Anchor href="https://observablehq.com/d/a1383688270e4c00">
               {' '}
               Notebook containing data sources and processing steps.
             </Anchor>
+          </Text>
+          <Text size="sm">
+            This site uses GoatCounter, a privacy-friendly analytics tool.
+            It does not use cookies or collect personal data.
+            It only collects anonymised usage statistics to understand overall traffic patterns.
           </Text>
         </Flex>
       </Modal>
