@@ -22,7 +22,7 @@ import { stats } from './data/stats/stats';
 import { GameResult, UserStatsService } from './services/userStats';
 
 import { getDailyCountry } from "./helpers/getRandomCountry";
-import GlobeJourney from './components/globe-journey';
+import GlobeJourney from './components/globe/globe-journey';
 // import { CheatDetector } from "./components/cheat-detector";
 
 const todaysCountry = getDailyCountry();

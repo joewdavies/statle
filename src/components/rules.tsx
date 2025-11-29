@@ -133,6 +133,7 @@ export function Rules() {
             </Text>
             , it's the location to guess! Congrats! 🎉
           </Text>
+          <Divider />
           <Text size="sm">
             Inspired by{' '}
             <Anchor href="https://www.nytimes.com/games/wordle/index.html">

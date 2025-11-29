@@ -21,6 +21,7 @@
     "@tabler/icons-react": "^3.11.0",
     "clsx": "^2.1.1",
     "d3": "^7.9.0",
+    "d3-array": "^3.2.4",
     "d3-ease": "^3.0.1",
     "d3-geo": "^3.1.1",
     "d3-geo-zoom": "^1.5.5",
@@ -28,6 +29,7 @@
     "d3-selection": "^3.0.0",
     "d3-timer": "^3.0.1",
     "d3-transition": "^3.0.1",
+    "d3-zoom": "^3.0.0",
     "framer-motion": "^11.3.21",
     "geolib": "^3.3.4",
     "react": "^18.3.1",
@@ -37,9 +39,11 @@
     "react-emoji": "^0.5.0",
     "react-icons": "^5.5.0",
     "topojson-client": "^3.1.0",
-    "ts-node": "^10.9.2"
+    "ts-node": "^10.9.2",
+    "versor": "^0.2.0"
   },
   "devDependencies": {
+    "@types/d3-array": "^3.2.2",
     "@types/d3-drag": "^3.0.7",
     "@types/d3-ease": "^3.0.2",
     "@types/d3-geo": "^3.1.0",
