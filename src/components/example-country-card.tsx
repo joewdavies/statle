@@ -18,7 +18,7 @@ type AnimatedTextProps = { text: string };
 
 const AnimatedText = ({ text }: AnimatedTextProps) => (
   <TextWithAnimation>
-    <Text lineClamp={1}>{text}</Text>
+    <Text size="xs" lineClamp={1}>{text}</Text>
   </TextWithAnimation>
 );
 
@@ -54,7 +54,7 @@ export function ExampleCountryCard({ guessCountry, country }: CountryCardProps) 
 
             <Divider orientation="vertical" />
 
-            <Text w="20%">
+            <Text w="20%" size="xs">
               <CountUp start={0} end={Math.round(distance)} duration={1} /> km
             </Text>
 
@@ -69,7 +69,7 @@ export function ExampleCountryCard({ guessCountry, country }: CountryCardProps) 
 
             <Divider orientation="vertical" />
 
-            <Text w="15%">
+            <Text w="15%" size="xs">
               <CountUp start={0} end={Math.floor(proximity)} duration={1} /> %
             </Text>
           </>
