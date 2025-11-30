@@ -194,7 +194,7 @@ function App() {
           />
 
           {/* Globe journey */}
-          <Flex style={{ width: "100%", maxWidth: 820, margin: "12px auto" }}>
+          <Flex style={{ width: "100%", maxWidth: window.innerWidth, margin: "12px auto" }}>
             <GlobeJourney
               guesses={guesses
                 .filter(Boolean)

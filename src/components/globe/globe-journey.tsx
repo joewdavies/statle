@@ -241,10 +241,85 @@ export default function GlobeJourney({
         }
 
         function addZoom() {
-            select(context!.canvas).call(versorZoom(projection));
+            const zoomWrapper = versorZoom(projection);
+            const zoomInstance = (zoomWrapper as any).zoom; // get the actual d3 zoom behavior
+            const selection = select(context!.canvas);
+
+            let zoomEnabled = false;
+
+            // --- helpers ---
+            function isInsideSphereXY(x: number, y: number): boolean {
+                const [cx, cy] = projection.translate();
+                const radius = projection.scale();
+                const dx = x - cx;
+                const dy = y - cy;
+                return dx * dx + dy * dy <= radius * radius;
+            }
+
+            function getRelativeXY(e: MouseEvent | Touch | PointerEvent): [number, number] {
+                const rect = canvas.getBoundingClientRect();
+                return [e.clientX - rect.left, e.clientY - rect.top];
+            }
+
+            // --- pointer tracking for drag state ---
+            canvas.addEventListener("pointerdown", (e) => {
+                const [x, y] = getRelativeXY(e);
+                zoomEnabled = isInsideSphereXY(x, y);
+                canvas.style.cursor = zoomEnabled ? "grabbing" : "default";
+            });
+
+            canvas.addEventListener("pointerup", () => {
+                zoomEnabled = false;
+                canvas.style.cursor = "grab";
+            });
+
+            // --- dynamically filter zoom events ---
+            zoomInstance.filter((event: any) => {
+                if (event.type === "wheel" || event.type === "mousedown" || event.type === "touchstart") {
+                    const [x, y] = event instanceof WheelEvent
+                        ? [event.offsetX, event.offsetY]
+                        : event.touches
+                            ? [
+                                event.touches[0].clientX - canvas.getBoundingClientRect().left,
+                                event.touches[0].clientY - canvas.getBoundingClientRect().top,
+                            ]
+                            : [event.offsetX, event.offsetY];
+                    return isInsideSphereXY(x, y);
+                }
+                return zoomEnabled; // allow continued drag until pointerup
+            });
+
+            // --- bind zoom to canvas ---
+            selection.call(zoomWrapper.on("zoom.render", () => render()) as any);
+
+            // --- scroll guards (prevent zoom scroll from bubbling) ---
+            canvas.addEventListener(
+                "wheel",
+                (e) => {
+                    const [x, y] = getRelativeXY(e);
+                    if (isInsideSphereXY(x, y)) e.preventDefault();
+                },
+                { passive: false }
+            );
+
+            canvas.addEventListener(
+                "touchmove",
+                (e) => {
+                    if (e.touches.length === 1) {
+                        const [x, y] = getRelativeXY(e.touches[0]);
+                        if (isInsideSphereXY(x, y)) e.preventDefault();
+                    }
+                },
+                { passive: false }
+            );
         }
 
         // 🌍 Versor-based drag + zoom
+        let USE_INERTIA = false;
+        let inertiaTimer: any = null;
+        let lastRotation: [number, number, number] | null = null;
+        let lastEventTime = 0;
+        let velocity: [number, number, number] = [0, 0, 0];
         function versorZoom(projection: any, {
             // Capture the projection’s original scale, before any zooming.
             scale = projection._scale === undefined
@@ -257,7 +332,8 @@ export default function GlobeJourney({
             const zoomInstance = d3Zoom()
                 .scaleExtent(scaleExtent.map(x => x * scale) as [number, number])
                 .on("start", zoomstarted)
-                .on("zoom", zoomed);
+                .on("zoom", zoomed)
+                .on("end", zoomend)
 
             function point(event: any, that: any) {
                 const t = pointers(event, that);
@@ -295,21 +371,81 @@ export default function GlobeJourney({
                     q1 = versor.multiply([Math.sqrt(1 - s * s), 0, 0, c * s], q1);
                 }
                 projection.rotate(versor.rotation(q1));
+                // --- inertia tracking ---
+                if (USE_INERTIA) {
+                    const nowTime = Date.now();
+                    const newRotation = projection.rotate() as [number, number, number];
+                    if (lastRotation) {
+                        const dt = (nowTime - lastEventTime) / 1000; // seconds
+                        if (dt > 0) {
+                            velocity = [
+                                (newRotation[0] - lastRotation[0]) / dt,
+                                (newRotation[1] - lastRotation[1]) / dt,
+                                (newRotation[2] - lastRotation[2]) / dt,
+                            ];
+                        }
+                    }
+                    lastRotation = newRotation;
+                    lastEventTime = nowTime;
+                }
+
                 if (delta[0] < 0.7) zoomstarted.call(this, event);
-                render(); // ✅ new line
+                render();
             }
 
-            return Object.assign((selection: any) =>
-                selection
-                    .property("__zoom", zoomIdentity.scale(projection.scale()))
-                    .call(zoomInstance), {
-                on(type: any, ...options: any[]) {
-                    return options.length
-                        //@ts-ignore
-                        ? (zoomInstance.on(type, ...options), this)
-                        : zoomInstance.on(type);
-                },
-            });
+            function zoomend(this: any) {
+                if (inertiaTimer) inertiaTimer.stop();
+                if (!velocity) return;
+
+                // threshold: ignore tiny movements
+                const speed = Math.hypot(...velocity);
+                if (speed < 10) {
+                    velocity = [0, 0, 0];
+                    return;
+                }
+
+                const decay = 0.95; // friction per frame
+                const interval = 16; // ~60fps
+                let rotation = projection.rotate() as [number, number, number];
+
+                if (USE_INERTIA) {
+                    inertiaTimer = timer(() => {
+                        rotation = [
+                            rotation[0] + velocity[0] * (interval / 1000),
+                            rotation[1] + velocity[1] * (interval / 1000),
+                            rotation[2] + velocity[2] * (interval / 1000),
+                        ];
+                        projection.rotate(rotation);
+                        render();
+
+                        // decay velocity gradually
+                        velocity = velocity.map((v) => v * decay) as [number, number, number];
+
+                        if (Math.hypot(...velocity) < 1) {
+                            inertiaTimer.stop();
+                        }
+                    });
+                }
+
+            }
+
+            return Object.assign(
+                (selection: any) =>
+                    selection
+                        .property("__zoom", zoomIdentity.scale(projection.scale()))
+                        .call(zoomInstance),
+                {
+                    zoom: zoomInstance, // <-- expose the actual d3 zoom instance
+                    on(type: any, listener?: any) {
+                        if (listener !== undefined) {
+                            zoomInstance.on(type, listener);
+                            return this;
+                        }
+                        return zoomInstance.on(type);
+                    }
+
+                }
+            );
         }
 
         // Initialize
