@@ -68,8 +68,8 @@ export default function GlobeJourney({
         canvas.style.width = `${width}px`;
         canvas.style.height = `${height}px`;
         context.scale(dpr, dpr);
-        context.imageSmoothingEnabled = true;
-        context.imageSmoothingQuality = "high";
+        context.imageSmoothingEnabled = false;
+        // context.imageSmoothingQuality = "high";
 
         const projection = geoOrthographic()
             .scale(Math.min(width, height) / 3)
@@ -100,7 +100,7 @@ export default function GlobeJourney({
             context.fill();
 
             // Land per-country fill
-            context.lineWidth = 0.1;
+            context.lineWidth = 0.5;
             context.strokeStyle = "#888";
 
             const activeGuess = guesses[currentIndex.current];
@@ -205,7 +205,7 @@ export default function GlobeJourney({
         function renderFlights(ctx: CanvasRenderingContext2D) {
             ctx.strokeStyle = lineColor;
             ctx.lineWidth = 1.2;
-            ctx.globalAlpha = 0.6;
+            ctx.globalAlpha = 0.4;
 
             for (let i = 1; i <= currentIndex.current; i++) {
                 const a = guesses[i - 1];
@@ -484,7 +484,8 @@ export default function GlobeJourney({
                 }
 
                 if (delta[0] < 0.7) zoomstarted.call(this, event);
-                render();
+                //prevents redundant intermediate renders when dragging quickly.
+                requestAnimationFrame(() => render());
             }
 
             function zoomend(this: any) {
