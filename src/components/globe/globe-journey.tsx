@@ -50,6 +50,7 @@ export default function GlobeJourney({
     const lineColor = colorScheme === "dark" ? "#ffffff" : "#404040";
     const visitedColor = "#ff6b6b";
     const correctColor = "#248b24";
+    const glow = false
 
     useEffect(() => {
         if (!canvasRef.current) return;
@@ -88,6 +89,9 @@ export default function GlobeJourney({
         function render() {
             if (!context) return;
             context.clearRect(0, 0, width, height);
+
+            //glow
+            if (glow) renderGlow(context);
 
             // Ocean
             context.beginPath();
@@ -129,6 +133,46 @@ export default function GlobeJourney({
 
             // Markers
             renderMarkers(context);
+        }
+
+        function renderGlow(ctx: CanvasRenderingContext2D) {
+            const [cx, cy] = projection.translate();
+            const radius = projection.scale();
+
+            // 🎨 Theme-aware glow color (reduced opacity)
+            const glowInner =
+                colorScheme === "dark"
+                    ? "rgba(120, 200, 255, 0.05)"  // ↓ lower opacity
+                    : "rgba(150, 210, 255, 0.05)";
+            const glowOuter =
+                colorScheme === "dark"
+                    ? "rgba(0, 0, 20, 0)"          // subtle fade to black
+                    : "rgba(255, 255, 255, 0)";
+
+            // 🌌 Gentle ambient radial glow
+            const radial = ctx.createRadialGradient(cx, cy, radius * 0.9, cx, cy, radius * 1.4);
+            radial.addColorStop(0, glowInner);
+            radial.addColorStop(1, glowOuter);
+
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(cx, cy, radius * 1.4, 0, 2 * Math.PI);
+            ctx.fillStyle = radial;
+            ctx.fill();
+            ctx.restore();
+
+            // 🌠 Subtle atmospheric rim (thinner + softer)
+            const atmosphere = ctx.createRadialGradient(cx, cy, radius * 0.95, cx, cy, radius * 1.1);
+            atmosphere.addColorStop(0, "rgba(255, 255, 255, 0)");
+            atmosphere.addColorStop(1, "rgba(150, 220, 255, 0.12)"); // ↓ softer opacity
+
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(cx, cy, radius * 1.03, 0, 2 * Math.PI);
+            ctx.strokeStyle = atmosphere;
+            ctx.lineWidth = radius * 0.04; // ↓ thinner rim
+            ctx.stroke();
+            ctx.restore();
         }
 
         function renderMarkers(ctx: CanvasRenderingContext2D) {
@@ -263,7 +307,17 @@ export default function GlobeJourney({
                 return [e.clientX - rect.left, e.clientY - rect.top];
             }
 
-            // --- prevent page scroll only when over the globe ---
+            // 🧱 Scroll lock helpers
+            const lockScroll = () => {
+                document.body.style.overflow = "hidden";
+                document.body.style.touchAction = "none"; // prevent iOS elastic scroll
+            };
+            const unlockScroll = () => {
+                document.body.style.overflow = "";
+                document.body.style.touchAction = "";
+            };
+
+            // --- prevent page scroll when interacting with the globe ---
             canvas.addEventListener(
                 "wheel",
                 (e) => {
@@ -273,15 +327,34 @@ export default function GlobeJourney({
                 { passive: false }
             );
 
+            // 🧠 Add these — main fix for mobile scroll issue:
             canvas.addEventListener(
-                "touchmove",
+                "touchstart",
                 (e) => {
-                    if (e.touches.length === 1) {
-                        const [x, y] = getRelativeXY(e.touches[0]);
-                        if (isInsideSphereXY(x, y)) e.preventDefault();
+                    const [x, y] = getRelativeXY(e.touches[0]);
+                    if (isInsideSphereXY(x, y)) {
+                        e.preventDefault();
+                        lockScroll(); // 🚫 disable page scroll
                     }
                 },
                 { passive: false }
+            );
+
+            canvas.addEventListener(
+                "touchmove",
+                (e) => {
+                    const [x, y] = getRelativeXY(e.touches[0]);
+                    if (isInsideSphereXY(x, y)) e.preventDefault();
+                },
+                { passive: false }
+            );
+
+            canvas.addEventListener(
+                "touchend",
+                () => {
+                    unlockScroll(); // ✅ restore page scroll
+                },
+                { passive: true }
             );
 
             // --- filter only start events ---
@@ -312,8 +385,11 @@ export default function GlobeJourney({
 
             // 🧹 cleanup
             return () => {
+                unlockScroll(); // ✅ always restore scrolling on cleanup
                 canvas.removeEventListener("wheel", () => { });
+                canvas.removeEventListener("touchstart", () => { });
                 canvas.removeEventListener("touchmove", () => { });
+                canvas.removeEventListener("touchend", () => { });
             };
         }
 
