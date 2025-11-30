@@ -57,6 +57,10 @@ export default function GlobeJourney({
         const context = canvas.getContext("2d");
         if (!context) return;
 
+        // 🧩 Prevent mobile bounce scroll while interacting
+        const prevOverscroll = document.body.style.overscrollBehavior;
+        document.body.style.overscrollBehavior = "contain";
+
         const dpr = window.devicePixelRatio || 1;
         canvas.width = width * dpr;
         canvas.height = height * dpr;
@@ -242,10 +246,8 @@ export default function GlobeJourney({
 
         function addZoom() {
             const zoomWrapper = versorZoom(projection);
-            const zoomInstance = (zoomWrapper as any).zoom; // get the actual d3 zoom behavior
+            const zoomInstance = (zoomWrapper as any).zoom;
             const selection = select(context!.canvas);
-
-            let zoomEnabled = false;
 
             // --- helpers ---
             function isInsideSphereXY(x: number, y: number): boolean {
@@ -261,38 +263,7 @@ export default function GlobeJourney({
                 return [e.clientX - rect.left, e.clientY - rect.top];
             }
 
-            // --- pointer tracking for drag state ---
-            canvas.addEventListener("pointerdown", (e) => {
-                const [x, y] = getRelativeXY(e);
-                zoomEnabled = isInsideSphereXY(x, y);
-                canvas.style.cursor = zoomEnabled ? "grabbing" : "default";
-            });
-
-            canvas.addEventListener("pointerup", () => {
-                zoomEnabled = false;
-                canvas.style.cursor = "grab";
-            });
-
-            // --- dynamically filter zoom events ---
-            zoomInstance.filter((event: any) => {
-                if (event.type === "wheel" || event.type === "mousedown" || event.type === "touchstart") {
-                    const [x, y] = event instanceof WheelEvent
-                        ? [event.offsetX, event.offsetY]
-                        : event.touches
-                            ? [
-                                event.touches[0].clientX - canvas.getBoundingClientRect().left,
-                                event.touches[0].clientY - canvas.getBoundingClientRect().top,
-                            ]
-                            : [event.offsetX, event.offsetY];
-                    return isInsideSphereXY(x, y);
-                }
-                return zoomEnabled; // allow continued drag until pointerup
-            });
-
-            // --- bind zoom to canvas ---
-            selection.call(zoomWrapper.on("zoom.render", () => render()) as any);
-
-            // --- scroll guards (prevent zoom scroll from bubbling) ---
+            // --- prevent page scroll only when over the globe ---
             canvas.addEventListener(
                 "wheel",
                 (e) => {
@@ -312,10 +283,44 @@ export default function GlobeJourney({
                 },
                 { passive: false }
             );
+
+            // --- filter only start events ---
+            zoomInstance.filter((event: any) => {
+                if (event.type === "wheel") {
+                    const [x, y] = [event.offsetX, event.offsetY];
+                    return isInsideSphereXY(x, y);
+                }
+
+                if (event.type === "mousedown" || event.type === "touchstart") {
+                    const [x, y] = event.touches
+                        ? [
+                            event.touches[0].clientX - canvas.getBoundingClientRect().left,
+                            event.touches[0].clientY - canvas.getBoundingClientRect().top,
+                        ]
+                        : [event.offsetX, event.offsetY];
+                    return isInsideSphereXY(x, y);
+                }
+
+                // once zooming/dragging has started, always allow
+                return true;
+            });
+
+            // --- bind zoom ---
+            selection.call(
+                zoomWrapper.on("zoom.render", () => render()) as any
+            );
+
+            // 🧹 cleanup
+            return () => {
+                canvas.removeEventListener("wheel", () => { });
+                canvas.removeEventListener("touchmove", () => { });
+            };
         }
 
+
+
         // 🌍 Versor-based drag + zoom
-        let USE_INERTIA = false;
+        const USE_INERTIA = false;
         let inertiaTimer: any = null;
         let lastRotation: [number, number, number] | null = null;
         let lastEventTime = 0;
@@ -371,6 +376,19 @@ export default function GlobeJourney({
                     q1 = versor.multiply([Math.sqrt(1 - s * s), 0, 0, c * s], q1);
                 }
                 projection.rotate(versor.rotation(q1));
+
+                // 🌍 Keep the globe upright (limit vertical tilt)
+                let [lambda, phi, gamma] = projection.rotate();
+
+                // Clamp φ (the vertical tilt) to prevent flipping the globe
+                const maxTilt = 60; // degrees — adjust if you want more/less freedom
+                phi = Math.max(-maxTilt, Math.min(maxTilt, phi));
+
+                // Keep the roll (γ) locked at 0 for stability
+                gamma = 0;
+
+                projection.rotate([lambda, phi, gamma]);
+
                 // --- inertia tracking ---
                 if (USE_INERTIA) {
                     const nowTime = Date.now();
@@ -449,21 +467,31 @@ export default function GlobeJourney({
         }
 
         // Initialize
-        addZoom();
+        const cleanupZoom = addZoom();
         render();
         runJourney();
 
+        //cleanup
         return () => {
+            // 🧹 stop any running rotation animation
             if (rotationAnimRef.current) {
                 try {
                     rotationAnimRef.current.stop();
                 } catch { }
             }
+
+            // ✅ Properly remove zoom listeners
+            if (cleanupZoom) cleanupZoom();
+
+            // 🧹 restore previous overscrollBehavior (safer)
+            document.body.style.overscrollBehavior = prevOverscroll;
         };
     }, [guesses, width, height, stepDuration, rotateDuration, markerRadius, colorScheme]);
 
     return (
-        <div style={{ width: "100%", height: "100%", display: "flex", justifyContent: "center", alignItems: "center", overflow: "hidden" }}>
+        <div style={{
+            width: "100%", height: "100%", display: "flex", justifyContent: "center", alignItems: "center", overflow: "hidden", touchAction: "auto",
+        }}>
             <canvas
                 ref={canvasRef}
                 width={width}
