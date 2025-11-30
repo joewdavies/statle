@@ -1,7 +1,8 @@
-import { Badge, Flex, Image } from '@mantine/core';
+import { Badge, Flex, Image, useMantineColorScheme } from '@mantine/core';
 import { GameStatus } from '../constants';
 import { Country } from '../data/countries/countries';
 import ConfettiExplosion from 'react-confetti-explosion';
+import Snowfall from 'react-snowfall';
 import { getFlagURL } from '../helpers/getFlagURL';
 import { ShareResult } from './share-result';
 
@@ -12,17 +13,33 @@ type CorrectCountryProps = {
   dailyMode?: boolean;
 };
 
+const christmas =
+  (new Date().getMonth() === 11 && new Date().getDate() >= 1) || // December (month 11)
+  (new Date().getMonth() === 0 && new Date().getDate() <= 7);   // January (month 0)
+
 export function CorrectCountry({
   country,
   gameStatus,
 }: CorrectCountryProps) {
   const flagUrl = getFlagURL(country.code);
+  const { colorScheme } = useMantineColorScheme();
 
   return (
     <Flex direction="column" gap={8} align="center">
       {gameStatus === GameStatus.Won && (
         <>
-          <ConfettiExplosion />
+          {christmas && <Snowfall
+            snowflakeCount={80}        // number of flakes
+            color={colorScheme === "dark" ? "#ffffffff" : "#3c4349ff"} // or "#cce6ff" for a softer look
+            radius={[0.5, 2.0]}        // size variation
+            style={{
+              position: 'absolute',
+              width: '100%',
+              height: '100%',
+              zIndex: 0,
+            }}
+          />}
+          {<ConfettiExplosion />}
           <Image
             src={flagUrl}
             alt={`${country.name} flag`}

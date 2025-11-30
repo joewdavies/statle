@@ -146,9 +146,8 @@ export function Rules() {
             </Anchor>
           </Text>
           <Text size="sm">
-            Data sources: Eurostat, World Bank, REST countries.  <Anchor href="https://observablehq.com/d/a1383688270e4c00">
-              {' '}
-              Notebook containing data sources and processing steps.
+            Data sources: Eurostat, World Bank, REST countries. Notebook containing data sources and processing steps <Anchor href="https://observablehq.com/d/a1383688270e4c00">
+              can be found here.
             </Anchor>
           </Text>
           <Text size="sm">

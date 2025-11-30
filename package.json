@@ -38,6 +38,7 @@
     "react-dom": "^18.3.1",
     "react-emoji": "^0.5.0",
     "react-icons": "^5.5.0",
+    "react-snowfall": "^2.3.0",
     "topojson-client": "^3.1.0",
     "ts-node": "^10.9.2",
     "versor": "^0.2.0"

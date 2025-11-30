@@ -46,7 +46,7 @@ export default function GlobeJourney({
     const { colorScheme } = useMantineColorScheme();
 
     const landFill = colorScheme === "dark" ? "#3a3a3a" : "#f2f2f2";
-    const oceanFill = colorScheme === "dark" ? "#2c3e50" : "#b4e1e9";
+    const oceanFill = colorScheme === "dark" ? "#5b7996ff" : "#b4e1e9";
     const lineColor = colorScheme === "dark" ? "#ffffff" : "#404040";
     const visitedColor = "#ff6b6b";
     const correctColor = "#248b24";
