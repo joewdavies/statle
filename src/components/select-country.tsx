@@ -140,6 +140,7 @@ export function SelectCountry({
   }
 
   function sendGoatEvent(path: string) {
+    //@ts-ignore
     if (window.goatcounter?.count) {
       //@ts-ignore
       window.goatcounter.count({ path, event: true });
