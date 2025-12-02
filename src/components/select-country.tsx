@@ -87,6 +87,7 @@ export function SelectCountry({
     // this is a guess so we need to add minus one
     if (country.name === value) {
       setGameStatus(GameStatus.Won);
+      sendGoatEvent(`won-${guessCount + 1}`);
       notifications.show({
         color: 'green',
         message: 'Nice job!',
@@ -96,6 +97,7 @@ export function SelectCountry({
     }
     if (guessCount === MAX_GUESSES - 1) {
       setGameStatus(GameStatus.Lost);
+      sendGoatEvent(`failed`);
       notifications.show({
         color: 'red',
         message: 'Game over, try again tomorrow!',
@@ -135,6 +137,13 @@ export function SelectCountry({
 
   function handleKeyboardOptionSubmit(newValue: string) {
     setValue(newValue);
+  }
+
+  function sendGoatEvent(path: string) {
+    if (window.goatcounter?.count) {
+      //@ts-ignore
+      window.goatcounter.count({ path, event: true });
+    }
   }
 
   const autoItems = countries.map((c) => {
