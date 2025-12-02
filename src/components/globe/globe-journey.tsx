@@ -72,7 +72,7 @@ export default function GlobeJourney({
         // context.imageSmoothingQuality = "high";
 
         const projection = geoOrthographic()
-            .scale(Math.min(width, height) / 3)
+            .scale(Math.min(width, height) / 2)
             .translate([width / 2, height / 2])
             .clipAngle(90)
             .precision(0.3);
