@@ -20,6 +20,7 @@ import {
   IconCurrencyDollar,
   IconMoneybag,
   IconBolt,
+  IconEyeDollar,
 } from '@tabler/icons-react';
 
 import { GiGoat } from "react-icons/gi";
@@ -44,7 +45,7 @@ const clueIcons = {
   forestArea: <IconTrees size={16} />,
   precipitation: <IconCloudRain size={16} />,
   co2: <IconCloud size={16} />, // TODO: swap for a nicer CO2 icon if you want
-  corruption: <IconBriefcaseOff size={16} />, // TODO: swap for a nicer corruption icon if you want
+  corruption: <IconEyeDollar size={16} />, // TODO: swap for a nicer corruption icon if you want
   landlocked: <IconLock size={16} />,
   tax: <IconCoins size={16} />,
   cereal: <IconWheat size={16} />,
@@ -103,7 +104,7 @@ export function StatClues({
         )}
 
         {!isLoading && clues.length > 0 && (
-          <Flex direction="column" gap={6} mt={4}>
+          <Flex direction="column" gap={3} mt={0}>
             {clues.slice(0, revealCount).map((s, i) => (
               <Box key={i}>
                 <Group gap="xs" wrap="nowrap">
@@ -132,23 +133,21 @@ function buildClues(stats: CountryStats | null | undefined): Clue[] {
   if (isNum(stats.population)) out.push({ key: 'population', label: 'Population', value: formatter(stats.population) });
   if (isNum(stats.gdpPerCapita)) out.push({ key: 'gdpPerCapita', label: 'GDP per capita', value: '$' + formatter(stats.gdpPerCapita) });
   if (isNum(stats.lifeExpectancy)) out.push({ key: 'lifeExpectancy', label: 'Life expectancy', value: stats.lifeExpectancy.toFixed(1) + ' years of age' });
-  if (isNum(stats.unemployment)) out.push({ key: 'unemployment', label: 'Unemployment rate', value: stats.unemployment.toFixed(1) + '%' });
-  if (isNum(stats.gdp)) out.push({ key: 'gdp', label: 'GDP', value: '$' + formatterCompact(stats.gdp) });
-
-
   if (isNum(stats.area)) out.push({ key: 'area', label: 'Area', value: formatter(stats.area) + ' km²' });
-  // first 6 are clues, the rest are just info for the nerds
   if (isNum(stats.goats)) out.push({ key: 'goats', label: 'Goat population', value: formatter(stats.goats) });
+  if (isNum(stats.unemployment)) out.push({ key: 'unemployment', label: 'Unemployment rate', value: stats.unemployment.toFixed(1) + '%' });
+  // first 6 are clues, the rest are just info for the nerds
   if (stats.carSide) out.push({ key: 'carSide', label: 'Drives on the', value: stats.carSide });
   if (isNum(stats.forestArea)) out.push({ key: 'forestArea', label: 'Forest area', value: formatter(stats.forestArea) + ' km²' });
   if (isNum(stats.precipitation)) out.push({ key: 'precipitation', label: 'Annual precipitation', value: formatter(stats.precipitation) + ' mm' });
+  if (isNum(stats.gdp)) out.push({ key: 'gdp', label: 'GDP', value: '$' + formatterCompact(stats.gdp) });
   if (isNum(stats.co2)) out.push({ key: 'co2', label: 'CO2 per capita', value: formatter(stats.co2) + ' tonnes' });
   if (stats.landlocked === true) out.push({ key: 'landlocked', label: 'Landlocked', value: "" });
-  if (isNum(stats.corruption)) out.push({ key: 'corruption', label: 'Corruption (percentile)', value: formatter(stats.corruption) });
   if (isNum(stats.tax)) out.push({ key: 'tax', label: 'Tax revenue (% of GDP)', value: stats.tax.toFixed(1) });
+  if (isNum(stats.corruption)) out.push({ key: 'corruption', label: 'Corruption (percentile)', value: formatter(stats.corruption) });
+  if (isNum(stats.bribes)) out.push({ key: 'bribes', label: '% of firms that bribe public officials', value: formatter(stats.bribes) });
   if (isNum(stats.cereal)) out.push({ key: 'cereal', label: 'Cereal production', value: formatterCompact(stats.cereal) + ' tonnes' });
   if (isNum(stats.airPassengers)) out.push({ key: 'airPassengers', label: 'Air Passengers', value: formatterCompact(stats.airPassengers) });
-  if (isNum(stats.bribes)) out.push({ key: 'bribes', label: '% of firms that bribe public officials', value: formatter(stats.bribes) });
   if (isNum(stats.electricity)) out.push({ key: 'electricity', label: 'Access to electricity', value: formatter(stats.electricity) + '% of population' });
 
   return out;

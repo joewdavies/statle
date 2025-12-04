@@ -9,15 +9,19 @@ import { getCompassDirection, directionMap } from '../services/geo';
 export function Rules() {
   const [opened, { open, close }] = useDisclosure(false);
 
+
+  const country1 = countries[140];
+  const country2 = countries[142];
+  const targetCountry = countries[25];
   const distance1 = convertDistance(
     getDistance(
       {
-        latitude: countries[2].latitude,
-        longitude: countries[2].longitude,
+        latitude: country1.latitude,
+        longitude: country1.longitude,
       },
       {
-        latitude: countries[0].latitude,
-        longitude: countries[0].longitude,
+        latitude: targetCountry.latitude,
+        longitude: targetCountry.longitude,
       }
     ),
     'km'
@@ -26,12 +30,12 @@ export function Rules() {
   const distance2 = convertDistance(
     getDistance(
       {
-        latitude: countries[5].latitude,
-        longitude: countries[5].longitude,
+        latitude: country2.latitude,
+        longitude: country2.longitude,
       },
       {
-        latitude: countries[0].latitude,
-        longitude: countries[0].longitude,
+        latitude: targetCountry.latitude,
+        longitude: targetCountry.longitude,
       }
     ),
     'km'
@@ -67,28 +71,27 @@ export function Rules() {
             After each guess, you’ll see one additional statistic, plus feedback
             on distance, direction and proximity to the target.
           </Text>
-          <Divider />
           <Text fw={500} size="sm">
             Examples:
           </Text>
           <Flex direction={'column'} gap={24}>
             <ExampleCountryCard
-              guessCountry={countries[2]}
-              country={countries[0]}
+              guessCountry={country1}
+              country={targetCountry}
             />
             <Text size="sm">
-              Your guess {countries[2].name} is {distance1}
+              Your guess {country1.name} is {distance1}
               km away from the target location, the target location is in the
               {
                 directionMap[
                 getCompassDirection(
                   {
-                    latitude: countries[2].latitude,
-                    longitude: countries[2].longitude,
+                    latitude: country1.latitude,
+                    longitude: country1.longitude,
                   },
                   {
-                    latitude: countries[0].latitude,
-                    longitude: countries[0].longitude,
+                    latitude: targetCountry.latitude,
+                    longitude: targetCountry.longitude,
                   }
                 )
                 ]
@@ -98,23 +101,23 @@ export function Rules() {
           </Flex>
 
           <ExampleCountryCard
-            guessCountry={countries[5]}
-            country={countries[0]}
+            guessCountry={country2}
+            country={targetCountry}
           />
           <Text size="sm">
             Your second guess <Text span fw={500} />
-            {countries[5].name} is getting closer! {distance2}
+            {country2.name} is getting closer! {distance2}
             km away,{' '}
             {
               directionMap[
               getCompassDirection(
                 {
-                  latitude: countries[5].latitude,
-                  longitude: countries[5].longitude,
+                  latitude: country2.latitude,
+                  longitude: country2.longitude,
                 },
                 {
-                  latitude: countries[0].latitude,
-                  longitude: countries[0].longitude,
+                  latitude: targetCountry.latitude,
+                  longitude: targetCountry.longitude,
                 }
               )
               ]
@@ -123,13 +126,13 @@ export function Rules() {
           </Text>
 
           <ExampleCountryCard
-            guessCountry={countries[0]}
-            country={countries[0]}
+            guessCountry={targetCountry}
+            country={targetCountry}
           />
           <Text size="sm">
             Next guess,{' '}
             <Text span fw={500}>
-              {countries[0].name}
+              {targetCountry.name}
             </Text>
             , it's the location to guess! Congrats! 🎉
           </Text>
@@ -146,7 +149,7 @@ export function Rules() {
             </Anchor>
           </Text>
           <Text size="sm">
-            Data sources: Eurostat, World Bank, REST countries. Notebook containing data sources and processing steps <Anchor href="https://observablehq.com/d/a1383688270e4c00">
+            Data sources: World Bank, REST countries, Eurostat. Notebook containing data sources and processing steps <Anchor href="https://observablehq.com/d/a1383688270e4c00">
               can be found here.
             </Anchor>
           </Text>

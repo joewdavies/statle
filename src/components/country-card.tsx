@@ -1,4 +1,4 @@
-import { Box, Divider, Flex, Text, Card } from '@mantine/core';
+import { Box, Divider, Flex, Text, Card, useMantineColorScheme } from '@mantine/core';
 import { convertDistance, getDistance } from 'geolib';
 import { Country } from '../data/countries/countries';
 import CountUp from 'react-countup';
@@ -14,6 +14,7 @@ export function CountryCardHeader() {
     overflow: 'hidden' as const,
     textOverflow: 'ellipsis' as const,
   };
+
 
   return (
     <Card
@@ -55,7 +56,7 @@ const clampStyle = { fontSize: 'clamp(12px, 3.5vw, 16px)' };
 const truncateStyle = {
   whiteSpace: 'nowrap',
   overflow: 'hidden',
-  textOverflow: 'ellipsis',
+  textOverflow: 'ellipsis'
 };
 
 const CellText = ({ children }: { children: React.ReactNode }) => (
@@ -101,6 +102,8 @@ export function CountryCard({ guessCountry, country }: CountryCardProps) {
   const isCorrect =
     guessCountry.code?.toLowerCase() === country.code?.toLowerCase();
 
+  const { colorScheme } = useMantineColorScheme();
+
   return (
 
     <Flex
@@ -112,7 +115,8 @@ export function CountryCard({ guessCountry, country }: CountryCardProps) {
         border: '1px solid transparent',
         background: 'transparent',
         borderRadius: 8,
-        padding: 8,
+        padding: 0,
+        color: colorScheme === 'dark' && isCorrect ? 'var(--mantine-color-body)' : '',
       }}
     >
       {guessCountry && (
@@ -135,7 +139,7 @@ export function CountryCard({ guessCountry, country }: CountryCardProps) {
 
           {/* Direction */}
           <Box w="25%">
-            <CellText>
+            <CellText >
               {isCorrect ? '🎉' : directionMap[direction] || '🧭'}
             </CellText>
           </Box>
