@@ -26,7 +26,7 @@ export function CorrectCountry({
 
   return (
     <Flex direction="column" gap={8} align="center">
-      {gameStatus === GameStatus.Won || gameStatus === GameStatus.Lost && christmas && colorScheme == 'dark' && < Snowfall
+      {(gameStatus === GameStatus.Won || gameStatus === GameStatus.Lost) && christmas && colorScheme == 'dark' && < Snowfall
         snowflakeCount={80}        // number of flakes
         color={colorScheme === "dark" ? "#ffffffff" : "#3c4349ff"} // or "#cce6ff" for a softer look
         radius={[0.5, 2.0]}        // size variation
