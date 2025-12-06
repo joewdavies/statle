@@ -36,24 +36,24 @@ type StatCluesProps = {
 
 // Keys for safer icon mapping
 const clueIcons = {
-  population: <IconUsers size={16} />,
-  gdpPerCapita: <IconCurrencyDollar size={16} />,
-  lifeExpectancy: <IconHeartbeat size={16} />,
-  unemployment: <IconBriefcaseOff size={16} />,
-  gdp: <IconCoins size={16} />,
-  area: <IconRulerMeasure size={16} />,
-  goats: <GiGoat size={16} />,
-  carSide: <IconSteeringWheel size={16} />,
-  forestArea: <IconTrees size={16} />,
-  precipitation: <IconCloudRain size={16} />,
-  co2: <IconCloud size={16} />, // TODO: swap for a nicer CO2 icon if you want
-  corruption: <IconEyeDollar size={16} />, // TODO: swap for a nicer corruption icon if you want
-  landlocked: <IconLock size={16} />,
-  tax: <IconCoins size={16} />,
-  cereal: <IconWheat size={16} />,
-  airPassengers: <IconPlane size={16} />,
-  bribes: <IconMoneybag size={16} />,
-  electricity: <IconBolt size={16} />,
+  population: <IconUsers size={20} />,
+  gdpPerCapita: <IconCurrencyDollar size={20} />,
+  lifeExpectancy: <IconHeartbeat size={20} />,
+  unemployment: <IconBriefcaseOff size={20} />,
+  gdp: <IconCoins size={20} />,
+  area: <IconRulerMeasure size={20} />,
+  goats: <GiGoat size={20} />,
+  carSide: <IconSteeringWheel size={20} />,
+  forestArea: <IconTrees size={20} />,
+  precipitation: <IconCloudRain size={20} />,
+  co2: <IconCloud size={20} />, // TODO: swap for a nicer CO2 icon if you want
+  corruption: <IconEyeDollar size={20} />, // TODO: swap for a nicer corruption icon if you want
+  landlocked: <IconLock size={20} />,
+  tax: <IconCoins size={20} />,
+  cereal: <IconWheat size={20} />,
+  airPassengers: <IconPlane size={20} />,
+  bribes: <IconMoneybag size={20} />,
+  electricity: <IconBolt size={20} />,
 } as const;
 
 // Keys for safer icon mapping, derived from the icon map
@@ -85,7 +85,7 @@ export function StatClues({
 
   return (
     <Card w="100%" withBorder shadow="xs" p="md">
-      <Flex direction="column" gap={8}>
+      <Flex direction="column" gap={4}>
         <Flex align="center" justify="space-between">
           <Text fw={600}>
             {gameEnded ? 'Stats' : 'Clues'}

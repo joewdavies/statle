@@ -168,7 +168,7 @@ export function Rules() {
               <img
                 src="https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png"
                 alt="Buy Me A Coffee"
-                style={{ border: 0, display: 'inline-block', height: '30px' }}
+                style={{ border: 0, display: 'inline-block', height: '37px' }}
               />
             </a>
           </Text>
