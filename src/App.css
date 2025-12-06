@@ -7,3 +7,30 @@
   padding-right: 1rem;
   text-align: center;
 }
+
+.new-clue {
+  position: relative;
+  animation: revealOutline 1s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes revealOutline {
+  0% {
+    outline: 2px solid rgba(0, 0, 0, 0.6);
+    outline-offset: 4px;
+    transform: scale(1.015);
+    opacity: 0.7;
+  }
+
+  40% {
+    outline: 2px solid rgba(0, 0, 0, 0.4);
+    outline-offset: 2px;
+    opacity: 1;
+  }
+
+  100% {
+    outline: 0px solid transparent;
+    outline-offset: 0px;
+    transform: scale(1);
+    opacity: 1;
+  }
+}

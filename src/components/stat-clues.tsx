@@ -2,6 +2,8 @@
 import { Alert, Badge, Box, Card, Flex, Group, Text } from '@mantine/core';
 import { Country } from '../data/countries/countries';
 import type { CountryStats } from '../data/stats/stats';
+import { Transition } from '@mantine/core';
+import { motion } from 'framer-motion';
 
 // ⬇️ Tabler icons (add/remove as you like)
 import {
@@ -85,10 +87,15 @@ export function StatClues({
     <Card w="100%" withBorder shadow="xs" p="md">
       <Flex direction="column" gap={8}>
         <Flex align="center" justify="space-between">
-          <Text fw={600}>Clues</Text>
-          <Badge variant="light">
-            {Math.min(revealCount, clues.length)} / {clues.length}
-          </Badge>
+          <Text fw={600}>
+            {gameEnded ? 'Stats' : 'Clues'}
+          </Text>
+
+          {!gameEnded && (
+            <Badge variant="light">
+              {Math.min(revealCount)} / 6
+            </Badge>
+          )}
         </Flex>
 
         {isLoading && (
@@ -105,17 +112,41 @@ export function StatClues({
 
         {!isLoading && clues.length > 0 && (
           <Flex direction="column" gap={3} mt={0}>
-            {clues.slice(0, revealCount).map((s, i) => (
-              <Box key={i}>
-                <Group gap="xs" wrap="nowrap">
-                  {clueIcons[s.key]}
-                  <Text size="sm" className='stat-row'>
-                    <Text className='stat-label' span fw={600}>{s.label}{s.key !== 'landlocked' ? ':' : ''} </Text>
-                    <Text className='stat-value' span>{s.value}</Text>
-                  </Text>
-                </Group>
-              </Box>
-            ))}
+
+            {/* CLUES */}
+            {clues.slice(0, revealCount).map((s, i) => {
+              const isNew = i === revealCount - 1 && !gameEnded; // newest clue
+              return (
+                <Transition
+                  key={i}
+                  mounted={i < revealCount}
+                  transition="pop"
+                  duration={300}
+                  timingFunction="ease"
+                >
+                  {(styles) => (
+                    <Box
+                      style={styles}
+                      component={motion.div}
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.4 }}
+                      className={isNew ? 'new-clue' : ''}
+                    >
+                      <Group gap="xs" wrap="nowrap">
+                        {clueIcons[s.key]}
+                        <Text size="sm" className='stat-row'>
+                          <Text className='stat-label' span fw={600}>
+                            {s.label}{s.key !== 'landlocked' ? ':' : ''}{' '}
+                          </Text>
+                          <Text className='stat-value' span>{s.value}</Text>
+                        </Text>
+                      </Group>
+                    </Box>
+                  )}
+                </Transition>
+              );
+            })}
           </Flex>
         )}
       </Flex>

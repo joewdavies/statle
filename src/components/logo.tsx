@@ -1,5 +1,4 @@
 import { Flex, Title, Image } from '@mantine/core';
-import { IconChartScatter } from '@tabler/icons-react';
 
 export function Logo() {
   const christmas =
@@ -8,7 +7,13 @@ export function Logo() {
 
   return (
     <Flex align={'center'} gap={4} justify={'center'}>
-      <IconChartScatter />
+      <Image
+        src="./img/statle-icon.png"
+        alt="Statle logo"
+        width={28}
+        height={28}
+        style={{ pointerEvents: 'none' }}
+      />
       <Title fw={700} order={2} c="var(--mantine-white)">
         STATLE
       </Title>

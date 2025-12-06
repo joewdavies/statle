@@ -156,7 +156,7 @@ function App() {
   const hasAnyGuess = guesses.some((g) => g && g.trim().length > 0);
 
   return (
-    <Flex align="center" direction="column" gap={20}>
+    <Flex align="center" direction="column" gap={15}>
       {/* {gameStatus === GameStatus.Playing && (<CheatDetector threshold={1200} />)} */}
       <Navbar />
       <Text>Guess today's country!</Text>
