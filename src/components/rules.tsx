@@ -158,6 +158,21 @@ export function Rules() {
             It does not use cookies or collect personal data.
             It only collects anonymised usage statistics to understand overall traffic patterns.
           </Text>
+          <Text ta="center">
+            <a
+              href="https://www.buymeacoffee.com/joewdavies"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Buy Me A Coffee — Joe W Davies"
+            >
+              <img
+                src="https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png"
+                alt="Buy Me A Coffee"
+                style={{ border: 0, display: 'inline-block', height: '30px' }}
+              />
+            </a>
+          </Text>
+
         </Flex>
       </Modal>
       <ActionIcon onClick={open} size={'lg'} variant="default">
