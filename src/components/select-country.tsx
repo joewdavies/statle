@@ -192,6 +192,7 @@ export function SelectCountry({
     }, 0);
 
     notifications.show({
+      position: 'top-center',
       color: 'blue',
       title: 'You rolled the dice!',
       message: `selection set to: ${pick}`,
