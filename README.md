@@ -2,7 +2,7 @@
 
 <p align="center">
   <a href="https://joewdavies.github.io/statle/">
-    <img src="https://raw.githubusercontent.com/joewdavies/statle/master/public/img/og-image.png" />
+    <img src="https://raw.githubusercontent.com/joewdavies/statle/master/public/img/banner.png" />
   </a>
 </p>
 
