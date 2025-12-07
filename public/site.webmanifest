@@ -1,22 +1,21 @@
 {
-  "id": "/",
   "name": "Statle",
   "short_name": "Statle",
   "description": "Daily country guessing game",
-  "start_url": "/",
-  "scope": "/",
+  "start_url": "/statle/",
+  "scope": "/statle/",
   "display": "standalone",
   "orientation": "portrait",
   "theme_color": "#006E5C",
   "background_color": "#ffffff",
   "icons": [
     {
-      "src": "./img/favicon/android-chrome-192x192.png",
+      "src": "/img/favicon/android-chrome-192x192.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "./img/favicon/android-chrome-512x512.png",
+      "src": "/img/favicon/android-chrome-512x512.png",
       "sizes": "512x512",
       "type": "image/png"
     }
