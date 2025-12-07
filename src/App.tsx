@@ -4,7 +4,7 @@ import './App.css';
 import { CorrectCountry } from './components/correct-country';
 import { StatClues } from './components/stats-list/stat-clues';
 import { Navbar } from './components/navbar/navbar';
-import { SelectCountry } from './components/select-country';
+import { SelectCountry } from './components/select-country/select-country';
 import { GameStatus, MAX_GUESSES } from './constants';
 import { countries } from './data/countries/countries';
 import { useUserStats } from './hooks/useUserStats';

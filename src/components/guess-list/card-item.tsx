@@ -1,4 +1,4 @@
-import { Card } from "@mantine/core";
+import { Card, useMantineColorScheme } from "@mantine/core";
 import { Country } from "../../data/countries/countries";
 import { CountryCard } from "./country-card";
 
@@ -21,6 +21,7 @@ export const CardItem = ({
   const borderColor = isActive ? "var(--mantine-color-blue-6)" : "";
   const isCorrect = guess === country.name;
   const isEmpty = guess === "";
+  const { colorScheme } = useMantineColorScheme();
 
   return (
     <Card
@@ -34,8 +35,10 @@ export const CardItem = ({
         background: isCorrect
           ? "var(--mantine-color-green-0)"
           : isEmpty
-          ? "var(--mantine-color-gray-3)"  // ⬅️ grey bar
-          : "transparent",
+            ? colorScheme === "dark"
+              ? "var(--mantine-color-dark-5)"   // dark-mode friendly grey
+              : "var(--mantine-color-gray-3)"   // light mode grey
+            : "transparent",
         border: isCorrect
           ? "1px solid var(--mantine-color-green-4)"
           : borderColor,

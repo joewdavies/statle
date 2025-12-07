@@ -4,9 +4,10 @@ import { notifications } from '@mantine/notifications';
 import { IconDice5Filled, IconSearch } from '@tabler/icons-react';
 import { useCallback, useEffect, useRef } from 'react';
 import ConfettiExplosion from 'react-confetti-explosion';
-import { GameStatus, MAX_GUESSES } from '../constants';
-import { Country } from '../data/countries/countries';
-import useFocusOnKey from '../hooks/useFocusOnKey';
+import { GameStatus, MAX_GUESSES } from '../../constants';
+import { Country } from '../../data/countries/countries';
+import useFocusOnKey from '../../hooks/useFocusOnKey';
+import { fuzzyCountryFilter } from './country-search-filter';
 
 type SelectCountryProps = {
   countries: Country[];
@@ -155,7 +156,7 @@ export function SelectCountry({
     };
   });
 
-  // ---------- NEW: roll-the-dice helper ----------
+  // ---------- roll-the-dice helper ----------
   function pickRandomCountryName(): string | null {
     // prefer countries not already guessed
     const remaining = countries
@@ -227,16 +228,7 @@ export function SelectCountry({
           inputSize="md"
           leftSection={<IconSearch size={18} />}
           // key bit: custom filter that is accent/alias aware
-          filter={({ options, search, limit }) => {
-            const q = normalize(search.trim());
-
-            const filtered = options.filter((item: any) => {
-              return normalize(item.value).includes(q) || (item.keywords && item.keywords.includes(q));
-            });
-
-            // Respect Mantine’s built-in limit behavior
-            return filtered.slice(0, limit);
-          }}
+          filter={fuzzyCountryFilter}
           // (Optional) show more hits
           limit={200}
         />
