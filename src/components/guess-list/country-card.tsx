@@ -1,9 +1,9 @@
 import { Box, Divider, Flex, Text, Card, useMantineColorScheme } from '@mantine/core';
 import { convertDistance, getDistance } from 'geolib';
-import { Country } from '../data/countries/countries';
+import { Country } from '../../data/countries/countries';
 import CountUp from 'react-countup';
-import { getCompassDirection, directionMap, sharesLandBorder } from '../services/geo';
-import { dataset } from '../data/stats/dataset';
+import { getCompassDirection, directionMap, sharesLandBorder } from '../../services/geo';
+import { dataset } from '../../data/stats/dataset';
 
 
 export function CountryCardHeader() {

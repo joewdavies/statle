@@ -24,6 +24,7 @@ export type CountryStats = {
   bribes?: number | null | undefined;
   cereal?: number | null | undefined;
   electricity?: number | null | undefined;
+  borders?: string[] | null | undefined;
 };
 
 // Optional convenience

@@ -1,6 +1,7 @@
-import { Autocomplete, Button, Flex } from '@mantine/core';
+// src/components/select-country.tsx
+import { ActionIcon, Autocomplete, Button, Flex, Tooltip } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
-import { IconSearch } from '@tabler/icons-react';
+import { IconDice5Filled, IconSearch } from '@tabler/icons-react';
 import { useCallback, useEffect, useRef } from 'react';
 import ConfettiExplosion from 'react-confetti-explosion';
 import { GameStatus, MAX_GUESSES } from '../constants';
@@ -49,8 +50,6 @@ export function SelectCountry({
 }: SelectCountryProps) {
   const btnRef = useRef<HTMLButtonElement>(null);
   const autoCompleteRef = useRef<HTMLInputElement>(null);
-
-
 
   const handleCountrySubmit = useCallback(() => {
     if (!value) {
@@ -150,24 +149,67 @@ export function SelectCountry({
   const autoItems = countries.map((c) => {
     const aliases = COUNTRY_ALIASES[c.name] ?? [];
     return {
-      value: c.name,                                   // what gets inserted on select
+      value: c.name, // what gets inserted on select
       // a hidden searchable field with normalized name + aliases + code
-      keywords: [c.name, ...aliases, c.code ?? '']
-        .map(normalize)
-        .join(' '),
+      keywords: [c.name, ...aliases, c.code ?? ''].map(normalize).join(' '),
     };
   });
+
+  // ---------- NEW: roll-the-dice helper ----------
+  function pickRandomCountryName(): string | null {
+    // prefer countries not already guessed
+    const remaining = countries
+      .map((c) => c.name)
+      .filter((n) => !guesses.includes(n));
+    if (remaining.length === 0) return null;
+    const idx = Math.floor(Math.random() * remaining.length);
+    return remaining[idx];
+  }
+
+  function handleRollClick() {
+    const pick = pickRandomCountryName();
+    if (!pick) {
+      notifications.show({
+        color: 'yellow',
+        title: 'No countries left',
+        message: 'You have guessed everything!',
+      });
+      return;
+    }
+
+    setValue(pick);
+
+    // focus the autocomplete input so the user can submit quickly
+    setTimeout(() => {
+      autoCompleteRef.current?.focus();
+      // place caret at end — some browsers set caret on focus automatically,
+      // but this helps if using keyboard users
+      const input = autoCompleteRef.current;
+      if (input?.setSelectionRange) {
+        const len = input.value.length;
+        input.setSelectionRange(len, len);
+      }
+    }, 0);
+
+    notifications.show({
+      color: 'blue',
+      title: 'You rolled the dice!',
+      message: `selection set to: ${pick}`,
+      autoClose: 1800,
+    });
+
+    sendGoatEvent('rolled-dice');
+
+    // If you want the roll to auto-submit as a guess (Wordle-style),
+    // uncomment the next line:
+    // handleCountrySubmit();
+  }
+  // ---------- end roll-the-dice ----------
 
   return (
     <>
       {gameStatus === GameStatus.Won && <ConfettiExplosion />}
-      <Flex
-        gap={16}
-        align={'center'}
-        justify={'center'}
-        direction={'row'}
-        w={'100%'}
-      >
+      <Flex gap={16} align={'center'} justify={'center'} direction={'row'} w={'100%'}>
         <Autocomplete
           data={autoItems}
           aria-label="Country"
@@ -188,10 +230,7 @@ export function SelectCountry({
             const q = normalize(search.trim());
 
             const filtered = options.filter((item: any) => {
-              return (
-                normalize(item.value).includes(q) ||
-                (item.keywords && item.keywords.includes(q))
-              );
+              return normalize(item.value).includes(q) || (item.keywords && item.keywords.includes(q));
             });
 
             // Respect Mantine’s built-in limit behavior
@@ -200,6 +239,21 @@ export function SelectCountry({
           // (Optional) show more hits
           limit={200}
         />
+
+        {/* Submit + Roll buttons */}
+        {/* icon-only Roll button */}
+        <Tooltip label="Roll suggestion" withArrow openDelay={100}>
+          <ActionIcon
+            size="l"
+            variant="outline"
+            onClick={handleRollClick}
+            aria-label="Roll a country suggestion"
+            title="Roll a country suggestion"
+          >
+            <IconDice5Filled size={25} />
+          </ActionIcon>
+        </Tooltip>
+
         <Button size="md" ref={btnRef} onClick={handleCountrySubmit}>
           Submit
         </Button>

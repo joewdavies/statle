@@ -1,21 +1,22 @@
-import { Flex, Text } from '@mantine/core';
+import { Flex, Text, useMantineColorScheme } from '@mantine/core';
 import { useEffect, useMemo, useState } from 'react';
 import './App.css';
-import { CardItem } from './components/card-item';
 import { CorrectCountry } from './components/correct-country';
-import { StatClues } from './components/stat-clues';
-import { Navbar } from './components/navbar';
+import { StatClues } from './components/stats-list/stat-clues';
+import { Navbar } from './components/navbar/navbar';
 import { SelectCountry } from './components/select-country';
 import { GameStatus, MAX_GUESSES } from './constants';
 import { countries } from './data/countries/countries';
 import { useUserStats } from './hooks/useUserStats';
-import { CountryCardHeader } from './components/country-card';
+import { CountryCardHeader } from './components/guess-list/country-card';
 import {
   todayKeyLocal,
   finishedKeyFor,
   stateKeyFor,
   msUntilLocalReset,
 } from './helpers/daily';
+import Snowfall from 'react-snowfall';
+
 
 // stats
 import { stats } from './data/stats/stats';
@@ -23,6 +24,7 @@ import { GameResult, UserStatsService } from './services/userStats';
 
 import { getDailyCountry } from "./helpers/getRandomCountry";
 import GlobeJourney from './components/globe/globe-journey';
+import GuessList from './components/guess-list/guess-list';
 // import { CheatDetector } from "./components/cheat-detector";
 
 const todaysCountry = getDailyCountry();
@@ -31,6 +33,10 @@ const todayKey = todayKeyLocal();
 // Storage keys for today
 const TODAY_STATE_KEY = stateKeyFor(todayKey);
 const TODAY_FINISHED_KEY = finishedKeyFor(todayKey);
+
+const christmas =
+  (new Date().getMonth() === 11 && new Date().getDate() >= 1) || // December (month 11)
+  (new Date().getMonth() === 0 && new Date().getDate() <= 7);   // January (month 0)
 
 // 🧹 one-time cleanup of *exact* duplicates (same content; keep latest finishedAt)
 const sortByDateAscLocal = (a: GameResult, b: GameResult) =>
@@ -154,10 +160,12 @@ function App() {
 
   // Helper: do we have any non-empty guesses?
   const hasAnyGuess = guesses.some((g) => g && g.trim().length > 0);
+  const { colorScheme } = useMantineColorScheme();
 
   return (
     <Flex align="center" direction="column" gap={15}>
       {/* {gameStatus === GameStatus.Playing && (<CheatDetector threshold={1200} />)} */}
+
       <Navbar />
       <Text>Guess today's country!</Text>
 
@@ -225,21 +233,27 @@ function App() {
       <Flex direction="column" gap={8} w="100%" align="center">
         {hasAnyGuess && <CountryCardHeader />}
         {guesses.length === 0 && <h1>No guesses</h1>}
-        {guesses.map((guess, index) => {
-          const guessCountry = countries.find((c) => c.name === guess);
-          if (gameStatus === GameStatus.Won && index >= guessCount) return null;
-          return (
-            <CardItem
-              key={index}
-              index={index}
-              guessCount={guessCount}
-              guess={guess}
-              guessCountry={guessCountry}
-              country={country}
-            />
-          );
-        })}
+        <GuessList
+          guesses={guesses}
+          countries={countries}
+          guessCount={guessCount}
+          country={country}
+          gameStatus={gameStatus}
+        />
       </Flex>
+
+      {/* snowfall */}
+      {christmas && colorScheme == 'dark' && < Snowfall
+        snowflakeCount={80}        // number of flakes
+        color={colorScheme === "dark" ? "#ffffffff" : "#3c4349ff"} // or "#cce6ff" for a softer look
+        radius={[0.5, 2.0]}        // size variation
+        style={{
+          position: 'absolute',
+          width: '100%',
+          height: '100dvh',
+          zIndex: 0,
+        }}
+      />}
     </Flex>
   );
 }

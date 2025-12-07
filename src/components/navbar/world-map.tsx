@@ -3,8 +3,8 @@ import { select } from 'd3-selection';
 import { geoNaturalEarth1, geoPath } from 'd3-geo';
 import { feature } from 'topojson-client';
 import { useEffect, useRef } from 'react';
-import { UserStatsService } from '../services/userStats';
-import worldTopoJSON from '../data/world-topo.json'; // your TopoJSON file
+import { UserStatsService } from '../../services/userStats';
+import worldTopoJSON from '../../data/world-topo.json'; // your TopoJSON file
 
 export function WorldMap() {
     const containerRef = useRef<HTMLDivElement | null>(null);

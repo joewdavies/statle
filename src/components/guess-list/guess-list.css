@@ -1,0 +1,58 @@
+/* GuessList grid */
+.guess-list-root { width: 100%; }
+
+/* header */
+.guess-list-head {
+  display: grid;
+  grid-template-columns: 1fr 140px 56px 80px;
+  gap: 8px;
+  align-items: center;
+  padding: 6px 8px;
+  color: #666;
+  font-size: 12px;
+  margin-bottom: 6px;
+}
+
+/* row grid */
+.guess-row {
+  display: grid;
+  grid-template-columns: 1fr 140px 56px 80px;
+  gap: 8px;
+  align-items: center;
+  padding: 6px 8px;
+  margin-bottom: 6px;
+}
+
+/* empty row: grey blocks, lighter border */
+.guess-row--empty .guess-cell > .mantine-Card-root,
+.guess-row--empty .guess-placeholder {
+  background: #f1f3f5;
+  border-color: rgba(0,0,0,0.03);
+  color: rgba(0,0,0,0.35);
+}
+
+/* cell basics */
+.guess-cell { display:flex; align-items:center; padding:0 6px; }
+
+/* Country cell contains CardItem (Card) — force it to be inline inside the grid cell */
+.guess-cell--country > .mantine-Card-root {
+  width: 100%;
+  min-height: 34px; /* ensure a consistent height for country block */
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding-left: 12px;
+}
+
+/* placeholders */
+.guess-placeholder { width: 100%; height: 14px; background: rgba(0,0,0,0.06); border-radius: 3px; }
+.guess-placeholder.small { width: 24px; height: 14px; }
+
+/* adjust the flag image box so it doesn't break line height */
+.guess-cell--icon img { display: block; width: 24px; height: 14px; object-fit: cover; border-radius: 2px; }
+
+/* responsive */
+@media (max-width: 640px) {
+  .guess-list-head, .guess-row { grid-template-columns: 1fr 100px 44px 64px; }
+  .guess-cell--country > .mantine-Card-root { min-height: 30px; padding-left: 8px; }
+}

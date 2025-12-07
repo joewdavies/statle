@@ -3,8 +3,8 @@ import { useDisclosure } from '@mantine/hooks';
 import { IconQuestionMark } from '@tabler/icons-react';
 import { ExampleCountryCard } from './example-country-card';
 import { convertDistance, getDistance } from 'geolib';
-import { countries } from '../data/countries/countries';
-import { getCompassDirection, directionMap } from '../services/geo';
+import { countries } from '../../data/countries/countries';
+import { getCompassDirection, directionMap } from '../../services/geo';
 
 export function Rules() {
   const [opened, { open, close }] = useDisclosure(false);

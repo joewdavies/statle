@@ -1,10 +1,10 @@
 import { ActionIcon, Card, Flex, Group, Modal, Progress, Table, Text, Image } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { IconChartBar } from "@tabler/icons-react";
-import { useUserStats } from "../hooks/useUserStats";
-import { MAX_GUESSES } from "../constants";
+import { useUserStats } from "../../hooks/useUserStats";
+import { MAX_GUESSES } from "../../constants";
 import { WorldMap } from './world-map';
-import { getFlagURL } from "../helpers/getFlagURL";
+import { getFlagURL } from "../../helpers/getFlag";
 
 export function UserStats() {
   const [opened, { open, close }] = useDisclosure(false);

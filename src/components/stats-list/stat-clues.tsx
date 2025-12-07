@@ -1,7 +1,7 @@
 // src/components/stat-clues.tsx
-import { Alert, Badge, Box, Card, Flex, Group, Text } from '@mantine/core';
-import { Country } from '../data/countries/countries';
-import type { CountryStats } from '../data/stats/stats';
+import {  Alert, Badge, Box, Card, Flex, Group, Text } from '@mantine/core';
+import { countriesMap, Country } from '../../data/countries/countries';
+import type { CountryStats } from '../../data/stats/stats';
 import { Transition } from '@mantine/core';
 import { motion } from 'framer-motion';
 
@@ -23,9 +23,11 @@ import {
   IconMoneybag,
   IconBolt,
   IconEyeDollar,
+  IconBorderAll,
 } from '@tabler/icons-react';
 
 import { GiGoat } from "react-icons/gi";
+import { LandBorders } from './land-borders';
 
 type StatCluesProps = {
   country: Country;
@@ -54,6 +56,7 @@ const clueIcons = {
   airPassengers: <IconPlane size={20} />,
   bribes: <IconMoneybag size={20} />,
   electricity: <IconBolt size={20} />,
+  borders: <IconBorderAll size={20} />
 } as const;
 
 // Keys for safer icon mapping, derived from the icon map
@@ -83,12 +86,13 @@ export function StatClues({
   const isLoading = statsByCode == null; // fetching/cached not ready
   const hasNoClues = !isLoading && clues.length === 0;
 
+
   return (
     <Card w="100%" withBorder shadow="xs" p="md">
       <Flex direction="column" gap={4}>
         <Flex align="center" justify="space-between">
           <Text fw={600}>
-            {gameEnded ? 'Stats' : 'Clues'}
+            {gameEnded ? 'Factsheet' : 'Clues'}
           </Text>
 
           {!gameEnded && (
@@ -131,7 +135,7 @@ export function StatClues({
                       initial={{ opacity: 0, y: 8 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.4 }}
-                      className={isNew ? 'new-clue' : ''}
+                      className={isNew ? 'new-clue stat-clue-box' : 'stat-clue-box'}
                     >
                       <Group gap="xs" wrap="nowrap">
                         {clueIcons[s.key]}
@@ -139,7 +143,31 @@ export function StatClues({
                           <Text className='stat-label' span fw={600}>
                             {s.label}{s.key !== 'landlocked' ? ':' : ''}{' '}
                           </Text>
-                          <Text className='stat-value' span>{s.value}</Text>
+                          <Text className="stat-value" span>
+                            {s.key === "borders" ? (() => {
+                              const codes = s.value as unknown as string[] | undefined;
+                              if (!codes || codes.length === 0) return '';
+
+                              // Convert to names
+                              const names = codes.map(c => {
+                                const found = countriesMap.get(c);
+                                return found ? found.name : c;
+                              });
+
+                              const joined = names.join(', ');
+
+                              // NEW: length-based cutoff
+                              const STRING_CUTOFF = 28; // tweak if needed
+
+                              if (joined.length <= STRING_CUTOFF) {
+                                return joined;
+                              } else {
+                                return <LandBorders borders={codes} />;
+                              }
+                            })() : (
+                              s.value
+                            )}
+                          </Text>
                         </Text>
                       </Group>
                     </Box>
@@ -147,6 +175,7 @@ export function StatClues({
                 </Transition>
               );
             })}
+
           </Flex>
         )}
       </Flex>
@@ -173,7 +202,6 @@ function buildClues(stats: CountryStats | null | undefined): Clue[] {
   if (stats.carSide) out.push({ key: 'carSide', label: 'Drives on the', value: stats.carSide });
 
   // environmental
-  if (stats.landlocked === true) out.push({ key: 'landlocked', label: 'Landlocked', value: "" });
   if (isNum(stats.forestArea)) out.push({ key: 'forestArea', label: 'Forest area', value: formatter(stats.forestArea) + ' km²' });
   if (isNum(stats.precipitation)) out.push({ key: 'precipitation', label: 'Annual precipitation', value: formatter(stats.precipitation) + ' mm' });
   if (isNum(stats.co2)) out.push({ key: 'co2', label: 'CO2 per capita', value: formatter(stats.co2) + ' tonnes' });
@@ -192,7 +220,15 @@ function buildClues(stats: CountryStats | null | undefined): Clue[] {
   if (isNum(stats.bribes)) out.push({ key: 'bribes', label: '% of firms that bribe public officials', value: formatter(stats.bribes) });
   if (isNum(stats.cereal)) out.push({ key: 'cereal', label: 'Cereal production', value: formatterCompact(stats.cereal) + ' tonnes' });
 
-
+  //geography
+  if (stats.landlocked === true) out.push({ key: 'landlocked', label: 'Landlocked', value: "" });
+  if (stats.borders) {
+    out.push({
+      key: "borders",
+      label: "Land borders",
+      value: stats.borders, // pass raw codes, LandBorders will format them
+    } as any);
+  }
   return out;
 }
 

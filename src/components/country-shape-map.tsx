@@ -1,7 +1,7 @@
 import { useMantineColorScheme } from "@mantine/core";
 import { Country } from "../data/countries/countries";
 
-export function CountryMap({ country }: { country: Country }) {
+export function CountryShapeMap({ country }: { country: Country }) {
   const colorScheme = useMantineColorScheme();
   const filter = colorScheme.colorScheme === "dark" ? "invert(0.8)" : "";
 

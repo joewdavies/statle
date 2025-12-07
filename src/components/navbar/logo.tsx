@@ -1,18 +1,20 @@
-import { Flex, Title, Image } from '@mantine/core';
+import { Flex, Title, Image, useMantineColorScheme } from '@mantine/core';
 
 export function Logo() {
   const christmas =
     (new Date().getMonth() === 11 && new Date().getDate() >= 1) || // December (month 11)
     (new Date().getMonth() === 0 && new Date().getDate() <= 7);   // January (month 0)
 
+     const { colorScheme } = useMantineColorScheme();
+
   return (
     <Flex align={'center'} gap={4} justify={'center'}>
       <Image
-        src="./img/statle-icon.png"
+        src={colorScheme === "dark" ? "./img/statle-icon-darkmode.png" : "./img/statle-icon.png"}
         alt="Statle logo"
         width={28}
         height={28}
-        style={{ pointerEvents: 'none' }}
+        style={{ pointerEvents: 'none', opacity:colorScheme === "dark" ? 0.8 :1}}
       />
       <Title fw={700} order={2} c="var(--mantine-white)">
         STATLE

@@ -30,3 +30,42 @@
     background-color: transparent;
   }
 }
+
+/* the ActionIcon wrapper for flags — em-based so it matches text height */
+.land-border-flag {
+  display: inline-flex !important; /* must override Mantine */
+  align-items: center;
+  justify-content: center;
+  width: 1.05em;    /* tie width to current font-size */
+  height: 1.05em;   /* tie height to current font-size */
+  padding: 0;
+  margin: 0;
+  line-height: 1;
+  vertical-align: middle;
+  overflow: hidden;
+  border-radius: 2px; /* optional */
+}
+
+/* Force the <img> output by Mantine Image to obey the parent box */
+.land-border-flag img,
+.land-border-flag .mantine-Image-image {
+  display: block !important;   /* remove inline descender gap */
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important;
+}
+
+/* make sure the icon glyph area also doesn't expand the row */
+.mantine-Group-root > svg,
+.mantine-Group-root > span > svg {
+  width: 1.15em;
+  height: 1.15em;
+  vertical-align: middle;
+  display: inline-block;
+}
+
+.stat-clue-box .flag-button{
+  min-height: unset !important;
+  height: 19px;
+
+}

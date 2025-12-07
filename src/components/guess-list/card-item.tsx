@@ -1,6 +1,5 @@
-import { Card, Text } from "@mantine/core";
-import { MAX_GUESSES } from "../constants";
-import { Country } from "../data/countries/countries";
+import { Card } from "@mantine/core";
+import { Country } from "../../data/countries/countries";
 import { CountryCard } from "./country-card";
 
 type PaperItemProps = {
@@ -20,8 +19,8 @@ export const CardItem = ({
 }: PaperItemProps) => {
   const isActive = index === guessCount;
   const borderColor = isActive ? "var(--mantine-color-blue-6)" : "";
-  const displayText = guess === "" ? `Guess ${index + 1} / ${MAX_GUESSES}` : "";
   const isCorrect = guess === country.name;
+  const isEmpty = guess === "";
 
   return (
     <Card
@@ -32,16 +31,23 @@ export const CardItem = ({
       h={24}
       px={24}
       style={{
-        background: isCorrect ? 'var(--mantine-color-green-0)' : 'transparent',
-        border: isCorrect ? '1px solid var(--mantine-color-green-4)' : borderColor,
+        background: isCorrect
+          ? "var(--mantine-color-green-0)"
+          : isEmpty
+          ? "var(--mantine-color-gray-3)"  // ⬅️ grey bar
+          : "transparent",
+        border: isCorrect
+          ? "1px solid var(--mantine-color-green-4)"
+          : borderColor,
         textAlign: "center",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
       }}
     >
-      {guess === "" ? (
-        <Text>{index === guessCount ? displayText : ""}</Text>
+      {isEmpty ? (
+        // ⬅️ nothing inside, just the grey bar
+        <></>
       ) : (
         <CountryCard guessCountry={guessCountry!} country={country} />
       )}
