@@ -245,13 +245,13 @@ export function SelectCountry({
         {/* icon-only Roll button */}
         <Tooltip label="Roll suggestion" withArrow openDelay={100}>
           <ActionIcon
-            size="l"
+            size="xl"
             variant="outline"
             onClick={handleRollClick}
             aria-label="Roll a country suggestion"
             title="Roll a country suggestion"
           >
-            <IconDice5Filled size={25} />
+            <IconDice5Filled size={'90%'} />
           </ActionIcon>
         </Tooltip>
 
