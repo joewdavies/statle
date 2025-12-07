@@ -10,27 +10,23 @@
 
 .new-clue {
   position: relative;
-  animation: revealOutline 1s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation: cluePulse 1.2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
-@keyframes revealOutline {
+@keyframes cluePulse {
   0% {
-    outline: 2px solid rgba(0, 0, 0, 0.6);
-    outline-offset: 4px;
-    transform: scale(1.015);
-    opacity: 0.7;
+    box-shadow: 0 0 0 0 #1C7ED699;
+    transform: scale(1.02);
+    background-color: rgba(255, 235, 120, 0.15);
   }
 
   40% {
-    outline: 2px solid rgba(0, 0, 0, 0.4);
-    outline-offset: 2px;
-    opacity: 1;
+    box-shadow: 0 0 10px 4px #1C7ED64d;
   }
 
   100% {
-    outline: 0px solid transparent;
-    outline-offset: 0px;
+    box-shadow: 0 0 0 0 rgba(255, 215, 0, 0);
     transform: scale(1);
-    opacity: 1;
+    background-color: transparent;
   }
 }
