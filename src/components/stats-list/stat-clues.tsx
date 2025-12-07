@@ -156,7 +156,7 @@ export function StatClues({
 
                               const joined = names.join(', ');
 
-                              // NEW: length-based cutoff
+                              // length-based cutoff
                               const STRING_CUTOFF = 28; // tweak if needed
 
                               if (joined.length <= STRING_CUTOFF) {

@@ -53,23 +53,36 @@ export function SelectCountry({
   const autoCompleteRef = useRef<HTMLInputElement>(null);
 
   const handleCountrySubmit = useCallback(() => {
-    if (!value) {
+    const trimmed = value.trim();
+    const normalized = trimmed.toLowerCase();
+
+    // find the country regardless of capitalization
+    const match = countries.find(
+      (c) => c.name.toLowerCase() === normalized
+    );
+
+    if (!trimmed) {
       notifications.show({
-        color: 'red',
-        title: 'No country selected',
-        message: 'Please select a country',
+        color: "red",
+        title: "No country selected",
+        message: "Please select a country",
       });
       return;
     }
-    if (!countries.map((c) => c.name).includes(value)) {
+
+    if (!match) {
       notifications.show({
-        color: 'red',
-        title: 'Country not found',
-        message: 'Please select a valid country',
+        color: "red",
+        title: "Country not found",
+        message: "Please select a valid country",
       });
       return;
     }
-    if (guesses.includes(value)) {
+
+    const selectedName = match.name; // always the canonical name
+
+
+    if (guesses.includes(selectedName)) {
       notifications.show({
         color: 'red',
         title: 'Already guessed',
@@ -79,13 +92,13 @@ export function SelectCountry({
     }
     if (guessCount < MAX_GUESSES) {
       const newGuesses = [...guesses];
-      newGuesses[guessCount] = value;
+      newGuesses[guessCount] = selectedName;
       setGuesses(newGuesses);
       setGuessCount(guessCount + 1);
       setValue('');
     }
     // this is a guess so we need to add minus one
-    if (country.name === value) {
+    if (country.name === selectedName) {
       setGameStatus(GameStatus.Won);
       sendGoatEvent(`won-${guessCount + 1}`);
       notifications.show({
@@ -121,7 +134,12 @@ export function SelectCountry({
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Enter') {
         event.preventDefault();
-        if (countries.map((c) => c.name).includes(value)) {
+        const trimmed = value.trim();
+        const normalized = trimmed.toLowerCase();
+        const match = countries.find((c) => c.name.toLowerCase() === normalized);
+        if (match) {
+          // set the value to canonical name (optional) then submit
+          setValue(match.name);
           handleCountrySubmit();
         }
       }
@@ -131,12 +149,18 @@ export function SelectCountry({
     return () => {
       autoComplete?.removeEventListener('keydown', handleKeyDown);
     };
-  }, [value, countries, autoCompleteRef, handleCountrySubmit]);
+  }, [value, countries, autoCompleteRef, handleCountrySubmit, setValue]);
+
 
   useFocusOnKey('/', autoCompleteRef);
 
   function handleKeyboardOptionSubmit(newValue: string) {
-    setValue(newValue);
+    // newValue comes from an option (should already be the canonical name),
+    // but trim just in case and set the canonical form from countries list.
+    const trimmed = newValue.trim();
+    const normalized = trimmed.toLowerCase();
+    const match = countries.find((c) => c.name.toLowerCase() === normalized);
+    setValue(match ? match.name : trimmed);
   }
 
   function sendGoatEvent(path: string) {
@@ -211,7 +235,7 @@ export function SelectCountry({
   return (
     <>
       {gameStatus === GameStatus.Won && <ConfettiExplosion />}
-      <Flex gap={16} align={'center'} justify={'center'} direction={'row'} w={'100%'}>
+      <Flex gap={10} align={'center'} justify={'center'} direction={'row'} w={'100%'}>
         <Autocomplete
           data={autoItems}
           aria-label="Country"

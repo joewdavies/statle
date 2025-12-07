@@ -49,7 +49,7 @@ export const CardItem = ({
       }}
     >
       {isEmpty ? (
-        // ⬅️ nothing inside, just the grey bar
+        //  nothing inside, just the grey bar
         <></>
       ) : (
         <CountryCard guessCountry={guessCountry!} country={country} />
