@@ -53,6 +53,7 @@
   width: 100% !important;
   height: 100% !important;
   object-fit: contain !important;
+  min-width: 25px !important;  /* force visibility on firefox */
 }
 
 /* make sure the icon glyph area also doesn't expand the row */
