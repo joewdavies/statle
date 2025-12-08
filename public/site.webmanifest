@@ -1,7 +1,7 @@
 {
   "name": "Statle",
   "short_name": "Statle",
-  "description": "Daily country guessing game",
+  "description": "Guess the country! One country per day. Guess in up to 6 tries. Hints get revealed after each guess.",
   "start_url": "/statle/",
   "scope": "/statle/",
   "display": "standalone",
