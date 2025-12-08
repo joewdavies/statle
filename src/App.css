@@ -47,8 +47,7 @@
 }
 
 /* Force the <img> output by Mantine Image to obey the parent box */
-.land-border-flag img,
-.land-border-flag .mantine-Image-image {
+.land-border-flag img {
   display: block !important;   /* remove inline descender gap */
   width: 100% !important;
   height: 100% !important;
