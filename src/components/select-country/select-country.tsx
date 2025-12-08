@@ -8,6 +8,7 @@ import { GameStatus, MAX_GUESSES } from '../../constants';
 import { Country } from '../../data/countries/countries';
 import useFocusOnKey from '../../hooks/useFocusOnKey';
 import { fuzzyCountryFilter } from './country-search-filter';
+import { animateDiceRoll } from './dice-button';
 
 type SelectCountryProps = {
   countries: Country[];
@@ -51,6 +52,8 @@ export function SelectCountry({
 }: SelectCountryProps) {
   const btnRef = useRef<HTMLButtonElement>(null);
   const autoCompleteRef = useRef<HTMLInputElement>(null);
+  const diceRef = useRef<HTMLButtonElement>(null);
+
 
   const handleCountrySubmit = useCallback(() => {
     const trimmed = value.trim();
@@ -182,7 +185,6 @@ export function SelectCountry({
 
   // ---------- roll-the-dice helper ----------
   function pickRandomCountryName(): string | null {
-    // prefer countries not already guessed
     const remaining = countries
       .map((c) => c.name)
       .filter((n) => !guesses.includes(n));
@@ -192,23 +194,22 @@ export function SelectCountry({
   }
 
   function handleRollClick() {
+    animateDiceRoll(diceRef.current);
+
     const pick = pickRandomCountryName();
     if (!pick) {
       notifications.show({
-        color: 'yellow',
-        title: 'No countries left',
-        message: 'You have guessed everything!',
+        color: "yellow",
+        title: "No countries left",
+        message: "You have guessed everything!",
       });
       return;
     }
 
     setValue(pick);
 
-    // focus the autocomplete input so the user can submit quickly
     setTimeout(() => {
       autoCompleteRef.current?.focus();
-      // place caret at end — some browsers set caret on focus automatically,
-      // but this helps if using keyboard users
       const input = autoCompleteRef.current;
       if (input?.setSelectionRange) {
         const len = input.value.length;
@@ -217,18 +218,14 @@ export function SelectCountry({
     }, 0);
 
     notifications.show({
-      position: 'top-center',
-      color: 'blue',
-      title: 'You rolled the dice!',
+      position: "top-center",
+      color: "blue",
+      title: "You rolled the dice!",
       message: `selection set to: ${pick}`,
       autoClose: 1800,
     });
 
-    sendGoatEvent('rolled-dice');
-
-    // If you want the roll to auto-submit as a guess (Wordle-style),
-    // uncomment the next line:
-    // handleCountrySubmit();
+    sendGoatEvent("rolled-dice");
   }
   // ---------- end roll-the-dice ----------
 
@@ -257,17 +254,24 @@ export function SelectCountry({
           limit={200}
         />
 
-        {/* Submit + Roll buttons */}
+
         {/* icon-only Roll button */}
         <Tooltip label="Roll suggestion" withArrow openDelay={100}>
           <ActionIcon
             size="xl"
             variant="outline"
             onClick={handleRollClick}
+            ref={diceRef}
             aria-label="Roll a country suggestion"
             title="Roll a country suggestion"
           >
-            <IconDice5Filled size={'90%'} />
+            {/* inner wrapper sized/positioned for animations */}
+            <span className="dice-button-inner" aria-hidden>
+              <span className="dice-wrapper" aria-hidden>
+                <IconDice5Filled size={'90%'} />
+              </span>
+              <span className="dice-shadow" aria-hidden />
+            </span>
           </ActionIcon>
         </Tooltip>
 

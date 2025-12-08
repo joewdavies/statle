@@ -7,7 +7,7 @@ import { UserStats } from "./user-stats";
 
 export function Navbar() {
   return (
-    <Flex justify={"space-between"} align="center" w={"100%"}>
+    <Flex justify={"space-between"} align="center" w={"100%"} className="statle-navbar">
       <Flex gap={16}>
         <Rules />
         <UserStats />

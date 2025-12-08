@@ -1,0 +1,43 @@
+:root {
+  --roll-duration: 500ms;
+}
+
+.dice-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  will-change: transform;
+  transition: transform 120ms ease;
+}
+
+@keyframes dice-roll {
+  0% {
+    transform: rotateX(0deg) rotateY(0deg) rotateZ(0deg);
+  }
+  25% {
+    transform: rotateX(540deg) rotateY(360deg) rotateZ(180deg);
+  }
+  55% {
+    transform: rotateX(900deg) rotateY(720deg) rotateZ(360deg);
+  }
+  80% {
+    transform: rotateX(1080deg) rotateY(880deg) rotateZ(420deg);
+  }
+  100% {
+    transform: rotateX(1260deg) rotateY(900deg) rotateZ(450deg);
+  }
+}
+
+.dice-wrapper.rolling {
+  animation: dice-roll var(--roll-duration) cubic-bezier(.2,.9,.2,1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dice-wrapper.rolling {
+    animation: none;
+    transform: rotateZ(10deg);
+  }
+}
