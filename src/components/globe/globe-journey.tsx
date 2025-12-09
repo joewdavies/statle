@@ -302,9 +302,9 @@ export default function GlobeJourney({
                 return dx * dx + dy * dy <= radius * radius;
             }
 
-            function getRelativeXY(e: MouseEvent | Touch | PointerEvent): [number, number] {
+            function getRelativeXYFromClient(clientX: number, clientY: number): [number, number] {
                 const rect = canvas.getBoundingClientRect();
-                return [e.clientX - rect.left, e.clientY - rect.top];
+                return [clientX - rect.left, clientY - rect.top];
             }
 
             // 🧱 Scroll lock helpers
@@ -318,46 +318,87 @@ export default function GlobeJourney({
             };
 
             // --- prevent page scroll when interacting with the globe ---
-            canvas.addEventListener(
-                "wheel",
-                (e) => {
-                    const [x, y] = getRelativeXY(e);
-                    if (isInsideSphereXY(x, y)) e.preventDefault();
-                },
-                { passive: false }
-            );
+            const onWheel = (e: WheelEvent) => {
+                const [x, y] = getRelativeXYFromClient((e as any).clientX ?? e.pageX, (e as any).clientY ?? e.pageY);
+                if (isInsideSphereXY(x, y)) e.preventDefault();
+            };
+            canvas.addEventListener("wheel", onWheel, { passive: false });
 
-            // 🧠 Add these — main fix for mobile scroll issue:
-            canvas.addEventListener(
-                "touchstart",
-                (e) => {
-                    const [x, y] = getRelativeXY(e.touches[0]);
-                    if (isInsideSphereXY(x, y)) {
-                        e.preventDefault();
-                        lockScroll(); // 🚫 disable page scroll
+            const onTouchStart = (e: TouchEvent) => {
+                const [x, y] = getRelativeXYFromClient(e.touches[0].clientX, e.touches[0].clientY);
+                if (isInsideSphereXY(x, y)) {
+                    e.preventDefault();
+                    lockScroll();
+                }
+            };
+            canvas.addEventListener("touchstart", onTouchStart, { passive: false });
+
+            const onTouchMove = (e: TouchEvent) => {
+                const [x, y] = getRelativeXYFromClient(e.touches[0].clientX, e.touches[0].clientY);
+                if (isInsideSphereXY(x, y)) e.preventDefault();
+            };
+            canvas.addEventListener("touchmove", onTouchMove, { passive: false });
+
+            const onTouchEnd = () => {
+                unlockScroll();
+            };
+            canvas.addEventListener("touchend", onTouchEnd, { passive: true });
+
+            // --- dblclick / double-tap handling ---
+            // Desktop: use native dblclick
+            const onDblClick = (ev: MouseEvent) => {
+                const rect = canvas.getBoundingClientRect();
+                const x = ev.clientX - rect.left;
+                const y = ev.clientY - rect.top;
+                if (!isInsideSphereXY(x, y)) return;
+                // zoom in by factor — adjust if you want stronger/weaker zoom
+                //@ts-ignore
+                selection.transition().duration(300).call(zoomInstance.scaleBy as any, 1.8, [x, y]);
+            };
+            canvas.addEventListener("dblclick", onDblClick);
+
+            // Mobile double-tap detection
+            let lastTapTime = 0;
+            let lastTapX = 0;
+            let lastTapY = 0;
+            const DOUBLE_TAP_MAX_DELAY = 300; // ms
+            const DOUBLE_TAP_MAX_DISTANCE = 24; // px
+
+            const onTouchEndDoubleTap = (e: TouchEvent) => {
+                if (!e.changedTouches || e.changedTouches.length === 0) return;
+                const t = e.changedTouches[0];
+                const nowTime = Date.now();
+                const [x, y] = getRelativeXYFromClient(t.clientX, t.clientY);
+
+                const dt = nowTime - lastTapTime;
+                const distSq = (x - lastTapX) * (x - lastTapX) + (y - lastTapY) * (y - lastTapY);
+
+                if (dt <= DOUBLE_TAP_MAX_DELAY && distSq <= DOUBLE_TAP_MAX_DISTANCE * DOUBLE_TAP_MAX_DISTANCE) {
+                    // Double-tap detected
+                    if (!isInsideSphereXY(x, y)) {
+                        // ignore if outside globe
+                        lastTapTime = 0;
+                        return;
                     }
-                },
-                { passive: false }
-            );
+                    // perform zoom in
+                    //@ts-ignore
+                    selection.transition().duration(300).call(zoomInstance.scaleBy as any, 1.8, [x, y]);
+                    // reset
+                    lastTapTime = 0;
+                    lastTapX = 0;
+                    lastTapY = 0;
+                    // prevent synthetic double click / other interactions
+                    e.preventDefault();
+                } else {
+                    // store as potential first tap
+                    lastTapTime = nowTime;
+                    lastTapX = x;
+                    lastTapY = y;
+                }
+            };
+            canvas.addEventListener("touchend", onTouchEndDoubleTap, { passive: false });
 
-            canvas.addEventListener(
-                "touchmove",
-                (e) => {
-                    const [x, y] = getRelativeXY(e.touches[0]);
-                    if (isInsideSphereXY(x, y)) e.preventDefault();
-                },
-                { passive: false }
-            );
-
-            canvas.addEventListener(
-                "touchend",
-                () => {
-                    unlockScroll(); // ✅ restore page scroll
-                },
-                { passive: true }
-            );
-
-            // --- filter only start events ---
+            // --- filter only start events for the d3 zoom filter (existing behaviour) ---
             zoomInstance.filter((event: any) => {
                 if (event.type === "wheel") {
                     const [x, y] = [event.offsetX, event.offsetY];
@@ -379,17 +420,23 @@ export default function GlobeJourney({
             });
 
             // --- bind zoom ---
-            selection.call(
-                zoomWrapper.on("zoom.render", () => render()) as any
-            );
+            selection.call(zoomWrapper.on("zoom.render", () => render()) as any);
 
             // 🧹 cleanup
             return () => {
-                unlockScroll(); // ✅ always restore scrolling on cleanup
-                canvas.removeEventListener("wheel", () => { });
-                canvas.removeEventListener("touchstart", () => { });
-                canvas.removeEventListener("touchmove", () => { });
-                canvas.removeEventListener("touchend", () => { });
+                unlockScroll(); // always restore scrolling on cleanup
+
+                canvas.removeEventListener("wheel", onWheel as any);
+                canvas.removeEventListener("touchstart", onTouchStart as any);
+                canvas.removeEventListener("touchmove", onTouchMove as any);
+                canvas.removeEventListener("touchend", onTouchEnd as any);
+
+                // remove dblclick & double-tap listener
+                canvas.removeEventListener("dblclick", onDblClick as any);
+                canvas.removeEventListener("touchend", onTouchEndDoubleTap as any);
+
+                // also remove the one passive touchend listener if any
+                // (we attached onTouchEnd earlier with passive:true)
             };
         }
 

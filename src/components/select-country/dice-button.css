@@ -1,5 +1,5 @@
 :root {
-  --roll-duration: 500ms;
+  --roll-duration: 700ms;
 }
 
 .dice-wrapper {
@@ -10,24 +10,15 @@
   height: 100%;
   transform-style: preserve-3d;
   will-change: transform;
-  transition: transform 120ms ease;
+  transition: transform 20ms ease;
 }
 
 @keyframes dice-roll {
   0% {
-    transform: rotateX(0deg) rotateY(0deg) rotateZ(0deg);
-  }
-  25% {
-    transform: rotateX(540deg) rotateY(360deg) rotateZ(180deg);
-  }
-  55% {
-    transform: rotateX(900deg) rotateY(720deg) rotateZ(360deg);
-  }
-  80% {
-    transform: rotateX(1080deg) rotateY(880deg) rotateZ(420deg);
+    transform: rotate(0deg);
   }
   100% {
-    transform: rotateX(1260deg) rotateY(900deg) rotateZ(450deg);
+    transform: rotate(360deg);
   }
 }
 

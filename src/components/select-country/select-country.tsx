@@ -8,7 +8,7 @@ import { GameStatus, MAX_GUESSES } from '../../constants';
 import { Country } from '../../data/countries/countries';
 import useFocusOnKey from '../../hooks/useFocusOnKey';
 import { fuzzyCountryFilter } from './country-search-filter';
-import { animateDiceRoll } from './dice-button';
+import { animateDiceRoll, cleanupDiceRollTimer, DICE_ANIMATION_DURATION } from './dice-button';
 
 type SelectCountryProps = {
   countries: Country[];
@@ -53,7 +53,8 @@ export function SelectCountry({
   const btnRef = useRef<HTMLButtonElement>(null);
   const autoCompleteRef = useRef<HTMLInputElement>(null);
   const diceRef = useRef<HTMLButtonElement>(null);
-
+  const flickIntervalRef = useRef<number | null>(null);
+  const flickTimeoutRef = useRef<number | null>(null);
 
   const handleCountrySubmit = useCallback(() => {
     const trimmed = value.trim();
@@ -194,10 +195,17 @@ export function SelectCountry({
   }
 
   function handleRollClick() {
+    // If button already animating, do nothing
+    if (diceRef.current?.dataset.rolling === "true") return;
+
+    // trigger the visual roll animation you already have
     animateDiceRoll(diceRef.current);
 
-    const pick = pickRandomCountryName();
-    if (!pick) {
+    const remaining = countries
+      .map((c) => c.name)
+      .filter((n) => !guesses.includes(n));
+
+    if (remaining.length === 0) {
       notifications.show({
         color: "yellow",
         title: "No countries left",
@@ -206,28 +214,113 @@ export function SelectCountry({
       return;
     }
 
-    setValue(pick);
+    // pick final result now (deterministic)
+    const finalPick = pickRandomCountryName();
+    if (!finalPick) return;
 
-    setTimeout(() => {
-      autoCompleteRef.current?.focus();
-      const input = autoCompleteRef.current;
-      if (input?.setSelectionRange) {
-        const len = input.value.length;
-        input.setSelectionRange(len, len);
+    // Respect reduced-motion: avoid flicking if user prefers reduced motion
+    const prefersReduced =
+      typeof window !== "undefined" &&
+      window.matchMedia &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    // clear any previous flicking
+    if (flickIntervalRef.current) {
+      window.clearInterval(flickIntervalRef.current);
+      flickIntervalRef.current = null;
+    }
+    if (flickTimeoutRef.current) {
+      window.clearTimeout(flickTimeoutRef.current);
+      flickTimeoutRef.current = null;
+    }
+
+    if (!prefersReduced) {
+      // Create a shuffled copy so flick looks random
+      const shuffled = remaining.slice();
+      for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
       }
-    }, 0);
 
-    notifications.show({
-      position: "top-center",
-      color: "blue",
-      title: "You rolled the dice!",
-      message: `selection set to: ${pick}`,
-      autoClose: 1800,
-    });
+      const tickMs = 80; // speed of flicking; smaller = faster
+      let pos = 0;
 
-    sendGoatEvent("rolled-dice");
+      flickIntervalRef.current = window.setInterval(() => {
+        setValue(shuffled[pos % shuffled.length]);
+        pos += 1;
+      }, tickMs);
+
+      // stop flicking after the dice animation duration (use the exported constant)
+      flickTimeoutRef.current = window.setTimeout(() => {
+        if (flickIntervalRef.current) {
+          window.clearInterval(flickIntervalRef.current);
+          flickIntervalRef.current = null;
+        }
+
+        // finalise selection and focus input (keeps previous behaviour)
+        setValue(finalPick);
+
+        setTimeout(() => {
+          autoCompleteRef.current?.focus();
+          const input = autoCompleteRef.current;
+          if (input?.setSelectionRange) {
+            const len = input.value.length;
+            input.setSelectionRange(len, len);
+          }
+        }, 0);
+
+        notifications.show({
+          position: "top-center",
+          color: "blue",
+          title: "You rolled the dice!",
+          message: `selection set to: ${finalPick}`,
+          autoClose: 1800,
+        });
+
+        sendGoatEvent("rolled-dice");
+      }, DICE_ANIMATION_DURATION);
+    } else {
+      // reduced-motion: just set final pick and focus
+      setValue(finalPick);
+      setTimeout(() => {
+        autoCompleteRef.current?.focus();
+        const input = autoCompleteRef.current;
+        if (input?.setSelectionRange) {
+          const len = input.value.length;
+          input.setSelectionRange(len, len);
+        }
+      }, 0);
+
+      notifications.show({
+        position: "top-center",
+        color: "blue",
+        title: "You rolled the dice!",
+        message: `selection set to: ${finalPick}`,
+        autoClose: 1800,
+      });
+
+      sendGoatEvent("rolled-dice");
+    }
   }
   // ---------- end roll-the-dice ----------
+
+  // CLEANUP
+  useEffect(() => {
+    return () => {
+      if (flickIntervalRef.current) {
+        window.clearInterval(flickIntervalRef.current);
+        flickIntervalRef.current = null;
+      }
+      if (flickTimeoutRef.current) {
+        window.clearTimeout(flickTimeoutRef.current);
+        flickTimeoutRef.current = null;
+      }
+      // also clear any timer internal to the dice util (robustness)
+      if (typeof cleanupDiceRollTimer === 'function') {
+        cleanupDiceRollTimer();
+      }
+    };
+  }, []);
 
   return (
     <>
@@ -252,33 +345,38 @@ export function SelectCountry({
           filter={fuzzyCountryFilter}
           // (Optional) show more hits
           limit={200}
+          rightSectionWidth={44}                       // reserve space for the dice icon
+          rightSection={
+            <Tooltip label="Roll suggestion" withArrow openDelay={100}>
+              <ActionIcon
+                size="lg"
+                variant="outline"
+                onClick={handleRollClick}
+                ref={diceRef}
+                aria-label="Roll a country suggestion"
+                title="Roll a country suggestion"
+                tabIndex={0}
+                style={{
+                  border: 'none'
+                }}
+                onMouseDown={(e) => e.preventDefault()} // prevent input blur on click
+              >
+                <span className="dice-button-inner" aria-hidden>
+                  <span className="dice-wrapper" aria-hidden>
+                    <IconDice5Filled size={'100%'} />
+                  </span>
+                  <span className="dice-shadow" aria-hidden />
+                </span>
+              </ActionIcon>
+            </Tooltip>
+          }
         />
 
-
-        {/* icon-only Roll button */}
-        <Tooltip label="Roll suggestion" withArrow openDelay={100}>
-          <ActionIcon
-            size="xl"
-            variant="outline"
-            onClick={handleRollClick}
-            ref={diceRef}
-            aria-label="Roll a country suggestion"
-            title="Roll a country suggestion"
-          >
-            {/* inner wrapper sized/positioned for animations */}
-            <span className="dice-button-inner" aria-hidden>
-              <span className="dice-wrapper" aria-hidden>
-                <IconDice5Filled size={'90%'} />
-              </span>
-              <span className="dice-shadow" aria-hidden />
-            </span>
-          </ActionIcon>
-        </Tooltip>
-
         <Button size="md" ref={btnRef} onClick={handleCountrySubmit}>
-          Submit
+          Guess
         </Button>
       </Flex>
+
     </>
   );
 }

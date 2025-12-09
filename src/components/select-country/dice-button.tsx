@@ -1,5 +1,5 @@
 // src/utils/dice-roll.ts
-export const DICE_ANIMATION_DURATION = 500; // ms (tweak to 700-900 for a heavier feel)
+export const DICE_ANIMATION_DURATION = 700; // ms (tweak to 700-900 for a heavier feel)
 
 let timer: number | null = null;
 
