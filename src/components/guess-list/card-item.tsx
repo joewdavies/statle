@@ -8,6 +8,7 @@ type PaperItemProps = {
   guess: string;
   guessCountry?: Country;
   country: Country;
+  className?: string;
 };
 
 export const CardItem = ({
@@ -16,6 +17,7 @@ export const CardItem = ({
   guess,
   guessCountry,
   country,
+  className
 }: PaperItemProps) => {
   const isActive = index === guessCount;
   const borderColor = isActive ? "var(--mantine-color-blue-6)" : "";
@@ -31,6 +33,7 @@ export const CardItem = ({
       withBorder
       h={24}
       px={24}
+      className={className}
       style={{
         background: isCorrect
           ? "var(--mantine-color-green-0)"

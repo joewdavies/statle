@@ -18,9 +18,11 @@ export function GuessList({
   country,
   gameStatus,
 }: GuessListProps) {
+
   return (
     <>
       {guesses.map((guess, index) => {
+        const isNew = index === guessCount - 1 && gameStatus === GameStatus.Playing;
         const guessCountry = countries.find((c) => c.name === guess);
         if (gameStatus === GameStatus.Won && index >= guessCount) return null;
         return (
@@ -31,6 +33,7 @@ export function GuessList({
             guess={guess}
             guessCountry={guessCountry}
             country={country}
+            className={isNew ? 'new-guess guess-item' : 'guess-item'}
           />
         );
       })}
