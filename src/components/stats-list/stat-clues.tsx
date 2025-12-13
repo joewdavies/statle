@@ -1,5 +1,5 @@
 // src/components/stat-clues.tsx
-import {  Alert, Badge, Box, Card, Flex, Group, Text } from '@mantine/core';
+import { Alert, Badge, Box, Card, Flex, Group, Text } from '@mantine/core';
 import { countriesMap, Country } from '../../data/countries/countries';
 import type { CountryStats } from '../../data/stats/stats';
 import { Transition } from '@mantine/core';
@@ -32,7 +32,8 @@ import { LandBorders } from './land-borders';
 type StatCluesProps = {
   country: Country;
   guessCount: number;
-  gameEnded?: boolean; // reveal all stats at game end
+  gameEnded?: boolean; // game end
+  revealAll?: boolean;   // reveal all stats 
   statsByCode?: Record<string, CountryStats> | null; // <-- NEW
 };
 
@@ -73,6 +74,7 @@ export function StatClues({
   guessCount,
   gameEnded,
   statsByCode,
+  revealAll
 }: StatCluesProps) {
   const stats = statsByCode?.[country.code] ?? null;
 
@@ -81,7 +83,9 @@ export function StatClues({
   const clues = buildClues(stats);
 
   // Show 1 stat initially, then +1 per guess. If game ended, reveal all.
-  const revealCount = gameEnded ? clues.length : Math.min(1 + guessCount, clues.length);
+  const revealCount = revealAll
+    ? clues.length
+    : Math.min(1 + guessCount, clues.length);
 
   const isLoading = statsByCode == null; // fetching/cached not ready
   const hasNoClues = !isLoading && clues.length === 0;
@@ -92,10 +96,10 @@ export function StatClues({
       <Flex direction="column" gap={4}>
         <Flex align="center" justify="space-between">
           <Text fw={600}>
-            {gameEnded ? 'Factsheet' : 'Clues'}
+            {revealAll ? 'Factsheet' : 'Clues'}
           </Text>
 
-          {!gameEnded && (
+          {!revealAll && (
             <Badge variant="light">
               {Math.min(revealCount)} / 6
             </Badge>
@@ -222,7 +226,7 @@ function buildClues(stats: CountryStats | null | undefined): Clue[] {
 
   //geography
   if (stats.landlocked === true) out.push({ key: 'landlocked', label: 'Landlocked', value: "" });
-  if (stats.borders) {
+  if (stats.borders && stats.borders.length > 0) {
     out.push({
       key: "borders",
       label: "Land borders",

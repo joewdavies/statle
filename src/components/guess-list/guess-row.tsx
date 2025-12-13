@@ -63,7 +63,7 @@ export function GuessRow({ guessCountry, country }: Props) {
   return (
     <Box
       w="100%"
-      className="guess-row"
+      className={isCorrect ? "guess-row correct-row" : "guess-row"}
       style={{
         display: 'grid',
         gridTemplateColumns: GUESS_GRID,
@@ -73,22 +73,22 @@ export function GuessRow({ guessCountry, country }: Props) {
       }}
     >
       {/* Country */}
-      <Box style={cellStyle} className="guess-cell">
+      <Box style={cellStyle}  className={isCorrect ? "guess-cell correct-cell" : "guess-cell"}>
         <Text size="sm" truncate>{guessCountry.name}</Text>
       </Box>
 
       {/* Distance */}
-      <Box style={cellStyle} className="guess-cell">
+      <Box style={cellStyle} className={isCorrect ? "guess-cell correct-cell" : "guess-cell"}>
         <Text size="sm">{spaceAsThousandSeparator(distance)}km</Text>
       </Box>
 
       {/* Direction */}
-      <Box style={cellStyle} className="guess-cell">
+      <Box style={cellStyle} className={isCorrect ? "guess-cell correct-cell" : "guess-cell"} >
         <Text size="sm">{isCorrect ? '🎉' : directionMap[direction] || '🧭'}</Text>
       </Box>
 
       {/* Proximity */}
-      <Box style={cellStyle} className="guess-cell">
+      <Box style={cellStyle} className={isCorrect ? "guess-cell correct-cell" : "guess-cell"}>
         <Text size="sm">{Math.round(proximity)}%</Text>
       </Box>
     </Box>

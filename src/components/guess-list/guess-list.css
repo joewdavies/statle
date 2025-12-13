@@ -20,3 +20,102 @@
     background-color: transparent;
   }
 }
+
+/* -------------------------
+   Correct guess – row
+   ------------------------- */
+
+.correct-row {
+  position: relative;
+  border-radius: 10px;
+  animation: correct-row-pop 420ms ease-out both;
+}
+
+/* soft halo behind the row */
+.correct-row::before {
+  content: "";
+  position: absolute;
+  inset: -4px;
+  border-radius: 12px;
+  background: linear-gradient(
+    135deg,
+    rgba(46, 204, 113, 0.25),
+    rgba(46, 204, 113, 0.05)
+  );
+  filter: blur(8px);
+  z-index: -1;
+}
+
+/* -------------------------
+   Correct guess – cells
+   ------------------------- */
+
+.correct-cell {
+  background: var(--mantine-color-green-0);
+  border-color: var(--mantine-color-green-4) !important;
+  color: var(--mantine-color-green-9);
+  font-weight: 700;
+  transition: background 180ms ease, box-shadow 180ms ease;
+}
+
+/* subtle inner highlight */
+.correct-cell {
+  box-shadow:
+    inset 0 0 0 1px rgba(46, 204, 113, 0.25),
+    0 1px 6px rgba(46, 204, 113, 0.15);
+}
+
+/* -------------------------
+   Emoji emphasis
+   ------------------------- */
+
+.correct-cell text,
+.correct-cell span {
+  font-size: 1.05em;
+}
+
+/* -------------------------
+   Animation
+   ------------------------- */
+
+@keyframes correct-row-pop {
+  0% {
+    transform: scale(0.98);
+    opacity: 0.85;
+  }
+  60% {
+    transform: scale(1.02);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* -------------------------
+   Dark mode tuning
+   ------------------------- */
+
+[data-mantine-color-scheme="dark"] .correct-cell {
+  background: rgba(46, 204, 113, 0.12);
+  border-color: rgba(46, 204, 113, 0.6) !important;
+  color: #e9fff3;
+}
+
+[data-mantine-color-scheme="dark"] .correct-row::before {
+  background: linear-gradient(
+    135deg,
+    rgba(46, 204, 113, 0.35),
+    rgba(46, 204, 113, 0.1)
+  );
+}
+
+.correct-cell:nth-child(3) {
+  animation: emoji-bounce 500ms ease-out 120ms both;
+}
+
+@keyframes emoji-bounce {
+  0% { transform: scale(0.8); }
+  60% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}

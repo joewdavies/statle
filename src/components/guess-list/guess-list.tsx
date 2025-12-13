@@ -47,8 +47,8 @@ export function GuessList({
       {/* Rows */}
       {guesses.map((guess, index) => {
         const isLatestGuess = index === guessCount - 1;
-        const isFinalWinGuess =
-          isLatestGuess && gameStatus === GameStatus.Won;
+        const isFinalGuess =
+          isLatestGuess && gameStatus !== GameStatus.Playing;
 
         const guessCountry =
           countries.find((c) => c.name === guess) || null;
@@ -64,7 +64,7 @@ export function GuessList({
             country={country}
             guessCount={guessCount}
             className="guess-item"
-            onRevealDone={isFinalWinGuess ? onFinalRevealDone : undefined}
+            onRevealDone={isFinalGuess ? onFinalRevealDone : undefined}
           />
         );
       })}

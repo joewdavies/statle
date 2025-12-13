@@ -10,8 +10,8 @@ type Props = {
 
 export function ProximityRevealBar({
   proximity,
-  blocks = 5,
-  durationMs = 800,
+  blocks = 10,
+  durationMs = 1000,
   onDone,
 }: Props) {
   const targetBlocks = Math.round((proximity / 100) * blocks);
@@ -52,7 +52,7 @@ export function ProximityRevealBar({
             key={i}
             style={{
               flex: 1,
-              height: 10,
+              height: 20,
               borderRadius: 3,
               backgroundColor: !isShown
                 ? 'transparent'

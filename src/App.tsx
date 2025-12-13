@@ -173,6 +173,7 @@ function App() {
         country={country}
         guessCount={guessCount}
         gameEnded={gameStatus !== GameStatus.Playing}
+        revealAll={gameStatus !== GameStatus.Playing && endRevealDone}
         statsByCode={statsByCode}
       />
 
@@ -194,7 +195,7 @@ function App() {
       {/* Win */}
       {gameStatus === GameStatus.Won && endRevealDone && (
         <>
-        {<ConfettiExplosion />}
+          {<ConfettiExplosion />}
           <CorrectCountry
             country={country}
             gameStatus={gameStatus}
@@ -229,7 +230,7 @@ function App() {
       )}
 
       {/* Loss */}
-      {gameStatus === GameStatus.Lost && (
+      {gameStatus === GameStatus.Lost && endRevealDone && (
         <CorrectCountry
           country={country}
           gameStatus={gameStatus}
