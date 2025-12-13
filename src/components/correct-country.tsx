@@ -1,7 +1,6 @@
 import { Badge, Flex, Image } from '@mantine/core';
 import { GameStatus } from '../constants';
 import { Country } from '../data/countries/countries';
-import ConfettiExplosion from 'react-confetti-explosion';
 
 import { getFlagURL } from '../helpers/getFlag';
 import { ShareResult } from './share-result';
@@ -27,7 +26,6 @@ export function CorrectCountry({
 
       {gameStatus === GameStatus.Won && (
         <>
-          {<ConfettiExplosion />}
           <Image
             src={flagUrl}
             alt={`${country.name} flag`}

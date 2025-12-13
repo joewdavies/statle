@@ -1,10 +1,10 @@
 import { ActionIcon, Anchor, Divider, Flex, Modal, Text } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { IconQuestionMark } from '@tabler/icons-react';
-import { ExampleCountryCard } from './example-country-card';
 import { convertDistance, getDistance } from 'geolib';
 import { countries } from '../../data/countries/countries';
 import { getCompassDirection, directionMap } from '../../services/geo';
+import { GuessRow } from '../guess-list/guess-row';
 
 export function Rules() {
   const [opened, { open, close }] = useDisclosure(false);
@@ -75,7 +75,7 @@ export function Rules() {
             Examples:
           </Text>
           <Flex direction={'column'} gap={24}>
-            <ExampleCountryCard
+            <GuessRow
               guessCountry={country1}
               country={targetCountry}
             />
@@ -100,7 +100,7 @@ export function Rules() {
             </Text>
           </Flex>
 
-          <ExampleCountryCard
+          <GuessRow
             guessCountry={country2}
             country={targetCountry}
           />
@@ -125,7 +125,7 @@ export function Rules() {
             and {proximity2}%!
           </Text>
 
-          <ExampleCountryCard
+          <GuessRow
             guessCountry={targetCountry}
             country={targetCountry}
           />

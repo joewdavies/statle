@@ -8,7 +8,7 @@ import { SelectCountry } from './components/select-country/select-country';
 import { GameStatus, MAX_GUESSES } from './constants';
 import { countries } from './data/countries/countries';
 import { useUserStats } from './hooks/useUserStats';
-import { CountryCardHeader } from './components/guess-list/country-card';
+
 import {
   todayKeyLocal,
   finishedKeyFor,
@@ -25,6 +25,7 @@ import { GameResult, UserStatsService } from './services/userStats';
 import { getDailyCountry } from "./helpers/getRandomCountry";
 import GlobeJourney from './components/globe/globe-journey';
 import GuessList from './components/guess-list/guess-list';
+import ConfettiExplosion from 'react-confetti-explosion';
 // import { CheatDetector } from "./components/cheat-detector";
 
 const todaysCountry = getDailyCountry();
@@ -106,6 +107,7 @@ function App() {
     if (finishedVal === 'lost') return GameStatus.Lost;
     return persisted?.gameStatus ?? GameStatus.Playing;
   });
+  const [endRevealDone, setEndRevealDone] = useState(false);
 
   // ==== Persist today's round to per-day key ====
   useEffect(() => {
@@ -157,9 +159,6 @@ function App() {
 
   // statistical data (static for now)
   const statsByCode = stats;
-
-  // Helper: do we have any non-empty guesses?
-  const hasAnyGuess = guesses.some((g) => g && g.trim().length > 0);
   const { colorScheme } = useMantineColorScheme();
 
   return (
@@ -168,6 +167,7 @@ function App() {
 
       <Navbar />
       <Text>Guess today's country!</Text>
+
 
       <StatClues
         country={country}
@@ -191,17 +191,16 @@ function App() {
         />
       )}
 
-      {gameStatus !== GameStatus.Playing && (
+      {/* Win */}
+      {gameStatus === GameStatus.Won && endRevealDone && (
         <>
+        {<ConfettiExplosion />}
           <CorrectCountry
             country={country}
             gameStatus={gameStatus}
-            onPlayAgain={() => {
-              // no replay in daily mode
-            }}
+            onPlayAgain={() => { }}
           />
 
-          {/* Globe journey */}
           <Flex style={{ width: "100%", maxWidth: window.innerWidth }}>
             <GlobeJourney
               guesses={guesses
@@ -229,18 +228,24 @@ function App() {
         </>
       )}
 
-      {/* Header + guess list */}
-      <Flex direction="column" gap={8} w="100%" align="center">
-        {hasAnyGuess && <CountryCardHeader />}
-        {guesses.length === 0 && <h1>No guesses</h1>}
-        <GuessList
-          guesses={guesses}
-          countries={countries}
-          guessCount={guessCount}
+      {/* Loss */}
+      {gameStatus === GameStatus.Lost && (
+        <CorrectCountry
           country={country}
           gameStatus={gameStatus}
+          onPlayAgain={() => { }}
         />
-      </Flex>
+      )}
+
+      {/* Guess list */}
+      <GuessList
+        guesses={guesses}
+        countries={countries}
+        guessCount={guessCount}
+        country={country}
+        gameStatus={gameStatus}
+        onFinalRevealDone={() => setEndRevealDone(true)}
+      />
 
       {/* snowfall */}
       {christmas && colorScheme == 'dark' && < Snowfall
