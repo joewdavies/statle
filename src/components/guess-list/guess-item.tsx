@@ -36,22 +36,29 @@ export const GuessItem = ({
     if (isNew) setRevealed(false);
   }, [isNew]);
 
-  const proximity = useMemo(() => {
-    if (!guessCountry) return 0;
-    if (sharesLandBorder(guessCountry.code, country.code, dataset)) return 100;
+  const { proximity, distanceKm } = useMemo(() => {
+  if (!guessCountry) {
+    return { proximity: 0, distanceKm: 0 };
+  }
 
-    const km = convertDistance(
-      getDistance(
-        { latitude: guessCountry.latitude, longitude: guessCountry.longitude },
-        { latitude: country.latitude, longitude: country.longitude }
-      ),
-      'km'
-    );
+  if (sharesLandBorder(guessCountry.code, country.code, dataset)) {
+    return { proximity: 100, distanceKm: 0 };
+  }
 
-    return Math.max(0, Math.min(100, 100 - (km / 20000) * 100));
-  }, [guessCountry, country]);
+  const meters = getDistance(
+    { latitude: guessCountry.latitude, longitude: guessCountry.longitude },
+    { latitude: country.latitude, longitude: country.longitude }
+  );
 
-    const bg =
+  const km = convertDistance(meters, 'km');
+
+  return {
+    distanceKm: Math.round(km),
+    proximity: Math.max(0, Math.min(100, 100 - (km / 20000) * 100)),
+  };
+}, [guessCountry, country]);
+
+  const bg =
     colorScheme === 'dark'
       ? 'var(--mantine-color-dark-5)'
       : 'var(--mantine-color-gray-1)';
@@ -73,6 +80,7 @@ export const GuessItem = ({
   return !revealed ? (
     <ProximityRevealBar
       proximity={proximity}
+      distanceKm={distanceKm}
       onDone={() => {
         setRevealed(true);
         onRevealDone?.(); //  signal App

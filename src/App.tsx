@@ -245,6 +245,7 @@ function App() {
         guessCount={guessCount}
         country={country}
         gameStatus={gameStatus}
+        endRevealDone={endRevealDone}
         onFinalRevealDone={() => setEndRevealDone(true)}
       />
 

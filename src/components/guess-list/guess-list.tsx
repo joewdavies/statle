@@ -11,6 +11,7 @@ type GuessListProps = {
   guessCount: number;
   country: Country;
   gameStatus: GameStatus;
+  endRevealDone?: boolean;
   onFinalRevealDone?: () => void;
 };
 
@@ -20,6 +21,7 @@ export function GuessList({
   guessCount,
   country,
   gameStatus,
+  endRevealDone,
   onFinalRevealDone
 }: GuessListProps) {
   const hasAnyGuess = guesses.some((g) => g && g.trim().length > 0);
@@ -53,7 +55,13 @@ export function GuessList({
         const guessCountry =
           countries.find((c) => c.name === guess) || null;
 
-        if (gameStatus === GameStatus.Won && index >= guessCount) return null;
+        if (
+          gameStatus !== GameStatus.Playing &&
+          endRevealDone &&
+          index >= guessCount
+        ) {
+          return null;
+        }
 
         return (
           <GuessItem
