@@ -8,6 +8,7 @@ import { SelectCountry } from './components/select-country/select-country';
 import { GameStatus, MAX_GUESSES } from './constants';
 import { countries } from './data/countries/countries';
 import { useUserStats } from './hooks/useUserStats';
+import { notifications } from '@mantine/notifications';
 
 import {
   todayKeyLocal,
@@ -157,6 +158,27 @@ function App() {
     return () => clearTimeout(id);
   }, []);
 
+  // win/loss notifications
+  useEffect(() => {
+  if (gameStatus === GameStatus.Won && endRevealDone) {
+    notifications.show({
+      color: 'green',
+      message: 'Nice job!',
+      position: 'top-center',
+    });
+  }
+}, [gameStatus, endRevealDone]);
+  // win/loss notifications
+useEffect(() => {
+  if (gameStatus === GameStatus.Lost && endRevealDone) {
+    notifications.show({
+      color: 'red',
+      message: 'Game over, try again tomorrow!',
+      position: 'top-center',
+    });
+  }
+}, [gameStatus, endRevealDone]);
+
   // statistical data (static for now)
   const statsByCode = stats;
   const { colorScheme } = useMantineColorScheme();
@@ -187,7 +209,6 @@ function App() {
           setGuesses={setGuesses}
           guessCount={guessCount}
           setGuessCount={setGuessCount}
-          gameStatus={gameStatus}
           setGameStatus={setGameStatus}
         />
       )}

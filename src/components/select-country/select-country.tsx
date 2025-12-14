@@ -3,7 +3,6 @@ import { ActionIcon, Autocomplete, Button, Flex, Tooltip } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
 import { IconDice5Filled, IconSearch } from '@tabler/icons-react';
 import { useCallback, useEffect, useRef } from 'react';
-import ConfettiExplosion from 'react-confetti-explosion';
 import { GameStatus, MAX_GUESSES } from '../../constants';
 import { Country } from '../../data/countries/countries';
 import useFocusOnKey from '../../hooks/useFocusOnKey';
@@ -19,7 +18,6 @@ type SelectCountryProps = {
   setGuesses: (guesses: string[]) => void;
   guessCount: number;
   setGuessCount: (guessCount: number) => void;
-  gameStatus: GameStatus;
   setGameStatus: (gameStatus: GameStatus) => void;
 };
 
@@ -47,7 +45,6 @@ export function SelectCountry({
   setGuesses,
   guessCount,
   setGuessCount,
-  gameStatus,
   setGameStatus,
 }: SelectCountryProps) {
   const btnRef = useRef<HTMLButtonElement>(null);
@@ -101,25 +98,14 @@ export function SelectCountry({
       setGuessCount(guessCount + 1);
       setValue('');
     }
-    // this is a guess so we need to add minus one
     if (country.name === selectedName) {
       setGameStatus(GameStatus.Won);
       sendGoatEvent(`won-${guessCount + 1}`);
-      notifications.show({
-        color: 'green',
-        message: 'Nice job!',
-        position: 'top-center',
-      });
       return;
     }
     if (guessCount === MAX_GUESSES - 1) {
       setGameStatus(GameStatus.Lost);
       sendGoatEvent(`failed`);
-      notifications.show({
-        color: 'red',
-        message: 'Game over, try again tomorrow!',
-        position: 'top-center',
-      });
     }
   }, [
     value,
@@ -324,7 +310,6 @@ export function SelectCountry({
 
   return (
     <>
-      {gameStatus === GameStatus.Won && <ConfettiExplosion />}
       <Flex gap={10} align={'center'} justify={'center'} direction={'row'} w={'100%'}>
         <Autocomplete
           data={autoItems}

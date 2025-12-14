@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Flex } from '@mantine/core';
+import { BASE_CELL_STYLE } from './grid';
 
 type Props = {
   proximity: number;          // 0–100
@@ -11,9 +12,8 @@ type Props = {
 
 export function ProximityRevealBar({
   proximity,
-  distanceKm,
   blocks = 10,
-  durationMs = 1000,
+  durationMs = 1100,
   onDone,
 }: Props) {
   const targetBlocks = Math.round((proximity / 100) * blocks);
@@ -41,19 +41,12 @@ export function ProximityRevealBar({
   }, [durationMs, onDone]);
 
   const visible = Math.round(progress * blocks);
-  console.log(distanceKm)
 
   return (
-    <Flex w="100%" direction="column" gap={6} px={12}>
-      {/* Numeric countdown */}
-      {/* <Text ta="center" fw={700} size="sm">
-        {distanceKm != null
-          ? `${Math.round(distanceKm * (1 - progress))} km`
-          : `${Math.round(progress * 100)}%`}
-      </Text> */}
+    <Flex w="100%" direction="column" gap={6} px={12} style={{ height: 30, justifyContent: 'center' }}>
 
       {/* Blocks */}
-      <Flex h={20} gap={6} align="center">
+      <Flex h={25} gap={6} align="center">
         {Array.from({ length: blocks }).map((_, i) => {
           const isShown = i < visible;
           const isGreen = i < targetBlocks;
@@ -62,6 +55,7 @@ export function ProximityRevealBar({
             <div
               key={i}
               style={{
+                ...BASE_CELL_STYLE,
                 flex: 1,
                 height: 25,
                 borderRadius: 3,

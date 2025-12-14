@@ -86,7 +86,6 @@ function HeaderCell({ children }: { children: React.ReactNode }) {
       className='header-cell'
       style={{
         ...BASE_CELL_STYLE,
-        height: 20,
         //textTransform: 'uppercase',
         opacity: 0.9,
         //letterSpacing: 0.3,

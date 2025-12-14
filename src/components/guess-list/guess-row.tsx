@@ -45,7 +45,6 @@ export function GuessRow({ guessCountry, country }: Props) {
 
   const cellStyle = {
     ...BASE_CELL_STYLE,
-    height: 36,
     border: `1px solid ${border}`,
     background: 'transparent',
     fontWeight: 600,

@@ -36,13 +36,13 @@ export const GuessItem = ({
     if (isNew) setRevealed(false);
   }, [isNew]);
 
-  const { proximity, distanceKm } = useMemo(() => {
+  const { proximity } = useMemo(() => {
   if (!guessCountry) {
-    return { proximity: 0, distanceKm: 0 };
+    return { proximity: 0 };
   }
 
   if (sharesLandBorder(guessCountry.code, country.code, dataset)) {
-    return { proximity: 100, distanceKm: 0 };
+    return { proximity: 100 };
   }
 
   const meters = getDistance(
@@ -80,7 +80,6 @@ export const GuessItem = ({
   return !revealed ? (
     <ProximityRevealBar
       proximity={proximity}
-      distanceKm={distanceKm}
       onDone={() => {
         setRevealed(true);
         onRevealDone?.(); //  signal App
