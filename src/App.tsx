@@ -213,46 +213,48 @@ useEffect(() => {
         />
       )}
 
-      {/* Win */}
-      {gameStatus === GameStatus.Won && endRevealDone && (
-        <>
-          {<ConfettiExplosion />}
-        <>
-      )}
+   {/* Win */}
+{gameStatus === GameStatus.Won && endRevealDone && (
+  <>
+    <ConfettiExplosion />
+  </>
+)}
 
-      {/* Loss */}
-      {(gameStatus === GameStatus.Lost || gamesStatus === GameStatus.Won) && endRevealDone && (
-        <CorrectCountry
-          country={country}
-          gameStatus={gameStatus}
-          onPlayAgain={() => { }}
-        />
-<Flex style={{ width: "100%", maxWidth: window.innerWidth }}>
-            <GlobeJourney
-              guesses={guesses
-                .filter(Boolean)
-                .map((g) => {
-                  const found = countries.find((c) => c.name === g);
-                  return found
-                    ? {
-                      code: found.code,
-                      name: found.name,
-                      latitude: found.latitude,
-                      longitude: found.longitude,
-                    }
-                    : null;
-                })
-                .filter(Boolean) as Array<{
-                  code?: string;
-                  name?: string;
-                  latitude: number;
-                  longitude: number;
-                }>}
-              correctCountry={country} // pass correct country
-            />
-          </Flex>
+{/* Loss OR Win (post-reveal content) */}
+{(gameStatus === GameStatus.Lost || gameStatus === GameStatus.Won) && endRevealDone && (
+  <>
+    <CorrectCountry
+      country={country}
+      gameStatus={gameStatus}
+      onPlayAgain={() => {}}
+    />
 
-      )}
+    <Flex style={{ width: "100%", maxWidth: window.innerWidth }}>
+      <GlobeJourney
+        guesses={guesses
+          .filter(Boolean)
+          .map((g) => {
+            const found = countries.find((c) => c.name === g);
+            return found
+              ? {
+                  code: found.code,
+                  name: found.name,
+                  latitude: found.latitude,
+                  longitude: found.longitude,
+                }
+              : null;
+          })
+          .filter(Boolean) as Array<{
+            code?: string;
+            name?: string;
+            latitude: number;
+            longitude: number;
+          }>}
+        correctCountry={country}
+      />
+    </Flex>
+  </>
+)}
 
       {/* Guess list */}
       <GuessList
