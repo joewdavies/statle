@@ -40,7 +40,7 @@ const christmas =
   (new Date().getMonth() === 11 && new Date().getDate() >= 1) || // December (month 11)
   (new Date().getMonth() === 0 && new Date().getDate() <= 7);   // January (month 0)
 
-// 🧹 one-time cleanup of *exact* duplicates (same content; keep latest finishedAt)
+//  one-time cleanup of *exact* duplicates (same content; keep latest finishedAt)
 const sortByDateAscLocal = (a: GameResult, b: GameResult) =>
   a.date !== b.date ? a.date.localeCompare(b.date) : a.finishedAt - b.finishedAt;
 
@@ -66,7 +66,7 @@ const sortByDateAscLocal = (a: GameResult, b: GameResult) =>
     if (deduped.length !== file.items.length) {
       localStorage.setItem(KEY, JSON.stringify({ v: 1, items: deduped }));
       console.info(
-        `🧹 Statle: deduped exact duplicates (${file.items.length} → ${deduped.length})`
+        `Statle: deduped exact duplicates (${file.items.length} → ${deduped.length})`
       );
     }
   } catch { }
@@ -217,13 +217,17 @@ useEffect(() => {
       {gameStatus === GameStatus.Won && endRevealDone && (
         <>
           {<ConfettiExplosion />}
-          <CorrectCountry
-            country={country}
-            gameStatus={gameStatus}
-            onPlayAgain={() => { }}
-          />
+        <>
+      )}
 
-          <Flex style={{ width: "100%", maxWidth: window.innerWidth }}>
+      {/* Loss */}
+      {(gameStatus === GameStatus.Lost || gamesStatus === GameStatus.Won) && endRevealDone && (
+        <CorrectCountry
+          country={country}
+          gameStatus={gameStatus}
+          onPlayAgain={() => { }}
+        />
+<Flex style={{ width: "100%", maxWidth: window.innerWidth }}>
             <GlobeJourney
               guesses={guesses
                 .filter(Boolean)
@@ -247,16 +251,7 @@ useEffect(() => {
               correctCountry={country} // pass correct country
             />
           </Flex>
-        </>
-      )}
 
-      {/* Loss */}
-      {gameStatus === GameStatus.Lost && endRevealDone && (
-        <CorrectCountry
-          country={country}
-          gameStatus={gameStatus}
-          onPlayAgain={() => { }}
-        />
       )}
 
       {/* Guess list */}
