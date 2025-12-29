@@ -1,7 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import { ProximityRevealBar } from './proximity-reveal-bar';
 import { convertDistance, getDistance } from 'geolib';
-import { sharesLandBorder } from '../../services/geo';
 import { dataset } from '../../data/stats/dataset';
 import { Country } from '../../data/countries/countries';
 import { GuessRow } from './guess-row';
@@ -39,10 +38,6 @@ export const GuessItem = ({
   const { proximity } = useMemo(() => {
   if (!guessCountry) {
     return { proximity: 0 };
-  }
-
-  if (sharesLandBorder(guessCountry.code, country.code, dataset)) {
-    return { proximity: 100 };
   }
 
   const meters = getDistance(
