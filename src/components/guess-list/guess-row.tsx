@@ -13,30 +13,36 @@ type Props = {
 export function GuessRow({ guessCountry, country }: Props) {
   const { colorScheme } = useMantineColorScheme();
 
+  const isCorrect = guessCountry.code === country.code;
+
   const isBordering = sharesLandBorder(
     guessCountry.code,
     country.code,
     dataset
   );
 
-  const distance = isBordering
-    ? 1
-    : Math.round(
-      convertDistance(
-        getDistance(
-          { latitude: guessCountry.latitude, longitude: guessCountry.longitude },
-          { latitude: country.latitude, longitude: country.longitude }
-        ),
-        'km'
-      )
-    );
+  const distance = isCorrect
+    ? 0
+    : isBordering
+      ? 1
+      : Math.round(
+          convertDistance(
+            getDistance(
+              { latitude: guessCountry.latitude, longitude: guessCountry.longitude },
+              { latitude: country.latitude, longitude: country.longitude }
+            ),
+            'km'
+          )
+        );
 
   const direction = getCompassDirection(
     { latitude: guessCountry.latitude, longitude: guessCountry.longitude },
     { latitude: country.latitude, longitude: country.longitude }
   );
 
-  const proximity = Math.max(0, Math.min(100, 100 - (distance / 20000) * 100));
+  const proximity = isCorrect
+    ? 100
+    : Math.max(0, Math.min(99, 100 - (distance / 20000) * 100));
 
   const border =
     colorScheme === 'dark'
@@ -54,15 +60,13 @@ export function GuessRow({ guessCountry, country }: Props) {
   };
 
   const spaceAsThousandSeparator = function (number: number) {
-    return number.toLocaleString('en').replace(/,/gi, ' ')
-  }
-
-  const isCorrect = guessCountry.code === country.code;
+    return number.toLocaleString('en').replace(/,/gi, ' ');
+  };
 
   return (
     <Box
       w="100%"
-      className={isCorrect ? "guess-row correct-row" : "guess-row"}
+      className={isCorrect ? 'guess-row correct-row' : 'guess-row'}
       style={{
         display: 'grid',
         gridTemplateColumns: GUESS_GRID,
@@ -72,22 +76,22 @@ export function GuessRow({ guessCountry, country }: Props) {
       }}
     >
       {/* Country */}
-      <Box style={cellStyle}  className={isCorrect ? "guess-cell correct-cell" : "guess-cell"}>
+      <Box style={cellStyle} className={isCorrect ? 'guess-cell correct-cell' : 'guess-cell'}>
         <Text size="sm" truncate>{guessCountry.name}</Text>
       </Box>
 
       {/* Distance */}
-      <Box style={cellStyle} className={isCorrect ? "guess-cell correct-cell" : "guess-cell"}>
+      <Box style={cellStyle} className={isCorrect ? 'guess-cell correct-cell' : 'guess-cell'}>
         <Text size="sm">{spaceAsThousandSeparator(distance)}km</Text>
       </Box>
 
       {/* Direction */}
-      <Box style={cellStyle} className={isCorrect ? "guess-cell correct-cell" : "guess-cell"} >
+      <Box style={cellStyle} className={isCorrect ? 'guess-cell correct-cell' : 'guess-cell'}>
         <Text size="sm">{isCorrect ? '🎉' : directionMap[direction] || '🧭'}</Text>
       </Box>
 
       {/* Proximity */}
-      <Box style={cellStyle} className={isCorrect ? "guess-cell correct-cell" : "guess-cell"}>
+      <Box style={cellStyle} className={isCorrect ? 'guess-cell correct-cell' : 'guess-cell'}>
         <Text size="sm">{Math.round(proximity)}%</Text>
       </Box>
     </Box>
