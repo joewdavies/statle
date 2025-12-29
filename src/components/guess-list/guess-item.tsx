@@ -34,9 +34,10 @@ export const GuessItem = ({
     if (isNew) setRevealed(false);
   }, [isNew]);
 
-  const { proximity } = useMemo(() => {
+//proximity 
+  const { proximity, distanceKm } = useMemo(() => {
   if (!guessCountry) {
-    return { proximity: 0 };
+    return { proximity: 0, distanceKm: 0 };
   }
 
   const meters = getDistance(
@@ -48,7 +49,10 @@ export const GuessItem = ({
 
   return {
     distanceKm: Math.round(km),
-    proximity: Math.max(0, Math.min(100, 100 - (km / 20000) * 100)),
+    proximity:
+      km === 0
+        ? 100
+        : Math.max(0, Math.min(99, 100 - (km / 20000) * 100)),
   };
 }, [guessCountry, country]);
 
