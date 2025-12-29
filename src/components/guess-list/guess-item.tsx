@@ -35,9 +35,9 @@ export const GuessItem = ({
   }, [isNew]);
 
 //proximity 
-  const { proximity, distanceKm } = useMemo(() => {
+  const { proximity } = useMemo(() => {
   if (!guessCountry) {
-    return { proximity: 0, distanceKm: 0 };
+    return { proximity: 0 };
   }
 
   const meters = getDistance(
