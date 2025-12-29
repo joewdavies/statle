@@ -1,7 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import { ProximityRevealBar } from './proximity-reveal-bar';
 import { convertDistance, getDistance } from 'geolib';
-import { dataset } from '../../data/stats/dataset';
 import { Country } from '../../data/countries/countries';
 import { GuessRow } from './guess-row';
 import { useMantineColorScheme } from '@mantine/core';
