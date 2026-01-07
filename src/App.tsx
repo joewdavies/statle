@@ -38,7 +38,7 @@ const TODAY_FINISHED_KEY = finishedKeyFor(todayKey);
 
 const christmas =
   (new Date().getMonth() === 11 && new Date().getDate() >= 1) || // December (month 11)
-  (new Date().getMonth() === 0 && new Date().getDate() <= 7);   // January (month 0)
+  (new Date().getMonth() === 0 && new Date().getDate() <= 6);   // January (month 0)
 
 //  one-time cleanup of *exact* duplicates (same content; keep latest finishedAt)
 const sortByDateAscLocal = (a: GameResult, b: GameResult) =>
