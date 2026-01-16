@@ -27,6 +27,7 @@ import { getDailyCountry } from "./helpers/getRandomCountry";
 import GlobeJourney from './components/globe/globe-journey';
 import GuessList from './components/guess-list/guess-list';
 import ConfettiExplosion from 'react-confetti-explosion';
+import { isChristmas } from './helpers/isChristmas';
 // import { CheatDetector } from "./components/cheat-detector";
 
 const todaysCountry = getDailyCountry();
@@ -36,9 +37,7 @@ const todayKey = todayKeyLocal();
 const TODAY_STATE_KEY = stateKeyFor(todayKey);
 const TODAY_FINISHED_KEY = finishedKeyFor(todayKey);
 
-const christmas =
-  (new Date().getMonth() === 11 && new Date().getDate() >= 1) || // December (month 11)
-  (new Date().getMonth() === 0 && new Date().getDate() <= 6);   // January (month 0)
+const christmas = isChristmas();
 
 //  one-time cleanup of *exact* duplicates (same content; keep latest finishedAt)
 const sortByDateAscLocal = (a: GameResult, b: GameResult) =>
@@ -184,7 +183,7 @@ useEffect(() => {
   const { colorScheme } = useMantineColorScheme();
 
   return (
-    <Flex align="center" direction="column" gap={15}>
+    <Flex align="center" direction="column" gap={10}>
       {/* {gameStatus === GameStatus.Playing && (<CheatDetector threshold={1200} />)} */}
 
       <Navbar />

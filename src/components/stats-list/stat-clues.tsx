@@ -24,10 +24,16 @@ import {
   IconChristmasTree,
   IconSnowman,
   IconSleigh,
+  IconUser,
+  IconTree,
+  IconPlane,
 } from '@tabler/icons-react';
 
 import { GiGoat } from "react-icons/gi";
 import { LandBorders } from './land-borders';
+import { isChristmas } from '../../helpers/isChristmas';
+
+const christmas = isChristmas();
 
 type StatCluesProps = {
   country: Country;
@@ -39,7 +45,7 @@ type StatCluesProps = {
 
 // Keys for safer icon mapping
 const clueIcons = {
-  population: <IconSnowman size={20} />,
+  population: christmas ? <IconSnowman size={20} /> : <IconUser size={20} />,
   gdpPerCapita: <IconCurrencyDollar size={20} />,
   lifeExpectancy: <IconHeartbeat size={20} />,
   unemployment: <IconBriefcaseOff size={20} />,
@@ -47,14 +53,14 @@ const clueIcons = {
   area: <IconRulerMeasure size={20} />,
   goats: <GiGoat size={20} />,
   carSide: <IconSteeringWheel size={20} />,
-  forestArea: <IconChristmasTree size={20} />,
+  forestArea: christmas ? <IconChristmasTree size={20} /> : <IconTree size={20} />,
   precipitation: <IconCloudRain size={20} />,
   co2: <IconCloud size={20} />, // TODO: swap for a nicer CO2 icon if you want
   corruption: <IconEyeDollar size={20} />, // TODO: swap for a nicer corruption icon if you want
   landlocked: <IconLock size={20} />,
   tax: <IconCoins size={20} />,
   cereal: <IconWheat size={20} />,
-  airPassengers: <IconSleigh size={20} />,
+  airPassengers: christmas ? <IconSleigh size={20} /> : <IconPlane size={20} />,
   bribes: <IconMoneybag size={20} />,
   electricity: <IconBolt size={20} />,
   borders: <IconBorderAll size={20} />
