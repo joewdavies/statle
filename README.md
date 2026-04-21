@@ -2,7 +2,11 @@
 
 <p align="center">
   <a href="https://joewdavies.github.io/statle/">
-    <img src="https://raw.githubusercontent.com/joewdavies/statle/master/public/img/banner.png" />
+    <img src="https://raw.githubusercontent.com/joewdavies/statle/master/public/img/banner.png" height=200 />
+  </a>
+</p>
+<p align="center">
+  <a href="https://joewdavies.github.io/statle/">https://joewdavies.github.io/statle/
   </a>
 </p>
 
