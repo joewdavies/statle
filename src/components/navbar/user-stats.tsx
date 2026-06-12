@@ -25,8 +25,8 @@ export function UserStats() {
 
   return (
     <>
-      <Modal opened={opened} onClose={close} title="Your stats" centered size="lg">
-        <Flex direction="column" gap={20}>
+      <Modal opened={opened} onClose={close} title="Your stats" centered size="lg" padding="xs">
+        <Flex direction="column" gap="sm">
           <Group grow align="stretch" gap="xs">
             <Card withBorder p="xs">
               <Flex direction="column" align="center" justify="center" gap={4} h="100%">
@@ -54,16 +54,16 @@ export function UserStats() {
             </Card>
           </Group>
 
-          <Card withBorder>
+          <Card withBorder p="xs">
             <div style={{ textAlign: 'center' }}>
-              <Text>Countries You’ve Guessed Correctly</Text>
+              <Text fw={600} size="sm" mb={4}>Countries You’ve Guessed Correctly</Text>
               <WorldMap />
             </div>
           </Card>
 
-          <Card withBorder>
+          <Card withBorder p="xs">
             <Flex direction="column" gap={10}>
-              <Text fw={600}>Guess distribution</Text>
+              <Text fw={600} size="sm">Guess distribution</Text>
               <Flex direction="column" gap={8}>
                 {userStats.guessDistribution.map((count, i) => (
                   <Flex key={i} align="center" gap={12}>
