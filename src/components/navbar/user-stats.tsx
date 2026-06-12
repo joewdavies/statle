@@ -16,29 +16,29 @@ export function UserStats() {
     <>
       <Modal opened={opened} onClose={close} title="Your stats" centered size="lg">
         <Flex direction="column" gap={20}>
-          <Group grow>
-            <Card withBorder>
-              <Flex direction="column" align="center" gap={4}>
+          <Group grow align="stretch" gap="xs">
+            <Card withBorder p="xs">
+              <Flex direction="column" align="center" justify="center" gap={4} h="100%">
                 <Text size="xl" fw={700}>{userStats.played}</Text>
-                <Text size="xs" c="dimmed">Played</Text>
+                <Text size="xs" c="dimmed" ta="center">Played</Text>
               </Flex>
             </Card>
-            <Card withBorder>
-              <Flex direction="column" align="center" gap={4}>
+            <Card withBorder p="xs">
+              <Flex direction="column" align="center" justify="center" gap={4} h="100%">
                 <Text size="xl" fw={700}>{Math.round(userStats.winRate * 100)}%</Text>
-                <Text size="xs" c="dimmed">Win rate</Text>
+                <Text size="xs" c="dimmed" ta="center">Win rate</Text>
               </Flex>
             </Card>
-            <Card withBorder>
-              <Flex direction="column" align="center" gap={4}>
+            <Card withBorder p="xs">
+              <Flex direction="column" align="center" justify="center" gap={4} h="100%">
                 <Text size="xl" fw={700}>{userStats.currentStreak}</Text>
-                <Text size="xs" c="dimmed">Current streak</Text>
+                <Text size="xs" c="dimmed" ta="center">Current streak</Text>
               </Flex>
             </Card>
-            <Card withBorder>
-              <Flex direction="column" align="center" gap={4}>
+            <Card withBorder p="xs">
+              <Flex direction="column" align="center" justify="center" gap={4} h="100%">
                 <Text size="xl" fw={700}>{userStats.maxStreak}</Text>
-                <Text size="xs" c="dimmed">Max streak</Text>
+                <Text size="xs" c="dimmed" ta="center">Max streak</Text>
               </Flex>
             </Card>
           </Group>
@@ -65,41 +65,43 @@ export function UserStats() {
             </Flex>
           </Card>
 
-          <Card withBorder>
+          <Card withBorder p="xs">
             <Text fw={600} mb={8}>Recent games</Text>
-            <Table striped highlightOnHover withColumnBorders>
-              <Table.Thead>
-                <Table.Tr>
-                  <Table.Th>Date</Table.Th>
-                  <Table.Th>Country</Table.Th>
-                  <Table.Th>Result</Table.Th>
-                  <Table.Th>Guesses</Table.Th>
-                </Table.Tr>
-              </Table.Thead>
-              <Table.Tbody>
-                {[...history].reverse().map((g) => (
-                  <Table.Tr key={`${g.date}-${g.finishedAt}`}>
-                    <Table.Td>{g.date}</Table.Td>
-                    <Table.Td>
-                      <Flex gap={12}>
-                        {g.countryName}
-                        <Image
-                          src={getFlagURL(g.countryCode)}
-                          alt={`${g.countryName} flag`}
-                          radius="sm"
-                          style={{ boxShadow: '0 2px 6px rgba(0, 0, 0, 0.15)', maxHeight: '20px', width: '30px' }}
-                        />
-                      </Flex>
-                    </Table.Td>
-                    <Table.Td>{g.result === "won" ? "✅ Won" : "❌ Lost"}</Table.Td>
-                    <Table.Td>{g.guessCount}</Table.Td>
+            <div style={{ overflowX: 'auto', width: '100%' }}>
+              <Table striped highlightOnHover withColumnBorders style={{ minWidth: '450px', fontSize: '13px' }}>
+                <Table.Thead>
+                  <Table.Tr>
+                    <Table.Th>Date</Table.Th>
+                    <Table.Th>Country</Table.Th>
+                    <Table.Th>Result</Table.Th>
+                    <Table.Th>Guesses</Table.Th>
                   </Table.Tr>
-                ))}
-                {history.length === 0 && (
-                  <Table.Tr><Table.Td colSpan={4}><Text c="dimmed">No games yet.</Text></Table.Td></Table.Tr>
-                )}
-              </Table.Tbody>
-            </Table>
+                </Table.Thead>
+                <Table.Tbody>
+                  {[...history].reverse().map((g) => (
+                    <Table.Tr key={`${g.date}-${g.finishedAt}`}>
+                      <Table.Td>{g.date}</Table.Td>
+                      <Table.Td>
+                        <Flex gap={12}>
+                          {g.countryName}
+                          <Image
+                            src={getFlagURL(g.countryCode)}
+                            alt={`${g.countryName} flag`}
+                            radius="sm"
+                            style={{ boxShadow: '0 2px 6px rgba(0, 0, 0, 0.15)', maxHeight: '20px', width: '30px' }}
+                          />
+                        </Flex>
+                      </Table.Td>
+                      <Table.Td>{g.result === "won" ? "✅ Won" : "❌ Lost"}</Table.Td>
+                      <Table.Td>{g.guessCount}</Table.Td>
+                    </Table.Tr>
+                  ))}
+                  {history.length === 0 && (
+                    <Table.Tr><Table.Td colSpan={4}><Text c="dimmed">No games yet.</Text></Table.Td></Table.Tr>
+                  )}
+                </Table.Tbody>
+              </Table>
+            </div>
           </Card>
 
           <Text size="xs" c="dimmed" ta="center">
