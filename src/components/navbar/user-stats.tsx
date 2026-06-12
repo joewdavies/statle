@@ -6,6 +6,17 @@ import { MAX_GUESSES } from "../../constants";
 import { WorldMap } from './world-map';
 import { getFlagURL } from "../../helpers/getFlag";
 
+function formatShortDate(dateStr: string) {
+  const parts = dateStr.split('-');
+  if (parts.length === 3) {
+    const month = parseInt(parts[1], 10);
+    const day = parseInt(parts[2], 10);
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    return `${day} ${monthNames[month - 1]}`;
+  }
+  return dateStr;
+}
+
 export function UserStats() {
   const [opened, { open, close }] = useDisclosure(false);
   const { history, userStats, clear } = useUserStats(MAX_GUESSES);
@@ -67,41 +78,45 @@ export function UserStats() {
 
           <Card withBorder p="xs">
             <Text fw={600} mb={8}>Recent games</Text>
-            <div style={{ overflowX: 'auto', width: '100%' }}>
-              <Table striped highlightOnHover withColumnBorders style={{ minWidth: '450px', fontSize: '13px' }}>
-                <Table.Thead>
-                  <Table.Tr>
-                    <Table.Th>Date</Table.Th>
-                    <Table.Th>Country</Table.Th>
-                    <Table.Th>Result</Table.Th>
-                    <Table.Th>Guesses</Table.Th>
-                  </Table.Tr>
-                </Table.Thead>
-                <Table.Tbody>
-                  {[...history].reverse().map((g) => (
-                    <Table.Tr key={`${g.date}-${g.finishedAt}`}>
-                      <Table.Td>{g.date}</Table.Td>
-                      <Table.Td>
-                        <Flex gap={12}>
+            <Table striped highlightOnHover withColumnBorders style={{ width: '100%', tableLayout: 'fixed' }}>
+              <Table.Thead>
+                <Table.Tr>
+                  <Table.Th style={{ padding: '6px 4px', fontSize: '11px', width: '55px' }}>Date</Table.Th>
+                  <Table.Th style={{ padding: '6px 4px', fontSize: '11px' }}>Country</Table.Th>
+                  <Table.Th style={{ padding: '6px 4px', fontSize: '11px', width: '65px', textAlign: 'center' }}>Result</Table.Th>
+                  <Table.Th style={{ padding: '6px 4px', fontSize: '11px', width: '55px', textAlign: 'center' }}>Guesses</Table.Th>
+                </Table.Tr>
+              </Table.Thead>
+              <Table.Tbody>
+                {[...history].reverse().map((g) => (
+                  <Table.Tr key={`${g.date}-${g.finishedAt}`}>
+                    <Table.Td style={{ padding: '6px 4px', fontSize: '11px' }}>{formatShortDate(g.date)}</Table.Td>
+                    <Table.Td style={{ padding: '6px 4px', fontSize: '11px' }}>
+                      <Flex gap={6} align="center" style={{ flexWrap: 'nowrap' }}>
+                        <Image
+                          src={getFlagURL(g.countryCode)}
+                          alt=""
+                          radius="xs"
+                          style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.15)', height: '12px', width: '18px', flexShrink: 0 }}
+                        />
+                        <Text style={{ fontSize: '11px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '85px' }} title={g.countryName}>
                           {g.countryName}
-                          <Image
-                            src={getFlagURL(g.countryCode)}
-                            alt={`${g.countryName} flag`}
-                            radius="sm"
-                            style={{ boxShadow: '0 2px 6px rgba(0, 0, 0, 0.15)', maxHeight: '20px', width: '30px' }}
-                          />
-                        </Flex>
-                      </Table.Td>
-                      <Table.Td>{g.result === "won" ? "✅ Won" : "❌ Lost"}</Table.Td>
-                      <Table.Td>{g.guessCount}</Table.Td>
-                    </Table.Tr>
-                  ))}
-                  {history.length === 0 && (
-                    <Table.Tr><Table.Td colSpan={4}><Text c="dimmed">No games yet.</Text></Table.Td></Table.Tr>
-                  )}
-                </Table.Tbody>
-              </Table>
-            </div>
+                        </Text>
+                      </Flex>
+                    </Table.Td>
+                    <Table.Td style={{ padding: '6px 4px', fontSize: '11px', textAlign: 'center' }}>{g.result === "won" ? "✅ Won" : "❌ Lost"}</Table.Td>
+                    <Table.Td style={{ padding: '6px 4px', fontSize: '11px', textAlign: 'center' }}>{g.guessCount}</Table.Td>
+                  </Table.Tr>
+                ))}
+                {history.length === 0 && (
+                  <Table.Tr>
+                    <Table.Td colSpan={4} style={{ padding: '6px 4px', fontSize: '11px' }}>
+                      <Text c="dimmed" style={{ fontSize: '11px' }}>No games yet.</Text>
+                    </Table.Td>
+                  </Table.Tr>
+                )}
+              </Table.Tbody>
+            </Table>
           </Card>
 
           <Text size="xs" c="dimmed" ta="center">
