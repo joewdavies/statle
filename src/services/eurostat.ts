@@ -62,15 +62,13 @@ const indexStats = function (response: any): Record<string, number> {
       multipliers[i] = m;
     }
 
-    const latestTimeIdx = (() => {
+    const maxTimeIdx = (() => {
       if (posTime === -1) return null;
       const timeIdxMap: Record<string, number> | undefined = dimObj.time?.category?.index;
       if (!timeIdxMap) return null;
-      // pick max index (latest) by sorting keys asc and taking last
       const entries = Object.entries(timeIdxMap);
       if (!entries.length) return null;
-      const maxIdx = Math.max(...entries.map(([, idx]) => Number(idx)));
-      return maxIdx;
+      return Math.max(...entries.map(([, idx]) => Number(idx)));
     })();
 
     for (const [geo, gIdx] of Object.entries(geoIndex)) {
@@ -79,18 +77,31 @@ const indexStats = function (response: any): Record<string, number> {
       // set geo coordinate
       if (posGeo !== -1) coords[posGeo] = gIdx;
 
-      // prefer latest time if present
-      if (posTime !== -1 && latestTimeIdx != null) {
-        coords[posTime] = latestTimeIdx;
+      // search for the latest available year for this specific country
+      if (posTime !== -1 && maxTimeIdx !== null) {
+        let foundValue: number | null = null;
+        for (let tIdx = maxTimeIdx; tIdx >= 0; tIdx--) {
+          coords[posTime] = tIdx;
+          const lin = coords.reduce((acc, c, i) => acc + c * multipliers[i], 0);
+          const key = String(lin);
+          const v = values[key];
+          if (Number.isFinite(v)) {
+            foundValue = v;
+            break;
+          }
+        }
+        if (foundValue !== null) {
+          out[geo] = foundValue;
+        }
+      } else {
+        // No time dimension, just calculate index directly
+        const lin = coords.reduce((acc, c, i) => acc + c * multipliers[i], 0);
+        const key = String(lin);
+        const v = values[key];
+        if (Number.isFinite(v)) {
+          out[geo] = v;
+        }
       }
-
-      // compute linear index
-      const lin = coords.reduce((acc, c, i) => acc + c * multipliers[i], 0);
-      const key = String(lin);
-      const v = values[key];
-
-      if (Number.isFinite(v)) out[geo] = v;
-      // else: leave missing; caller will default to null
     }
 
     return out;
@@ -178,6 +189,7 @@ export async function getAllStats(
   }
 
   const codes = countries.map(c => c.code);
+  const queryCodes = codes.map(c => c === 'GB' ? 'UK' : c);
 
   // Dataset bases WITHOUT &geo
   const bases = {
@@ -191,24 +203,25 @@ export async function getAllStats(
 
   // Fetch all six datasets in parallel (each internally batched)
   const [areaMap, popMap, leMap, unempMap, gdpMap, gdpPcMap] = await Promise.all([
-    fetchDatasetForGeos(bases.area,           codes),
-    fetchDatasetForGeos(bases.population,     codes),
-    fetchDatasetForGeos(bases.lifeExpectancy, codes),
-    fetchDatasetForGeos(bases.unemployment,   codes),
-    fetchDatasetForGeos(bases.gdp,            codes),
-    fetchDatasetForGeos(bases.gdpPerCapita,   codes),
+    fetchDatasetForGeos(bases.area,           queryCodes),
+    fetchDatasetForGeos(bases.population,     queryCodes),
+    fetchDatasetForGeos(bases.lifeExpectancy, queryCodes),
+    fetchDatasetForGeos(bases.unemployment,   queryCodes),
+    fetchDatasetForGeos(bases.gdp,            queryCodes),
+    fetchDatasetForGeos(bases.gdpPerCapita,   queryCodes),
   ]);
 
   // Merge per code
   const result: Record<string, CountryStats> = {};
   for (const code of codes) {
+    const queryCode = code === 'GB' ? 'UK' : code;
     result[code] = {
-      area:           asNumOrNull(areaMap[code]),
-      population:     asNumOrNull(popMap[code]),
-      lifeExpectancy: asNumOrNull(leMap[code]),
-      unemployment:   asNumOrNull(unempMap[code]),
-      gdp:            asNumOrNull(gdpMap[code]),
-      gdpPerCapita:   asNumOrNull(gdpPcMap[code]),
+      area:           asNumOrNull(areaMap[queryCode]),
+      population:     asNumOrNull(popMap[queryCode]),
+      lifeExpectancy: asNumOrNull(leMap[queryCode]),
+      unemployment:   asNumOrNull(unempMap[queryCode]),
+      gdp:            asNumOrNull(gdpMap[queryCode]),
+      gdpPerCapita:   asNumOrNull(gdpPcMap[queryCode]),
     };
   }
 

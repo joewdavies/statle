@@ -136,6 +136,9 @@ export default function GlobeJourney({
 
       // Markers
       renderMarkers(context);
+
+      // Labels
+      renderLabels(context);
     }
 
     function renderGlow(ctx: CanvasRenderingContext2D) {
@@ -221,6 +224,111 @@ export default function GlobeJourney({
         ctx.lineWidth = 0.5;
         ctx.fill();
         ctx.stroke();
+      }
+    }
+
+    function drawRoundedRect(
+      ctx: CanvasRenderingContext2D,
+      x: number,
+      y: number,
+      width: number,
+      height: number,
+      radius: number
+    ) {
+      ctx.beginPath();
+      ctx.moveTo(x + radius, y);
+      ctx.lineTo(x + width - radius, y);
+      ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+      ctx.lineTo(x + width, y + height - radius);
+      ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+      ctx.lineTo(x + radius, y + height);
+      ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+      ctx.lineTo(x, y + radius);
+      ctx.quadraticCurveTo(x, y, x + radius, y);
+      ctx.closePath();
+    }
+
+    function renderLabels(ctx: CanvasRenderingContext2D) {
+      const labeledCodes = new Set<string>();
+      const labelsToRender: Array<{ name: string; lat: number; lon: number; isCorrect: boolean }> = [];
+
+      for (const g of guesses) {
+        if (g.code && !labeledCodes.has(g.code) && g.name) {
+          labeledCodes.add(g.code);
+          const isCorrect = correctCountry && g.code === correctCountry.code;
+          labelsToRender.push({
+            name: g.name,
+            lat: g.latitude,
+            lon: g.longitude,
+            isCorrect: !!isCorrect,
+          });
+        }
+      }
+
+      if (correctCountry && !labeledCodes.has(correctCountry.code)) {
+        labeledCodes.add(correctCountry.code);
+        labelsToRender.push({
+          name: correctCountry.name,
+          lat: correctCountry.latitude,
+          lon: correctCountry.longitude,
+          isCorrect: true,
+        });
+      }
+
+      const r = projection.rotate();
+      const centerLon = -r[0];
+      const centerLat = -r[1];
+      const rad = Math.PI / 180;
+      const phi2 = centerLat * rad;
+
+      for (const item of labelsToRender) {
+        const phi1 = item.lat * rad;
+        const deltaLambda = (item.lon - centerLon) * rad;
+        const cosD = Math.sin(phi1) * Math.sin(phi2) + Math.cos(phi1) * Math.cos(phi2) * Math.cos(deltaLambda);
+
+        if (cosD > 0) {
+          const [x, y] = projection([item.lon, item.lat]) || [-999, -999];
+          if (x === -999) continue;
+
+          ctx.font = '500 10px Inter, system-ui, sans-serif';
+          const textWidth = ctx.measureText(item.name).width;
+          const padX = 6;
+          const padY = 3;
+          const w = textWidth + padX * 2;
+          const h = 14 + padY * 2;
+          const rx = x - w / 2;
+          const ry = y - h - 8;
+
+          ctx.save();
+          ctx.shadowColor = 'rgba(0, 0, 0, 0.2)';
+          ctx.shadowBlur = 4;
+          ctx.shadowOffsetY = 2;
+
+          if (item.isCorrect) {
+            ctx.fillStyle = 'rgba(36, 139, 36, 0.9)';
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+          } else {
+            ctx.fillStyle = 'rgba(30, 30, 30, 0.85)';
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+          }
+
+          drawRoundedRect(ctx, rx, ry, w, h, 4);
+          ctx.fill();
+          ctx.stroke();
+          ctx.restore();
+
+          ctx.fillStyle = '#ffffff';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(item.name, x, ry + h / 2);
+
+          ctx.beginPath();
+          ctx.strokeStyle = item.isCorrect ? 'rgba(36, 139, 36, 0.7)' : 'rgba(30, 30, 30, 0.6)';
+          ctx.lineWidth = 1;
+          ctx.moveTo(x, ry + h);
+          ctx.lineTo(x, y - 4);
+          ctx.stroke();
+        }
       }
     }
 

@@ -46,8 +46,10 @@ export function WorldMap() {
                     .map((g) => g.countryCode.toUpperCase())
             );
 
-            const fillColor = (iso: string) =>
-                correctCodes.has(iso?.toUpperCase()) ? '#4caf50' : '#e0e0e0';
+            const fillColor = (iso: string) => {
+                const normalized = iso?.toUpperCase() === 'UK' ? 'GB' : iso?.toUpperCase();
+                return correctCodes.has(normalized) ? '#4caf50' : '#e0e0e0';
+            };
 
             svg
                 .attr('viewBox', `0 0 ${width} ${height}`)
