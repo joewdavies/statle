@@ -4,6 +4,7 @@ import { countriesMap, Country } from '../../data/countries/countries';
 import type { CountryStats } from '../../data/stats/stats';
 import { Transition } from '@mantine/core';
 import { motion } from 'framer-motion';
+import { useLanguage } from '../../hooks/useLanguage';
 
 // ⬇️ Tabler icons (add/remove as you like)
 import {
@@ -44,7 +45,7 @@ type StatCluesProps = {
 };
 
 // Keys for safer icon mapping
-const clueIcons = {
+export const clueIcons = {
   population: christmas ? <IconSnowman size={20} /> : <IconUser size={20} />,
   gdpPerCapita: <IconCurrencyDollar size={20} />,
   lifeExpectancy: <IconHeartbeat size={20} />,
@@ -82,11 +83,12 @@ export function StatClues({
   statsByCode,
   revealAll
 }: StatCluesProps) {
+  const { t, language } = useLanguage();
   const stats = statsByCode?.[country.code] ?? null;
 
   // Build clues in the order you want to reveal them.
   // Skip any that are null/undefined.
-  const clues = buildClues(stats);
+  const clues = buildClues(stats, t, language);
 
   // Show 1 stat initially, then +1 per guess. If game ended, reveal all.
   const revealCount = revealAll
@@ -102,7 +104,7 @@ export function StatClues({
       <Flex direction="column" gap={4}>
         <Flex align="center" justify="space-between">
           <Text fw={600}>
-            {revealAll ? 'Factsheet' : 'Clues'}
+            {revealAll ? t('Factsheet') : t('Clues')}
           </Text>
 
           {!revealAll && (
@@ -114,13 +116,13 @@ export function StatClues({
 
         {isLoading && (
           <Alert variant="light" color="blue" mt={4}>
-            Fetching latest stats…
+            {t('Fetching latest stats…')}
           </Alert>
         )}
 
         {hasNoClues && (
           <Alert variant="light" color="yellow" mt={4}>
-            No stats available (yet).
+            {t('No stats available (yet).')}
           </Alert>
         )}
 
@@ -161,7 +163,8 @@ export function StatClues({
                               // Convert to names
                               const names = codes.map(c => {
                                 const found = countriesMap.get(c);
-                                return found ? found.name : c;
+                                if (!found) return c;
+                                return language === 'es' && found.nameES ? found.nameES : found.name;
                               });
 
                               const joined = names.join(', ');
@@ -194,48 +197,48 @@ export function StatClues({
 }
 
 // ---- helpers ----
-function buildClues(stats: CountryStats | null | undefined): Clue[] {
+export function buildClues(stats: CountryStats | null | undefined, t: (k: string) => string, language: string): Clue[] {
   if (!stats) return [];
 
   const out: Clue[] = [];
 
   // Order of reveal (tweak as you like)
-  if (isNum(stats.population)) out.push({ key: 'population', label: 'Population', value: formatter(stats.population) });
-  if (isNum(stats.area)) out.push({ key: 'area', label: 'Area', value: formatter(stats.area) + ' km²' });
-  if (isNum(stats.gdpPerCapita)) out.push({ key: 'gdpPerCapita', label: 'GDP per capita', value: '$' + formatter(stats.gdpPerCapita) });
-  if (isNum(stats.lifeExpectancy)) out.push({ key: 'lifeExpectancy', label: 'Life expectancy', value: stats.lifeExpectancy.toFixed(1) + ' years of age' });
-  if (isNum(stats.goats)) out.push({ key: 'goats', label: 'Goat population', value: formatter(stats.goats) });
+  if (isNum(stats.population)) out.push({ key: 'population', label: t('Population'), value: formatter(stats.population) });
+  if (isNum(stats.area)) out.push({ key: 'area', label: t('Area'), value: formatter(stats.area) + ' km²' });
+  if (isNum(stats.gdpPerCapita)) out.push({ key: 'gdpPerCapita', label: t('GDP per capita'), value: '$' + formatter(stats.gdpPerCapita) });
+  if (isNum(stats.lifeExpectancy)) out.push({ key: 'lifeExpectancy', label: t('Life expectancy'), value: stats.lifeExpectancy.toFixed(1) + ' ' + t('years of age') });
+  if (isNum(stats.goats)) out.push({ key: 'goats', label: t('Goat population'), value: formatter(stats.goats) });
 
   // first 6 are clues, the rest are just info for the nerds
 
   //other
-  if (stats.carSide) out.push({ key: 'carSide', label: 'Drives on the', value: stats.carSide });
+  if (stats.carSide) out.push({ key: 'carSide', label: t('Drives on the'), value: t(stats.carSide) });
 
   // environmental
-  if (isNum(stats.forestArea)) out.push({ key: 'forestArea', label: 'Forest area', value: formatter(stats.forestArea) + ' km²' });
-  if (isNum(stats.precipitation)) out.push({ key: 'precipitation', label: 'Annual precipitation', value: formatter(stats.precipitation) + ' mm' });
-  if (isNum(stats.co2)) out.push({ key: 'co2', label: 'CO2 per capita', value: formatter(stats.co2) + ' tonnes' });
+  if (isNum(stats.forestArea)) out.push({ key: 'forestArea', label: t('Forest area'), value: formatter(stats.forestArea) + ' km²' });
+  if (isNum(stats.precipitation)) out.push({ key: 'precipitation', label: t('Annual precipitation'), value: formatter(stats.precipitation) + ' mm' });
+  if (isNum(stats.co2)) out.push({ key: 'co2', label: t('CO2 per capita'), value: formatter(stats.co2) + ' ' + t('tonnes') });
 
   //consumption
-  if (isNum(stats.airPassengers)) out.push({ key: 'airPassengers', label: 'Air Passengers', value: formatterCompact(stats.airPassengers) });
-  if (isNum(stats.electricity)) out.push({ key: 'electricity', label: 'Access to electricity', value: formatter(stats.electricity) + '% of population' });
+  if (isNum(stats.airPassengers)) out.push({ key: 'airPassengers', label: t('Air Passengers'), value: formatterCompact(stats.airPassengers, language) });
+  if (isNum(stats.electricity)) out.push({ key: 'electricity', label: t('Access to electricity'), value: formatter(stats.electricity) + t('% of population') });
 
   //economic stats
-  if (isNum(stats.unemployment)) out.push({ key: 'unemployment', label: 'Unemployment rate', value: stats.unemployment.toFixed(1) + '%' });
-  if (isNum(stats.gdp)) out.push({ key: 'gdp', label: 'GDP', value: '$' + formatterCompact(stats.gdp) });
-  if (isNum(stats.tax)) out.push({ key: 'tax', label: 'Tax revenue (% of GDP)', value: stats.tax.toFixed(1) });
+  if (isNum(stats.unemployment)) out.push({ key: 'unemployment', label: t('Unemployment rate'), value: stats.unemployment.toFixed(1) + '%' });
+  if (isNum(stats.gdp)) out.push({ key: 'gdp', label: t('GDP'), value: '$' + formatterCompact(stats.gdp, language) });
+  if (isNum(stats.tax)) out.push({ key: 'tax', label: t('Tax revenue (% of GDP)'), value: stats.tax.toFixed(1) });
 
   //corruption and other stats
-  if (isNum(stats.corruption)) out.push({ key: 'corruption', label: 'Corruption (percentile)', value: formatter(stats.corruption) });
-  if (isNum(stats.bribes)) out.push({ key: 'bribes', label: '% of firms that bribe public officials', value: formatter(stats.bribes) });
-  if (isNum(stats.cereal)) out.push({ key: 'cereal', label: 'Cereal production', value: formatterCompact(stats.cereal) + ' tonnes' });
+  if (isNum(stats.corruption)) out.push({ key: 'corruption', label: t('Corruption (percentile)'), value: formatter(stats.corruption) });
+  if (isNum(stats.bribes)) out.push({ key: 'bribes', label: t('% of firms that bribe public officials'), value: formatter(stats.bribes) });
+  if (isNum(stats.cereal)) out.push({ key: 'cereal', label: t('Cereal production'), value: formatterCompact(stats.cereal, language) + ' ' + t('tonnes') });
 
   //geography
-  if (stats.landlocked === true) out.push({ key: 'landlocked', label: 'Landlocked', value: "" });
+  if (stats.landlocked === true) out.push({ key: 'landlocked', label: t('Landlocked'), value: "" });
   if (stats.borders && stats.borders.length > 0) {
     out.push({
       key: "borders",
-      label: "Land borders",
+      label: t("Land borders"),
       value: stats.borders, // pass raw codes, LandBorders will format them
     } as any);
   }

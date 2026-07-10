@@ -4,6 +4,7 @@ import { GuessItem } from './guess-item';
 import { Country } from '../../data/countries/countries';
 import { GameStatus } from '../../constants';
 import { BASE_CELL_STYLE, GUESS_GRID } from './grid';
+import { useLanguage } from '../../hooks/useLanguage';
 
 type GuessListProps = {
   guesses: string[];
@@ -13,6 +14,7 @@ type GuessListProps = {
   gameStatus: GameStatus;
   endRevealDone?: boolean;
   onFinalRevealDone?: () => void;
+  statsByCode?: Record<string, any>; // Using any here to avoid importing CountryStats if it causes circular deps or just keep it simple
 };
 
 export function GuessList({
@@ -22,8 +24,10 @@ export function GuessList({
   country,
   gameStatus,
   endRevealDone,
-  onFinalRevealDone
+  onFinalRevealDone,
+  statsByCode
 }: GuessListProps) {
+  const { t } = useLanguage();
   const hasAnyGuess = guesses.some((g) => g && g.trim().length > 0);
 
   return (
@@ -39,10 +43,10 @@ export function GuessList({
             columnGap: 6,
           }}
         >
-          <HeaderCell>Guess</HeaderCell>
-          <HeaderCell>Distance</HeaderCell>
-          <HeaderCell>Direction</HeaderCell>
-          <HeaderCell>Proximity</HeaderCell>
+          <HeaderCell>{t('Guess (noun)')}</HeaderCell>
+          <HeaderCell>{t('Distance')}</HeaderCell>
+          <HeaderCell>{t('Direction')}</HeaderCell>
+          <HeaderCell>{t('Proximity')}</HeaderCell>
         </Box>
       )}
 
@@ -73,6 +77,9 @@ export function GuessList({
             guessCount={guessCount}
             className="guess-item"
             onRevealDone={isFinalGuess ? onFinalRevealDone : undefined}
+            statsByCode={statsByCode}
+            gameStatus={gameStatus}
+            endRevealDone={endRevealDone}
           />
         );
       })}

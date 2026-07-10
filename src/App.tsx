@@ -8,6 +8,7 @@ import { SelectCountry } from './components/select-country/select-country';
 import { GameStatus, MAX_GUESSES } from './constants';
 import { countries } from './data/countries/countries';
 import { useUserStats } from './hooks/useUserStats';
+import { useLanguage } from './hooks/useLanguage';
 import { notifications } from '@mantine/notifications';
 
 import {
@@ -162,7 +163,7 @@ function App() {
   if (gameStatus === GameStatus.Won && endRevealDone) {
     notifications.show({
       color: 'green',
-      message: 'Nice job!',
+      message: t('Nice job!'),
       position: 'top-center',
     });
   }
@@ -172,7 +173,7 @@ useEffect(() => {
   if (gameStatus === GameStatus.Lost && endRevealDone) {
     notifications.show({
       color: 'red',
-      message: 'Game over, try again tomorrow!',
+      message: t('Game over, try again tomorrow!'),
       position: 'top-center',
     });
   }
@@ -181,13 +182,14 @@ useEffect(() => {
   // statistical data (static for now)
   const statsByCode = stats;
   const { colorScheme } = useMantineColorScheme();
+  const { t, language } = useLanguage();
 
   return (
     <Flex align="center" direction="column" gap={10}>
       {/* {gameStatus === GameStatus.Playing && (<CheatDetector threshold={1200} />)} */}
 
       <Navbar />
-      <Text>Guess today's country!</Text>
+      <Text>{t("Guess today's country!")}</Text>
 
 
       <StatClues
@@ -264,6 +266,7 @@ useEffect(() => {
         gameStatus={gameStatus}
         endRevealDone={endRevealDone}
         onFinalRevealDone={() => setEndRevealDone(true)}
+        statsByCode={statsByCode}
       />
 
       {/* snowfall */}

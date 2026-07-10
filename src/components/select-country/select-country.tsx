@@ -6,6 +6,7 @@ import { useCallback, useEffect, useRef } from 'react';
 import { GameStatus, MAX_GUESSES } from '../../constants';
 import { Country } from '../../data/countries/countries';
 import useFocusOnKey from '../../hooks/useFocusOnKey';
+import { useLanguage } from '../../hooks/useLanguage';
 import { fuzzyCountryFilter } from './country-search-filter';
 import { animateDiceRoll, cleanupDiceRollTimer, DICE_ANIMATION_DURATION } from './dice-button';
 
@@ -52,6 +53,7 @@ export function SelectCountry({
   const diceRef = useRef<HTMLButtonElement>(null);
   const flickIntervalRef = useRef<number | null>(null);
   const flickTimeoutRef = useRef<number | null>(null);
+  const { t, language } = useLanguage();
 
   const handleCountrySubmit = useCallback(() => {
     const trimmed = value.trim();
@@ -59,14 +61,14 @@ export function SelectCountry({
 
     // find the country regardless of capitalization
     const match = countries.find(
-      (c) => c.name.toLowerCase() === normalized
+      (c) => c.name.toLowerCase() === normalized || (language === 'es' && c.nameES?.toLowerCase() === normalized)
     );
 
     if (!trimmed) {
       notifications.show({
         color: "red",
-        title: "No country selected",
-        message: "Please select a country",
+        title: t("No country selected"),
+        message: t("Please select a country"),
       });
       return;
     }
@@ -74,8 +76,8 @@ export function SelectCountry({
     if (!match) {
       notifications.show({
         color: "red",
-        title: "Country not found",
-        message: "Please select a valid country",
+        title: t("Country not found"),
+        message: t("Please select a valid country"),
       });
       return;
     }
@@ -86,8 +88,8 @@ export function SelectCountry({
     if (guesses.includes(selectedName)) {
       notifications.show({
         color: 'red',
-        title: 'Already guessed',
-        message: 'Please select a different country',
+        title: t('Already guessed'),
+        message: t('Please select a different country'),
       });
       return;
     }
@@ -126,7 +128,7 @@ export function SelectCountry({
         event.preventDefault();
         const trimmed = value.trim();
         const normalized = trimmed.toLowerCase();
-        const match = countries.find((c) => c.name.toLowerCase() === normalized);
+        const match = countries.find((c) => c.name.toLowerCase() === normalized || (language === 'es' && c.nameES?.toLowerCase() === normalized));
         if (match) {
           // set the value to canonical name (optional) then submit
           setValue(match.name);
@@ -149,7 +151,7 @@ export function SelectCountry({
     // but trim just in case and set the canonical form from countries list.
     const trimmed = newValue.trim();
     const normalized = trimmed.toLowerCase();
-    const match = countries.find((c) => c.name.toLowerCase() === normalized);
+    const match = countries.find((c) => c.name.toLowerCase() === normalized || (language === 'es' && c.nameES?.toLowerCase() === normalized));
     setValue(match ? match.name : trimmed);
   }
 
@@ -163,10 +165,11 @@ export function SelectCountry({
 
   const autoItems = countries.map((c) => {
     const aliases = COUNTRY_ALIASES[c.name] ?? [];
+    const displayName = language === 'es' && c.nameES ? c.nameES : c.name;
     return {
-      value: c.name, // what gets inserted on select
+      value: displayName, // what gets inserted on select
       // a hidden searchable field with normalized name + aliases + code
-      keywords: [c.name, ...aliases, c.code ?? ''].map(normalize).join(' '),
+      keywords: [displayName, c.name, ...aliases, c.code ?? ''].map(normalize).join(' '),
     };
   });
 
@@ -194,8 +197,8 @@ export function SelectCountry({
     if (remaining.length === 0) {
       notifications.show({
         color: "yellow",
-        title: "No countries left",
-        message: "You have guessed everything!",
+        title: t("No countries left"),
+        message: t("You have guessed everything!"),
       });
       return;
     }
@@ -258,8 +261,8 @@ export function SelectCountry({
         notifications.show({
           position: "top-center",
           color: "blue",
-          title: "You rolled the dice!",
-          message: `selection set to: ${finalPick}`,
+          title: t("You rolled the dice!"),
+          message: `${t("selection set to:")} ${language === 'es' ? (countries.find(c => c.name === finalPick)?.nameES || finalPick) : finalPick}`,
           autoClose: 1800,
         });
 
@@ -280,8 +283,8 @@ export function SelectCountry({
       notifications.show({
         position: "top-center",
         color: "blue",
-        title: "You rolled the dice!",
-        message: `selection set to: ${finalPick}`,
+        title: t("You rolled the dice!"),
+        message: `${t("selection set to:")} ${language === 'es' ? (countries.find(c => c.name === finalPick)?.nameES || finalPick) : finalPick}`,
         autoClose: 1800,
       });
 
@@ -313,8 +316,8 @@ export function SelectCountry({
       <Flex gap={10} align={'center'} justify={'center'} direction={'row'} w={'100%'}>
         <Autocomplete
           data={autoItems}
-          aria-label="Country"
-          placeholder="Select country"
+          aria-label={t("Country")}
+          placeholder={t("Select country")}
           radius="md"
           size="md"
           onOptionSubmit={handleKeyboardOptionSubmit}
@@ -332,14 +335,14 @@ export function SelectCountry({
           limit={200}
           rightSectionWidth={44}                       // reserve space for the dice icon
           rightSection={
-            <Tooltip label="Roll suggestion" withArrow openDelay={100}>
+            <Tooltip label={t("Roll suggestion")} withArrow openDelay={100}>
               <ActionIcon
                 size="lg"
                 variant="outline"
                 onClick={handleRollClick}
                 ref={diceRef}
-                aria-label="Roll a country suggestion"
-                title="Roll a country suggestion"
+                aria-label={t("Roll suggestion")}
+                title={t("Roll suggestion")}
                 tabIndex={0}
                 style={{
                   border: 'none'
@@ -358,7 +361,7 @@ export function SelectCountry({
         />
 
         <Button size="md" ref={btnRef} onClick={handleCountrySubmit}>
-          Guess
+          {t('Guess')}
         </Button>
       </Flex>
 

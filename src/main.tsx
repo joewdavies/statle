@@ -10,13 +10,17 @@ import { dedupeStatleHistoryV1 } from "./services/migrations";
 
 dedupeStatleHistoryV1();
 
+import { LanguageProvider } from './hooks/useLanguage';
+
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <MantineProvider>
-      <Notifications />
-      <main>
-        <App />
-      </main>
+      <LanguageProvider>
+        <Notifications />
+        <main>
+          <App />
+        </main>
+      </LanguageProvider>
     </MantineProvider>
   </React.StrictMode>
 );

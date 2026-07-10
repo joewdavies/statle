@@ -75,7 +75,7 @@ export default function GlobeJourney({
       .scale(Math.min(width, height) / 2.5)
       .translate([width / 2, height / 2])
       .clipAngle(90)
-      .precision(0.3);
+      .precision(0.5);
 
     const path = geoPath(projection, context);
     const worldGeoJSON: any = feature(
@@ -85,6 +85,16 @@ export default function GlobeJourney({
 
     const sphere = { type: 'Sphere' };
     const visitedCountries = new Set<string>();
+
+    // rAF deduplication — prevents multiple render calls per frame
+    let rafId: number | null = null;
+    function scheduleRender() {
+      if (rafId != null) return;
+      rafId = requestAnimationFrame(() => {
+        rafId = null;
+        render();
+      });
+    }
 
     function render() {
       if (!context) return;
@@ -99,36 +109,46 @@ export default function GlobeJourney({
       context.fillStyle = oceanFill;
       context.fill();
 
-      // Land per-country fill
-      context.lineWidth = 0.5;
-      context.strokeStyle = '#888';
-
+      // Land — batch plain countries into one path, draw highlighted ones individually
       const activeGuess = guesses[currentIndex.current];
       const activeCode = activeGuess?.code;
 
+      const highlightedVisited: any[] = [];
+      let correctFeature: any = null;
+
+      // Single pass: draw all plain land in one batch
+      context.beginPath();
       for (const f of worldGeoJSON.features) {
-        const props = f.properties || {};
-        const cntrId = props.CNTR_ID; // ✅ use your actual Eurostat ID
+        const cntrId = f.properties?.CNTR_ID;
 
-        let fill = landFill;
-
-        // 🟩 Correct country
         if (correctCountry && cntrId === correctCountry.code) {
-          fill = correctColor;
+          correctFeature = f;
+          continue;
         }
-        // 🟥 Guessed or visited
-        else if (
-          cntrId &&
-          (visitedCountries.has(cntrId) || cntrId === activeCode)
-        ) {
-          fill = visitedColor;
+        if (cntrId && (visitedCountries.has(cntrId) || cntrId === activeCode)) {
+          highlightedVisited.push(f);
+          continue;
         }
 
+        path(f); // accumulate into single path
+      }
+      context.fillStyle = landFill;
+      context.fill();
+
+      // Draw visited countries
+      if (highlightedVisited.length > 0) {
         context.beginPath();
-        path(f);
-        context.fillStyle = fill;
+        for (const f of highlightedVisited) path(f);
+        context.fillStyle = visitedColor;
         context.fill();
-        // context.stroke();
+      }
+
+      // Draw correct country
+      if (correctFeature) {
+        context.beginPath();
+        path(correctFeature);
+        context.fillStyle = correctColor;
+        context.fill();
       }
 
       // Flights
@@ -590,7 +610,7 @@ export default function GlobeJourney({
       });
 
       // --- bind zoom ---
-      selection.call(zoomWrapper.on('zoom.render', () => render()) as any);
+      selection.call(zoomWrapper.on('zoom.render', () => scheduleRender()) as any);
 
       // 🧹 cleanup
       return () => {
@@ -653,35 +673,49 @@ export default function GlobeJourney({
       }
 
       function zoomstarted(this: any, event: any) {
-        v0 = versor.cartesian(projection.invert(point(event, this)));
-        q0 = versor((r0 = projection.rotate()));
+        const pt = point(event, this);
+        if (pt) {
+          const inv = projection.invert(pt);
+          if (inv) {
+            v0 = versor.cartesian(inv);
+            q0 = versor((r0 = projection.rotate()));
+          }
+        }
       }
 
       function zoomed(this: any, event: any) {
         projection.scale(event.transform.k);
         const pt = point(event, this);
-        const v1 = versor.cartesian(projection.rotate(r0).invert(pt));
-        const delta = versor.delta(v0, v1);
-        let q1 = versor.multiply(q0, delta);
-        if (pt[2]) {
-          const d = (pt[2] - a0) / 2;
-          const s = -Math.sin(d);
-          const c = Math.sign(Math.cos(d));
-          q1 = versor.multiply([Math.sqrt(1 - s * s), 0, 0, c * s], q1);
+        
+        if (pt && v0) {
+          const inv = projection.rotate(r0).invert(pt);
+          if (inv) {
+            const v1 = versor.cartesian(inv);
+            const delta = versor.delta(v0, v1);
+            let q1 = versor.multiply(q0, delta);
+            if (pt[2]) {
+              const d = (pt[2] - a0) / 2;
+              const s = -Math.sin(d);
+              const c = Math.sign(Math.cos(d));
+              q1 = versor.multiply([Math.sqrt(1 - s * s), 0, 0, c * s], q1);
+            }
+            projection.rotate(versor.rotation(q1));
+
+            // 🌍 Keep the globe upright (limit vertical tilt)
+            let [lambda, phi, gamma] = projection.rotate();
+
+            // Clamp φ (the vertical tilt) to prevent flipping the globe
+            const maxTilt = 60; // degrees — adjust if you want more/less freedom
+            phi = Math.max(-maxTilt, Math.min(maxTilt, phi));
+
+            // Keep the roll (γ) locked at 0 for stability
+            gamma = 0;
+
+            projection.rotate([lambda, phi, gamma]);
+
+            if (delta[0] < 0.7) zoomstarted.call(this, event);
+          }
         }
-        projection.rotate(versor.rotation(q1));
-
-        // 🌍 Keep the globe upright (limit vertical tilt)
-        let [lambda, phi, gamma] = projection.rotate();
-
-        // Clamp φ (the vertical tilt) to prevent flipping the globe
-        const maxTilt = 60; // degrees — adjust if you want more/less freedom
-        phi = Math.max(-maxTilt, Math.min(maxTilt, phi));
-
-        // Keep the roll (γ) locked at 0 for stability
-        gamma = 0;
-
-        projection.rotate([lambda, phi, gamma]);
 
         // --- inertia tracking ---
         if (USE_INERTIA) {
@@ -701,9 +735,8 @@ export default function GlobeJourney({
           lastEventTime = nowTime;
         }
 
-        if (delta[0] < 0.7) zoomstarted.call(this, event);
         //prevents redundant intermediate renders when dragging quickly.
-        requestAnimationFrame(() => render());
+        scheduleRender();
       }
 
       function zoomend(this: any) {

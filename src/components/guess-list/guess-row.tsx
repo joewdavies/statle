@@ -4,6 +4,7 @@ import { convertDistance, getDistance } from 'geolib';
 import { getCompassDirection, directionMap, sharesLandBorder } from '../../services/geo';
 import { dataset } from '../../data/stats/dataset';
 import { BASE_CELL_STYLE, GUESS_GRID } from './grid';
+import { useLanguage } from '../../hooks/useLanguage';
 
 type Props = {
   guessCountry: Country;
@@ -12,6 +13,7 @@ type Props = {
 
 export function GuessRow({ guessCountry, country }: Props) {
   const { colorScheme } = useMantineColorScheme();
+  const { t, language } = useLanguage();
 
   const isCorrect = guessCountry.code === country.code;
 
@@ -77,7 +79,7 @@ export function GuessRow({ guessCountry, country }: Props) {
     >
       {/* Country */}
       <Box style={cellStyle} className={isCorrect ? 'guess-cell correct-cell' : 'guess-cell'}>
-        <Text size="sm" truncate>{guessCountry.name}</Text>
+        <Text size="sm" truncate>{language === 'es' && guessCountry.nameES ? guessCountry.nameES : guessCountry.name}</Text>
       </Box>
 
       {/* Distance */}
@@ -87,7 +89,7 @@ export function GuessRow({ guessCountry, country }: Props) {
 
       {/* Direction */}
       <Box style={cellStyle} className={isCorrect ? 'guess-cell correct-cell' : 'guess-cell'}>
-        <Text size="sm">{isCorrect ? '🎉' : directionMap[direction] || '🧭'}</Text>
+        <Text size="sm">{isCorrect ? '🎉' : (directionMap[direction] ? t(directionMap[direction]) : '🧭')}</Text>
       </Box>
 
       {/* Proximity */}

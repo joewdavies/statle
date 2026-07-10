@@ -1,13 +1,13 @@
-import { ActionIcon, Flex, Modal, Text } from '@mantine/core';
+import { ActionIcon, Anchor, Flex, Modal, Text, Tooltip, Divider } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { IconQuestionMark } from '@tabler/icons-react';
+import { IconInfoCircle, IconBrandGithub } from '@tabler/icons-react';
+import { useLanguage } from '../../hooks/useLanguage';
 import { convertDistance, getDistance } from 'geolib';
 import { countries } from '../../data/countries/countries';
 import { getCompassDirection, directionMap } from '../../services/geo';
 import { GuessRow } from '../guess-list/guess-row';
-import { useLanguage } from '../../hooks/useLanguage';
 
-export function Rules() {
+export function About() {
   const [opened, { open, close }] = useDisclosure(false);
   const { t } = useLanguage();
 
@@ -50,7 +50,7 @@ export function Rules() {
       <Modal
         opened={opened}
         onClose={close}
-        title={t("How to play")}
+        title={t('About')}
         size={'lg'}
         styles={{
           title: {
@@ -133,11 +133,62 @@ export function Rules() {
             </Text>
             {t(", it's the location to guess! Congrats! 🎉")}
           </Text>
+          
+          <Divider my="sm" />
+
+          <Text size="sm">
+            {t('Inspired by ')}
+            <Anchor href="https://www.nytimes.com/games/wordle/index.html">
+              Wordle
+            </Anchor>{' '}
+            {t('and')}{' '}
+            <Anchor href="https://worldle.teuteuf.fr/">
+              Worldle by Teuteuf
+            </Anchor>
+          </Text>
+          <Text size="sm">
+            {t('Data sources: World Bank, REST countries, Eurostat. Notebook containing data sources and processing steps ')}
+            <Anchor href="https://observablehq.com/d/a1383688270e4c00">
+              {t('can be found here.')}
+            </Anchor>
+          </Text>
+          <Text size="sm">
+            {t('This site uses GoatCounter, a privacy-friendly analytics tool. It does not use cookies or collect personal data. It only collects anonymised usage statistics to understand overall traffic patterns.')}
+          </Text>
+          <Text ta="center">
+            <a
+              href="https://www.buymeacoffee.com/joewdavies"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Buy Me A Coffee — Joe W Davies"
+            >
+              <img
+                src="https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png"
+                alt="Buy Me A Coffee"
+                style={{ border: 0, display: 'inline-block', height: '37px' }}
+              />
+            </a>
+          </Text>
+          <Flex justify="center" mt="md">
+            <Tooltip label="GitHub">
+              <ActionIcon
+                size={"xl"}
+                variant="default"
+                onClick={() =>
+                  window.open("https://github.com/joewdavies/statle", "_blank")
+                }
+              >
+                <IconBrandGithub stroke={1.5} />
+              </ActionIcon>
+            </Tooltip>
+          </Flex>
         </Flex>
       </Modal>
-      <ActionIcon onClick={open} size={'lg'} variant="default">
-        <IconQuestionMark stroke={1.5} />
-      </ActionIcon>
+      <Tooltip label={t('About')}>
+        <ActionIcon onClick={open} size={'lg'} variant="default">
+          <IconInfoCircle stroke={1.5} />
+        </ActionIcon>
+      </Tooltip>
     </>
   );
 }
