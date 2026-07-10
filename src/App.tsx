@@ -182,7 +182,7 @@ useEffect(() => {
   // statistical data (static for now)
   const statsByCode = stats;
   const { colorScheme } = useMantineColorScheme();
-  const { t, language } = useLanguage();
+  const { t } = useLanguage();
 
   return (
     <Flex align="center" direction="column" gap={10}>

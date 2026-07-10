@@ -84,7 +84,6 @@ export const translations: Record<string, Record<string, string>> = {
     // About
     "About": "Acerca de",
     "Inspired by ": "Inspirado en ",
-    "and": "y",
     "Data sources: World Bank, REST countries, Eurostat. Notebook containing data sources and processing steps ": "Fuentes de datos: Banco Mundial, REST countries, Eurostat. El cuaderno con las fuentes de datos y pasos de procesamiento ",
     "can be found here.": "se puede encontrar aquí.",
     "This site uses GoatCounter, a privacy-friendly analytics tool. It does not use cookies or collect personal data. It only collects anonymised usage statistics to understand overall traffic patterns.": "Este sitio usa GoatCounter, una herramienta de análisis respetuosa con la privacidad. No usa cookies ni recopila datos personales. Solo recopila estadísticas de uso anonimizadas para entender los patrones generales de tráfico.",
