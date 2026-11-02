@@ -8,7 +8,7 @@ import { timer, now } from 'd3-timer';
 import { mean } from 'd3-array';
 import { feature } from 'topojson-client';
 import worldTopoJSON from '../../data/world-topo.json';
-//@ts-ignore
+// @ts-expect-error versor ships no type declarations
 import versor from 'versor';
 import { useMantineColorScheme } from '@mantine/core';
 import { Country } from '../../data/countries/countries';
@@ -587,9 +587,8 @@ export default function GlobeJourney({
         const y = ev.clientY - rect.top;
         if (!isInsideSphereXY(x, y)) return;
         // zoom in by factor — adjust if you want stronger/weaker zoom
-        //@ts-ignore
         selection
-        //@ts-ignore
+        // @ts-expect-error d3 transition typing on generic selection
           .transition()
           .duration(300)
           .call(zoomInstance.scaleBy as any, 1.8, [x, y]);
@@ -624,9 +623,8 @@ export default function GlobeJourney({
             return;
           }
           // perform zoom in
-          //@ts-ignore
           selection
-          //@ts-ignore
+          // @ts-expect-error d3 transition typing on generic selection
             .transition()
             .duration(300)
             .call(zoomInstance.scaleBy as any, 1.8, [x, y]);
@@ -761,16 +759,14 @@ export default function GlobeJourney({
             projection.rotate(versor.rotation(q1));
 
             // 🌍 Keep the globe upright (limit vertical tilt)
-            let [lambda, phi, gamma] = projection.rotate();
+            const [lambda, rawPhi] = projection.rotate();
 
             // Clamp φ (the vertical tilt) to prevent flipping the globe
             const maxTilt = 60; // degrees — adjust if you want more/less freedom
-            phi = Math.max(-maxTilt, Math.min(maxTilt, phi));
+            const phi = Math.max(-maxTilt, Math.min(maxTilt, rawPhi));
 
             // Keep the roll (γ) locked at 0 for stability
-            gamma = 0;
-
-            projection.rotate([lambda, phi, gamma]);
+            projection.rotate([lambda, phi, 0]);
 
             if (delta[0] < 0.7) zoomstarted.call(this, event);
           }
@@ -878,6 +874,7 @@ export default function GlobeJourney({
       document.removeEventListener('visibilitychange', restoreCanvas);
       canvas.removeEventListener('contextrestored', restoreCanvas);
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     guesses,
     canvasWidth,

@@ -45,6 +45,7 @@ type StatCluesProps = {
 };
 
 // Keys for safer icon mapping
+// eslint-disable-next-line react-refresh/only-export-components
 export const clueIcons = {
   population: christmas ? <IconSnowman size={20} /> : <IconUser size={20} />,
   gdpPerCapita: <IconCurrencyDollar size={20} />,
@@ -197,6 +198,7 @@ export function StatClues({
 }
 
 // ---- helpers ----
+// eslint-disable-next-line react-refresh/only-export-components
 export function buildClues(stats: CountryStats | null | undefined, t: (k: string) => string, language: string): Clue[] {
   if (!stats) return [];
 

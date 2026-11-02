@@ -16,7 +16,7 @@ export const ABBREV_EXPANSIONS: Record<string, string> = {
 };
 
 function levenshtein(a: string, b: string) {
-  const dp = Array.from({ length: a.length + 1 }, (_) =>
+  const dp = Array.from({ length: a.length + 1 }, () =>
     Array(b.length + 1).fill(0)
   );
   for (let i = 0; i <= a.length; i++) dp[i][0] = i;

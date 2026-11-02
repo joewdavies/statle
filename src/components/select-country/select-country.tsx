@@ -163,9 +163,9 @@ export function SelectCountry({
   }
 
   function sendGoatEvent(path: string) {
-    //@ts-ignore
+    // @ts-expect-error goatcounter is injected globally
     if (window.goatcounter?.count) {
-      //@ts-ignore
+      // @ts-expect-error goatcounter is injected globally
       window.goatcounter.count({ path, event: true });
     }
   }

@@ -21,8 +21,10 @@ export function useUserStats(maxGuesses: number) {
     };
   }, []);
 
+  // history is not read directly, but a change signals that stored stats changed
   const userStats = useMemo(
     () => UserStatsService.getUserStats(maxGuesses),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [history, maxGuesses]
   );
 

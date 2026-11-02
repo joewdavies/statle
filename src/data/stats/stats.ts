@@ -1,8 +1,5 @@
 
 import { dataset } from "./dataset";
-import { useEffect, useState } from "react";
-import { countries } from "../countries/countries";
-import { getAllStats } from "../../services/eurostat";
 
 export type CountryStats = {
   area?: number | null | undefined;
@@ -30,20 +27,6 @@ export type CountryStats = {
 // Optional convenience
 export type CountryCode = keyof typeof stats;
 
-// React hook that retrieves and returns stats by code
-export function useCountryStats(force = false) {
-  const [statsByCode, setStatsByCode] =
-    useState<Record<string, CountryStats> | null>(null);
-
-  useEffect(() => {
-    (async () => {
-      const all = await getAllStats(countries, { force });
-      setStatsByCode(all);
-    })();
-  }, [force]);
-
-  return statsByCode;
-}
 // static export (no fetching)
 export const stats = {
   ...dataset,

@@ -68,7 +68,6 @@ export function animateDiceRoll(button: HTMLButtonElement | null) {
   // restart the animation even if class is already present
   wrapper.classList.remove("rolling");
   // force reflow so the animation can be re-triggered
-  // eslint-disable-next-line @typescript-eslint/no-unused-expressions
   void wrapper.offsetWidth;
   wrapper.classList.add("rolling");
 
