@@ -894,7 +894,6 @@ export default function GlobeJourney({
       ref={containerRef}
       style={{
         width: '100%',
-        maxWidth: `${width}px`,
         aspectRatio: `${width} / ${height}`,
         display: 'flex',
         justifyContent: 'center',

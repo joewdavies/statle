@@ -213,7 +213,7 @@ describe('<GlobeJourney /> sizing (mobile tab-restore regression)', () => {
   it('fills its container instead of being pinned to a fixed corner size', () => {
     const { canvas, wrapper } = renderGlobe({ width: 400, height: 300 })
     expect(wrapper.style.width).toBe('100%')
-    expect(wrapper.style.maxWidth).toBe('400px')
+    expect(wrapper.style.maxWidth).toBe('')
     expect(wrapper.style.aspectRatio).toMatch(/400\s*\/\s*300/)
     expect(canvas.style.width).toBe('100%')
     expect(canvas.style.height).toBe('100%')
