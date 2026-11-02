@@ -175,6 +175,8 @@ export function SelectCountry({
     const displayName = getCountryName(c, language);
     return {
       value: displayName, // what gets inserted on select
+      // Mantine drops extra fields (like keywords) from items that have no label
+      label: displayName,
       // a hidden searchable field with normalized name + aliases + code
       keywords: [displayName, c.name, ...aliases, c.code ?? ''].map(normalize).join(' '),
     };

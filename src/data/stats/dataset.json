@@ -663,7 +663,6 @@
       "AR",
       "BO",
       "CO",
-      "GF",
       "GY",
       "PY",
       "PE",
@@ -1104,14 +1103,12 @@
       "AF",
       "BT",
       "MM",
-      "HK",
       "IN",
       "KZ",
       "NP",
       "KP",
       "KG",
       "LA",
-      "MO",
       "MN",
       "PK",
       "RU",
@@ -1458,7 +1455,6 @@
       "TN",
       "LY",
       "NE",
-      "EH",
       "MR",
       "ML",
       "MA"
@@ -1633,7 +1629,6 @@
     "borders": [
       "AD",
       "FR",
-      "GI",
       "PT",
       "MA"
     ],
@@ -3167,7 +3162,6 @@
     "landlocked": false,
     "borders": [
       "DZ",
-      "EH",
       "ES"
     ],
     "lifeExpectancy": 75.493,
@@ -3445,8 +3439,7 @@
     "borders": [
       "DZ",
       "ML",
-      "SN",
-      "EH"
+      "SN"
     ],
     "lifeExpectancy": 68.713,
     "precipitation": 92,
@@ -4761,7 +4754,6 @@
     "landlocked": false,
     "borders": [
       "BR",
-      "GF",
       "GY"
     ],
     "lifeExpectancy": 73.757,
