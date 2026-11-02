@@ -4,7 +4,7 @@ import { notifications } from '@mantine/notifications';
 import { IconDice5Filled, IconSearch } from '@tabler/icons-react';
 import { useCallback, useEffect, useRef } from 'react';
 import { GameStatus, MAX_GUESSES } from '../../constants';
-import { Country } from '../../data/countries/countries';
+import { Country, getCountryName } from '../../data/countries/countries';
 import useFocusOnKey from '../../hooks/useFocusOnKey';
 import { useLanguage } from '../../hooks/useLanguage';
 import { fuzzyCountryFilter } from './country-search-filter';
@@ -28,6 +28,18 @@ const normalize = (s: string) =>
     .normalize('NFD')                // split accents
     .replace(/[\u0300-\u036f]/g, '') // remove accents
     .toLowerCase();
+
+function findCountryByName(countries: Country[], value: string, language: Parameters<typeof getCountryName>[1]) {
+  const normalized = normalize(value);
+  return countries.find((country) =>
+    [country.name, getCountryName(country, language)].some((name) => normalize(name) === normalized)
+  );
+}
+
+function localizedCountryName(countries: Country[], name: string, language: Parameters<typeof getCountryName>[1]) {
+  const country = countries.find((item) => item.name === name);
+  return country ? getCountryName(country, language) : name;
+}
 
 // Optional: aliases you want matched by typing (doesn't change what’s displayed/selected)
 const COUNTRY_ALIASES: Record<string, string[]> = {
@@ -57,12 +69,7 @@ export function SelectCountry({
 
   const handleCountrySubmit = useCallback(() => {
     const trimmed = value.trim();
-    const normalized = trimmed.toLowerCase();
-
-    // find the country regardless of capitalization
-    const match = countries.find(
-      (c) => c.name.toLowerCase() === normalized || (language === 'es' && c.nameES?.toLowerCase() === normalized)
-    );
+    const match = findCountryByName(countries, trimmed, language);
 
     if (!trimmed) {
       notifications.show({
@@ -112,6 +119,8 @@ export function SelectCountry({
   }, [
     value,
     countries,
+    language,
+    t,
     guesses,
     guessCount,
     country,
@@ -127,8 +136,7 @@ export function SelectCountry({
       if (event.key === 'Enter') {
         event.preventDefault();
         const trimmed = value.trim();
-        const normalized = trimmed.toLowerCase();
-        const match = countries.find((c) => c.name.toLowerCase() === normalized || (language === 'es' && c.nameES?.toLowerCase() === normalized));
+        const match = findCountryByName(countries, trimmed, language);
         if (match) {
           // set the value to canonical name (optional) then submit
           setValue(match.name);
@@ -141,7 +149,7 @@ export function SelectCountry({
     return () => {
       autoComplete?.removeEventListener('keydown', handleKeyDown);
     };
-  }, [value, countries, autoCompleteRef, handleCountrySubmit, setValue]);
+  }, [value, countries, language, handleCountrySubmit, setValue]);
 
 
   useFocusOnKey('/', autoCompleteRef);
@@ -150,8 +158,7 @@ export function SelectCountry({
     // newValue comes from an option (should already be the canonical name),
     // but trim just in case and set the canonical form from countries list.
     const trimmed = newValue.trim();
-    const normalized = trimmed.toLowerCase();
-    const match = countries.find((c) => c.name.toLowerCase() === normalized || (language === 'es' && c.nameES?.toLowerCase() === normalized));
+    const match = findCountryByName(countries, trimmed, language);
     setValue(match ? match.name : trimmed);
   }
 
@@ -165,7 +172,7 @@ export function SelectCountry({
 
   const autoItems = countries.map((c) => {
     const aliases = COUNTRY_ALIASES[c.name] ?? [];
-    const displayName = language === 'es' && c.nameES ? c.nameES : c.name;
+    const displayName = getCountryName(c, language);
     return {
       value: displayName, // what gets inserted on select
       // a hidden searchable field with normalized name + aliases + code
@@ -262,7 +269,7 @@ export function SelectCountry({
           position: "top-center",
           color: "blue",
           title: t("You rolled the dice!"),
-          message: `${t("selection set to:")} ${language === 'es' ? (countries.find(c => c.name === finalPick)?.nameES || finalPick) : finalPick}`,
+          message: `${t("selection set to:")} ${localizedCountryName(countries, finalPick, language)}`,
           autoClose: 1800,
         });
 
@@ -284,7 +291,7 @@ export function SelectCountry({
         position: "top-center",
         color: "blue",
         title: t("You rolled the dice!"),
-        message: `${t("selection set to:")} ${language === 'es' ? (countries.find(c => c.name === finalPick)?.nameES || finalPick) : finalPick}`,
+        message: `${t("selection set to:")} ${localizedCountryName(countries, finalPick, language)}`,
         autoClose: 1800,
       });
 

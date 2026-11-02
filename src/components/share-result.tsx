@@ -15,6 +15,7 @@ import { useUserStats } from '../hooks/useUserStats';
 import { countries } from '../data/countries/countries';
 import { getDistance } from 'geolib';
 import { getCompassDirection, directionMap } from '../services/geo';
+import { useLanguage } from '../hooks/useLanguage';
 
 // Prebuild a quick lookup by ISO code
 const countriesByCode: Record<string, any> = Object.fromEntries(
@@ -22,11 +23,8 @@ const countriesByCode: Record<string, any> = Object.fromEntries(
 );
 
 // ----------------------------- small utilities -----------------------------
-function pad2(n: number) {
-  return String(n).padStart(2, '0');
-}
-function formatDate(d = new Date()) {
-  return `${pad2(d.getDate())}/${pad2(d.getMonth() + 1)}/${d.getFullYear()}`;
+function formatDate(d: Date, language: string) {
+  return new Intl.DateTimeFormat(language).format(d);
 }
 function clamp(n: number, min: number, max: number) {
   return Math.max(min, Math.min(max, n));
@@ -53,10 +51,11 @@ function resolveCountry(token?: string) {
 // ----------------------------- component -----------------------------
 export function ShareResult() {
   const { userStats } = useUserStats(MAX_GUESSES);
+  const { t, language } = useLanguage();
   const last = userStats?.lastGame;
 
   const text = useMemo(() => {
-    const date = formatDate(new Date());
+    const date = formatDate(new Date(), language);
     const triesStr = last
       ? `${Math.max(1, last.guessCount ?? 0)}/${MAX_GUESSES}`
       : `${MAX_GUESSES}/${MAX_GUESSES}`;
@@ -125,18 +124,18 @@ export function ShareResult() {
 
     //  No markdown here; many targets won't render it.
     const header = `Statle (${date}) ${triesStr} (${headerPct}%)`;
-    const streakLine = `🔥 Current Win Streak: ${streak}`;
+    const streakLine = `🔥 ${t("Current Win Streak")}: ${streak}`;
     const footer = `https://joewdavies.github.io/statle`;
 
     return [header, streakLine, ...attemptLines, '', footer].join('\n');
-  }, [last, userStats]);
+  }, [last, userStats, language, t]);
 
   const [modalOpen, setModalOpen] = useState(false);
 
   const showCopiedToast = () =>
     notifications.show({
       color: 'green',
-      message: 'Copied results to clipboard!',
+      message: t('Copied results to clipboard!'),
       position: 'top-center',
     });
 
@@ -176,16 +175,16 @@ export function ShareResult() {
 
   return (
     <>
-      <Tooltip label="Share or copy result" withArrow>
+      <Tooltip label={t("Share or copy result")} withArrow>
         <Button onClick={share} leftSection={<IconShare3 size={18} />}>
-          Share result
+          {t("Share result")}
         </Button>
       </Tooltip>
 
       <Modal
         opened={modalOpen}
         onClose={() => setModalOpen(false)}
-        title="Copy your result"
+        title={t("Copy your result")}
         size="md"
         centered
       >
@@ -199,7 +198,7 @@ export function ShareResult() {
         />
         <Group justify="space-between" mt="sm">
           <div style={{ fontSize: 12, opacity: 0.7 }}>
-            Tip: Select and press Ctrl/Cmd+C if the Copy button doesn’t work.
+            {t("Tip: Select and press Ctrl/Cmd+C if the Copy button doesn’t work.")}
           </div>
           <CopyButton value={text} timeout={1500}>
             {({ copied, copy }) => (
@@ -211,7 +210,7 @@ export function ShareResult() {
                 variant="light"
                 leftSection={copied ? <IconCheck size={16} /> : <IconClipboard size={16} />}
               >
-                {copied ? 'Copied' : 'Copy'}
+                {copied ? t('Copied') : t('Copy')}
               </Button>
             )}
           </CopyButton>

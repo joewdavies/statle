@@ -1,6 +1,5 @@
 import { createContext, useContext, useEffect, useState } from 'react';
-
-export type Language = 'en' | 'es';
+import { translations, type Language } from '../i18n/translations';
 
 type LanguageContextType = {
   language: Language;
@@ -10,16 +9,16 @@ type LanguageContextType = {
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
-import { translations } from '../i18n/translations';
-
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
   const [language, setLanguageState] = useState<Language>(() => {
     if (typeof window !== 'undefined') {
       const stored = localStorage.getItem('statle-lang');
-      if (stored === 'en' || stored === 'es') return stored;
+      if (stored === 'en' || stored === 'es' || stored === 'fr' || stored === 'de') return stored;
 
       const navLang = navigator.language.toLowerCase();
       if (navLang.startsWith('es')) return 'es';
+      if (navLang.startsWith('fr')) return 'fr';
+      if (navLang.startsWith('de')) return 'de';
     }
     return 'en';
   });

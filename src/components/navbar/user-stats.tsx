@@ -4,19 +4,23 @@ import { IconChartBar } from "@tabler/icons-react";
 import { useUserStats } from "../../hooks/useUserStats";
 import { MAX_GUESSES } from "../../constants";
 import { WorldMap } from './world-map';
-import { countriesMap } from "../../data/countries/countries";
+import { countriesMap, getCountryName } from "../../data/countries/countries";
 import { getFlagURL } from "../../helpers/getFlag";
 import { useLanguage } from "../../hooks/useLanguage";
+import type { Language } from "../../i18n/translations";
 
-function formatShortDate(dateStr: string) {
+function formatShortDate(dateStr: string, language: Language) {
   const parts = dateStr.split('-');
   if (parts.length === 3) {
-    const month = parseInt(parts[1], 10);
-    const day = parseInt(parts[2], 10);
-    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    return `${day} ${monthNames[month - 1]}`;
+    const date = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+    return new Intl.DateTimeFormat(language, { day: 'numeric', month: 'short' }).format(date);
   }
   return dateStr;
+}
+
+function getHistoryCountryName(code: string, fallback: string, language: Language) {
+  const country = countriesMap.get(code);
+  return country ? getCountryName(country, language) : fallback;
 }
 
 export function UserStats() {
@@ -93,7 +97,7 @@ export function UserStats() {
               <Table.Tbody>
                 {[...history].reverse().map((g) => (
                   <Table.Tr key={`${g.date}-${g.finishedAt}`}>
-                    <Table.Td style={{ padding: '6px 4px', fontSize: '11px' }}>{formatShortDate(g.date)}</Table.Td>
+                    <Table.Td style={{ padding: '6px 4px', fontSize: '11px' }}>{formatShortDate(g.date, language)}</Table.Td>
                     <Table.Td style={{ padding: '6px 4px', fontSize: '11px' }}>
                       <Flex gap={6} align="center" style={{ flexWrap: 'nowrap' }}>
                         <Image
@@ -102,8 +106,8 @@ export function UserStats() {
                           radius="xs"
                           style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.15)', height: '12px', width: '18px', flexShrink: 0 }}
                         />
-                        <Text style={{ fontSize: '11px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '85px' }} title={g.countryName}>
-                          {language === 'es' && countriesMap.get(g.countryCode)?.nameES ? countriesMap.get(g.countryCode)?.nameES : g.countryName}
+                        <Text style={{ fontSize: '11px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '85px' }} title={getHistoryCountryName(g.countryCode, g.countryName, language)}>
+                          {getHistoryCountryName(g.countryCode, g.countryName, language)}
                         </Text>
                       </Flex>
                     </Table.Td>

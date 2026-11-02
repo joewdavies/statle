@@ -2,14 +2,14 @@ import { ActionIcon, Flex, Modal, Text } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { IconQuestionMark } from '@tabler/icons-react';
 import { convertDistance, getDistance } from 'geolib';
-import { countries } from '../../data/countries/countries';
+import { countries, getCountryName } from '../../data/countries/countries';
 import { getCompassDirection, directionMap } from '../../services/geo';
 import { GuessRow } from '../guess-list/guess-row';
 import { useLanguage } from '../../hooks/useLanguage';
 
 export function Rules() {
   const [opened, { open, close }] = useDisclosure(false);
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
 
   const country1 = countries[140];
   const country2 = countries[142];
@@ -80,7 +80,7 @@ export function Rules() {
               country={targetCountry}
             />
             <Text size="sm">
-              Your guess {country1.name} is {distance1}
+              {t("Your guess")} {getCountryName(country1, language)} is {distance1}
               {t("km away from the target location, the target location is in the")} {
                 t(directionMap[
                 getCompassDirection(
@@ -104,8 +104,8 @@ export function Rules() {
             country={targetCountry}
           />
           <Text size="sm">
-            Your second guess <Text span fw={500} />
-            {country2.name} {t("is getting closer!")} {distance2}
+            {t("Your second guess")} <Text span fw={500} />
+            {getCountryName(country2, language)} {t("is getting closer!")} {distance2}
             {t("km away,")} {
               t(directionMap[
               getCompassDirection(
@@ -129,7 +129,7 @@ export function Rules() {
           />
           <Text size="sm">
             {t("Next guess,")} <Text span fw={500}>
-              {targetCountry.name}
+              {getCountryName(targetCountry, language)}
             </Text>
             {t(", it's the location to guess! Congrats! 🎉")}
           </Text>

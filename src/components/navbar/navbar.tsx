@@ -1,4 +1,4 @@
-import { ActionIcon, Flex, Tooltip } from "@mantine/core";
+import { ActionIcon, Flex, Menu, Tooltip } from "@mantine/core";
 import { IconLanguage } from "@tabler/icons-react";
 import { Logo } from "./logo";
 import { ModeToggle } from "./mode-toggle";
@@ -7,7 +7,13 @@ import { About } from "./about";
 import { useLanguage } from "../../hooks/useLanguage";
 
 export function Navbar() {
-  const { language, setLanguage } = useLanguage();
+  const { language, setLanguage, t } = useLanguage();
+  const languages = [
+    { code: 'en', label: 'English' },
+    { code: 'es', label: 'Español' },
+    { code: 'fr', label: 'Français' },
+    { code: 'de', label: 'Deutsch' },
+  ] as const;
 
   return (
     <Flex justify={"space-between"} align="center" w={"100%"} className="statle-navbar">
@@ -17,15 +23,31 @@ export function Navbar() {
       </Flex>
       <Logo />
       <Flex gap={16}>
-        <Tooltip label="Toggle Language" withArrow>
-          <ActionIcon
-            size={"lg"}
-            variant="default"
-            onClick={() => setLanguage(language === 'en' ? 'es' : 'en')}
-          >
-            <IconLanguage stroke={1.5} />
-          </ActionIcon>
-        </Tooltip>
+        <Menu position="bottom-end" withinPortal>
+          <Menu.Target>
+            <Tooltip label={t("Change language")} withArrow>
+              <ActionIcon
+                size="lg"
+                variant="default"
+                aria-label={t("Change language")}
+              >
+                <IconLanguage stroke={1.5} />
+              </ActionIcon>
+            </Tooltip>
+          </Menu.Target>
+          <Menu.Dropdown>
+            {languages.map(({ code, label }) => (
+              <Menu.Item
+                key={code}
+                onClick={() => setLanguage(code)}
+                rightSection={language === code ? "✓" : null}
+                aria-current={language === code ? "true" : undefined}
+              >
+                {label}
+              </Menu.Item>
+            ))}
+          </Menu.Dropdown>
+        </Menu>
         <ModeToggle />
       </Flex>
     </Flex>

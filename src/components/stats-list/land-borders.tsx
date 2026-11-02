@@ -1,13 +1,16 @@
 import { countriesMap } from "../../data/countries/countries";
 import { Popover, ActionIcon, Image, Text } from "@mantine/core";
 import { countryCodeToEmoji, getFlagURL } from "../../helpers/getFlag";
+import { getCountryName } from "../../data/countries/countries";
+import { useLanguage } from "../../hooks/useLanguage";
 
 export function LandBorders({ borders }: { borders: string[] }) {
+  const { language } = useLanguage();
   const items = borders.map((code) => {
     const found = countriesMap.get(code);
     return {
       code,
-      name: found ? found.name : code,
+      name: found ? getCountryName(found, language) : code,
       flag: getFlagURL(code),
       emoji: countryCodeToEmoji(code),
     };

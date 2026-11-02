@@ -1,5 +1,5 @@
 // src/components/globe-journey.tsx
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { zoom as d3Zoom, zoomIdentity } from 'd3-zoom';
 import { geoOrthographic, geoPath, geoInterpolate } from 'd3-geo';
 import { easeCubicInOut } from 'd3-ease';
@@ -41,8 +41,15 @@ export default function GlobeJourney({
   correctCountry,
 }: Props) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
   const rotationAnimRef = useRef<any | null>(null);
   const currentIndex = useRef(0);
+  const [canvasSize, setCanvasSize] = useState(() => ({
+    width,
+    height,
+    dpr: typeof window === 'undefined' ? 1 : window.devicePixelRatio || 1,
+  }));
+  const { width: canvasWidth, height: canvasHeight, dpr } = canvasSize;
   const { colorScheme } = useMantineColorScheme();
 
   const landFill = colorScheme === 'dark' ? '#3a3a3a' : '#f2f2f2';
@@ -53,27 +60,64 @@ export default function GlobeJourney({
   const glow = false;
 
   useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const updateSize = () => {
+      if (document.visibilityState === 'hidden') return;
+
+      const rect = container.getBoundingClientRect();
+      const next = {
+        width: Math.round(rect.width || width),
+        height: Math.round(rect.height || height),
+        dpr: window.devicePixelRatio || 1,
+      };
+
+      setCanvasSize((previous) =>
+        previous.width === next.width &&
+        previous.height === next.height &&
+        previous.dpr === next.dpr
+          ? previous
+          : next
+      );
+    };
+
+    const resizeObserver = new ResizeObserver(updateSize);
+    resizeObserver.observe(container);
+    window.addEventListener('resize', updateSize);
+    window.addEventListener('pageshow', updateSize);
+    document.addEventListener('visibilitychange', updateSize);
+    updateSize();
+
+    return () => {
+      resizeObserver.disconnect();
+      window.removeEventListener('resize', updateSize);
+      window.removeEventListener('pageshow', updateSize);
+      document.removeEventListener('visibilitychange', updateSize);
+    };
+  }, [width, height]);
+
+  useEffect(() => {
     if (!canvasRef.current) return;
     const canvas = canvasRef.current;
     const context = canvas.getContext('2d');
     if (!context) return;
+    const renderWidth = canvasWidth;
+    const renderHeight = canvasHeight;
 
     // 🧩 Prevent mobile bounce scroll while interacting
     const prevOverscroll = document.body.style.overscrollBehavior;
     document.body.style.overscrollBehavior = 'contain';
 
-    const dpr = window.devicePixelRatio || 1;
-    canvas.width = width * dpr;
-    canvas.height = height * dpr;
-    canvas.style.width = `${width}px`;
-    canvas.style.height = `${height}px`;
-    context.scale(dpr, dpr);
+    canvas.width = renderWidth * dpr;
+    canvas.height = renderHeight * dpr;
+    context.setTransform(dpr, 0, 0, dpr, 0, 0);
     context.imageSmoothingEnabled = false;
     // context.imageSmoothingQuality = "high";
 
     const projection = geoOrthographic()
-      .scale(Math.min(width, height) / 2.5)
-      .translate([width / 2, height / 2])
+      .scale(Math.min(renderWidth, renderHeight) / 2.5)
+      .translate([renderWidth / 2, renderHeight / 2])
       .clipAngle(90)
       .precision(0.5);
 
@@ -98,7 +142,7 @@ export default function GlobeJourney({
 
     function render() {
       if (!context) return;
-      context.clearRect(0, 0, width, height);
+      context.clearRect(0, 0, renderWidth, renderHeight);
 
       //glow
       if (glow) renderGlow(context);
@@ -405,6 +449,21 @@ export default function GlobeJourney({
         await wait(stepDuration);
       }
     }
+
+    function restoreCanvas() {
+      if (document.visibilityState === 'hidden' || !context) return;
+
+      const pixelWidth = renderWidth * dpr;
+      const pixelHeight = renderHeight * dpr;
+      if (canvas.width !== pixelWidth) canvas.width = pixelWidth;
+      if (canvas.height !== pixelHeight) canvas.height = pixelHeight;
+      context.setTransform(dpr, 0, 0, dpr, 0, 0);
+      scheduleRender();
+    }
+
+    window.addEventListener('pageshow', restoreCanvas);
+    document.addEventListener('visibilitychange', restoreCanvas);
+    canvas.addEventListener('contextrestored', restoreCanvas);
 
     function wait(ms: number) {
       return new Promise((r) => setTimeout(r, ms));
@@ -815,11 +874,15 @@ export default function GlobeJourney({
 
       // 🧹 restore previous overscrollBehavior (safer)
       document.body.style.overscrollBehavior = prevOverscroll;
+      window.removeEventListener('pageshow', restoreCanvas);
+      document.removeEventListener('visibilitychange', restoreCanvas);
+      canvas.removeEventListener('contextrestored', restoreCanvas);
     };
   }, [
     guesses,
-    width,
-    height,
+    canvasWidth,
+    canvasHeight,
+    dpr,
     stepDuration,
     rotateDuration,
     markerRadius,
@@ -828,9 +891,11 @@ export default function GlobeJourney({
 
   return (
     <div
+      ref={containerRef}
       style={{
         width: '100%',
-        height: '100%',
+        maxWidth: `${width}px`,
+        aspectRatio: `${width} / ${height}`,
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
@@ -840,12 +905,11 @@ export default function GlobeJourney({
     >
       <canvas
         ref={canvasRef}
-        width={width}
-        height={height}
+        width={canvasWidth * dpr}
+        height={canvasHeight * dpr}
         style={{
           width: '100%',
           height: '100%',
-          objectFit: 'contain',
           display: 'block',
         }}
       />

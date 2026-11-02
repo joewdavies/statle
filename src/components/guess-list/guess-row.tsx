@@ -1,5 +1,5 @@
 import { Box, Text, useMantineColorScheme } from '@mantine/core';
-import { Country } from '../../data/countries/countries';
+import { Country, getCountryName } from '../../data/countries/countries';
 import { convertDistance, getDistance } from 'geolib';
 import { getCompassDirection, directionMap, sharesLandBorder } from '../../services/geo';
 import { dataset } from '../../data/stats/dataset';
@@ -62,7 +62,7 @@ export function GuessRow({ guessCountry, country }: Props) {
   };
 
   const spaceAsThousandSeparator = function (number: number) {
-    return number.toLocaleString('en').replace(/,/gi, ' ');
+    return number.toLocaleString(language).replace(/[\u00a0\u202f,]/gi, ' ');
   };
 
   return (
@@ -79,7 +79,7 @@ export function GuessRow({ guessCountry, country }: Props) {
     >
       {/* Country */}
       <Box style={cellStyle} className={isCorrect ? 'guess-cell correct-cell' : 'guess-cell'}>
-        <Text size="sm" truncate>{language === 'es' && guessCountry.nameES ? guessCountry.nameES : guessCountry.name}</Text>
+        <Text size="sm" truncate>{getCountryName(guessCountry, language)}</Text>
       </Box>
 
       {/* Distance */}

@@ -1,0 +1,4 @@
+- [x] make sure all countries can appear. it seems that russia for example has never appeared. I want to make sure the possibility of it appearing is there. If you find countries that would never appear, list them here. (Checked: all 197 countries have at least two core stats and are in the daily selection pool; none are excluded.)
+- [x] add language support for french and german too please. Then adjust the language button accordingly.
+- [x] sometimes on mobile when going back to an old tab instance of statle, the map globe goes small and into the top left corner of its container and remains fixed there (even if i zoom its anchored to the top left corner)
+- [x] make sure our stats are up-to-date (World Bank indicators and REST Countries reference fields refreshed from their current APIs.)

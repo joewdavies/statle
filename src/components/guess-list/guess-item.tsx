@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { ProximityRevealBar } from './proximity-reveal-bar';
 import { convertDistance, getDistance } from 'geolib';
-import { countriesMap, Country } from '../../data/countries/countries';
+import { countriesMap, Country, getCountryName } from '../../data/countries/countries';
 import { GuessRow } from './guess-row';
 import { useMantineColorScheme, Collapse, Box, Flex, Text, Group, UnstyledButton } from '@mantine/core';
 import { buildClues, clueIcons } from '../stats-list/stat-clues';
@@ -149,7 +149,7 @@ export const GuessItem = ({
                       const names = codes.map(c => {
                         const found = countriesMap.get(c);
                         if (!found) return c;
-                        return language === 'es' && found.nameES ? found.nameES : found.name;
+                        return getCountryName(found, language);
                       });
                       const joined = names.join(', ');
                       return joined.length <= 28 ? joined : <LandBorders borders={codes} />;
@@ -166,4 +166,3 @@ export const GuessItem = ({
     </Box>
   );
 };
-

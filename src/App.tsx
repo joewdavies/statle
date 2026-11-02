@@ -6,7 +6,7 @@ import { StatClues } from './components/stats-list/stat-clues';
 import { Navbar } from './components/navbar/navbar';
 import { SelectCountry } from './components/select-country/select-country';
 import { GameStatus, MAX_GUESSES } from './constants';
-import { countries } from './data/countries/countries';
+import { countries, getCountryName } from './data/countries/countries';
 import { useUserStats } from './hooks/useUserStats';
 import { useLanguage } from './hooks/useLanguage';
 import { notifications } from '@mantine/notifications';
@@ -80,6 +80,12 @@ type PersistedRound = {
 };
 
 function App() {
+  const { t, language } = useLanguage();
+
+  useEffect(() => {
+    document.title = `Statle — ${t("Guess today's country!")}`;
+  }, [t]);
+
   // ==== Load today's persisted state (if any) ====
   const persisted: PersistedRound | null = useMemo(() => {
     if (typeof window === 'undefined') return null;
@@ -167,7 +173,7 @@ function App() {
       position: 'top-center',
     });
   }
-}, [gameStatus, endRevealDone]);
+}, [gameStatus, endRevealDone, t]);
   // win/loss notifications
 useEffect(() => {
   if (gameStatus === GameStatus.Lost && endRevealDone) {
@@ -177,12 +183,11 @@ useEffect(() => {
       position: 'top-center',
     });
   }
-}, [gameStatus, endRevealDone]);
+}, [gameStatus, endRevealDone, t]);
 
   // statistical data (static for now)
   const statsByCode = stats;
   const { colorScheme } = useMantineColorScheme();
-  const { t } = useLanguage();
 
   return (
     <Flex align="center" direction="column" gap={10}>
@@ -239,7 +244,7 @@ useEffect(() => {
             return found
               ? {
                   code: found.code,
-                  name: found.name,
+                  name: getCountryName(found, language),
                   latitude: found.latitude,
                   longitude: found.longitude,
                 }
@@ -251,7 +256,7 @@ useEffect(() => {
             latitude: number;
             longitude: number;
           }>}
-        correctCountry={country}
+        correctCountry={{ ...country, name: getCountryName(country, language) }}
       />
     </Flex>
   </>

@@ -8,9 +8,11 @@ import {
 import { IconSun, IconSnowflake, IconMoon } from "@tabler/icons-react";
 import classes from "./mode-toggle.module.css";
 import { isChristmas } from "../../helpers/isChristmas";
+import { useLanguage } from "../../hooks/useLanguage";
 
 export function ModeToggle() {
   const { setColorScheme } = useMantineColorScheme();
+  const { t } = useLanguage();
   const christmas = isChristmas();
   const computedColorScheme = useComputedColorScheme("light", {
     getInitialValueInEffect: true,
@@ -24,7 +26,7 @@ export function ModeToggle() {
         }
         variant="default"
         size="lg"
-        aria-label="Toggle color scheme"
+        aria-label={t("Toggle color scheme")}
       >
         <IconSun className={cx(classes.icon, classes.light)} stroke={1.5} />
         {christmas ? (

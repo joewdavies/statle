@@ -3,13 +3,13 @@ import { useDisclosure } from '@mantine/hooks';
 import { IconInfoCircle, IconBrandGithub } from '@tabler/icons-react';
 import { useLanguage } from '../../hooks/useLanguage';
 import { convertDistance, getDistance } from 'geolib';
-import { countries } from '../../data/countries/countries';
+import { countries, getCountryName } from '../../data/countries/countries';
 import { getCompassDirection, directionMap } from '../../services/geo';
 import { GuessRow } from '../guess-list/guess-row';
 
 export function About() {
   const [opened, { open, close }] = useDisclosure(false);
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
 
   const country1 = countries[140];
   const country2 = countries[142];
@@ -80,7 +80,7 @@ export function About() {
               country={targetCountry}
             />
             <Text size="sm">
-              Your guess {country1.name} is {distance1}
+              {t("Your guess")} {getCountryName(country1, language)} is {distance1}
               {t("km away from the target location, the target location is in the")} {
                 t(directionMap[
                 getCompassDirection(
@@ -104,8 +104,8 @@ export function About() {
             country={targetCountry}
           />
           <Text size="sm">
-            Your second guess <Text span fw={500} />
-            {country2.name} {t("is getting closer!")} {distance2}
+            {t("Your second guess")} <Text span fw={500} />
+            {getCountryName(country2, language)} {t("is getting closer!")} {distance2}
             {t("km away,")} {
               t(directionMap[
               getCompassDirection(
@@ -129,7 +129,7 @@ export function About() {
           />
           <Text size="sm">
             {t("Next guess,")} <Text span fw={500}>
-              {targetCountry.name}
+              {getCountryName(targetCountry, language)}
             </Text>
             {t(", it's the location to guess! Congrats! 🎉")}
           </Text>
@@ -160,11 +160,11 @@ export function About() {
               href="https://www.buymeacoffee.com/joewdavies"
               target="_blank"
               rel="noopener noreferrer"
-              aria-label="Buy Me A Coffee — Joe W Davies"
+              aria-label={`${t("Buy Me A Coffee")} — Joe W Davies`}
             >
               <img
                 src="https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png"
-                alt="Buy Me A Coffee"
+                alt={t("Buy Me A Coffee")}
                 style={{ border: 0, display: 'inline-block', height: '37px' }}
               />
             </a>
