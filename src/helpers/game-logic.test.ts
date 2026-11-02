@@ -78,7 +78,14 @@ describe('getRandomCountry', () => {
         })
       )
     )
-    expect(() => getRandomCountry()).not.toThrow()
+    localStorage.setItem('country', 'FR')
+    for (let i = 0; i < 30; i++) {
+      localStorage.setItem('country', 'FR')
+      const c = getRandomCountry()
+      expect(countries.some((x) => x.code === c.code)).toBe(true)
+      expect(c.code).not.toBe('FR')
+      expect(localStorage.getItem('country')).toBe(c.code)
+    }
   })
 })
 
@@ -135,7 +142,10 @@ describe('hardResetGame', () => {
     vi.stubGlobal('location', { ...window.location, reload })
     hardResetGame()
     vi.unstubAllGlobals()
+    expect(reload).toHaveBeenCalledTimes(1)
     expect(localStorage.getItem('country')).toBeNull()
+    expect(localStorage.getItem('guessCount')).toBeNull()
+    expect(localStorage.getItem('gameStatus')).toBeNull()
     expect(localStorage.getItem('guesses')).toBeNull()
     expect(localStorage.getItem('statle-lang')).toBe('fr')
   })

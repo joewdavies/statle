@@ -39,6 +39,24 @@ describe('fuzzyCountryFilter', () => {
 
   it('expands abbreviations like st -> saint', () => {
     expect(search('st lucia')).toContain('Saint Lucia')
+    expect(search('st. lucia')).toContain('Saint Lucia')
+    expect(search('st')).toContain('Saint Lucia')
+    expect(search('st france')).toEqual([])
+  })
+
+  it('respects the result limit when filtering', () => {
+    expect(search('a', 2)).toHaveLength(2)
+    expect(search('a', 1)).toHaveLength(1)
+    expect(search('a', 0)).toHaveLength(0)
+  })
+
+  it('matches each word independently and in any order', () => {
+    expect(search('states united')).toEqual(['United States'])
+    expect(search('lucia saint')).toEqual(['Saint Lucia'])
+  })
+
+  it('ignores extra whitespace between words', () => {
+    expect(search('  united    states  ')).toEqual(['United States'])
   })
 
   it('requires every token to match', () => {
@@ -49,6 +67,8 @@ describe('fuzzyCountryFilter', () => {
   it('tolerates a one-letter typo on short tokens', () => {
     expect(search('usa')).toContain('United States')
     expect(search('fra')).toContain('France')
+    expect(search('frq')).toEqual(['France'])
+    expect(search('gxrmany')).toEqual([])
   })
 
   it('returns nothing for gibberish', () => {

@@ -95,6 +95,114 @@ afterEach(() => {
   Object.defineProperty(window, 'devicePixelRatio', { configurable: true, value: 1 })
 })
 
+describe('<GlobeJourney /> interaction and drawing', () => {
+  const calls = (canvas: HTMLCanvasElement) => contexts.get(canvas).__calls as Record<string, any[][]>
+  const touch = (x: number, y: number) => ({ clientX: x, clientY: y, identifier: 0, target: document.body })
+
+  function dispatch(canvas: HTMLCanvasElement, type: string, init: any = {}) {
+    const evt = new Event(type, { bubbles: true, cancelable: true })
+    Object.assign(evt, init)
+    act(() => {
+      canvas.dispatchEvent(evt)
+    })
+    return evt
+  }
+
+  it('draws the ocean, the land and a marker for each guess on first paint', () => {
+    const { canvas } = renderGlobe({ width: 400, height: 400 })
+    const c = calls(canvas)
+    expect(c.clearRect[0]).toEqual([0, 0, 400, 400])
+    expect(c.fill.length).toBeGreaterThanOrEqual(3)
+    expect(c.arc.length).toBeGreaterThanOrEqual(2)
+  })
+
+  it('draws a flight line between guesses once the journey has advanced', async () => {
+    const { canvas } = renderGlobe({ width: 400, height: 400, rotateDuration: 10, stepDuration: 10 })
+    await vi.waitFor(() => expect(calls(canvas).lineTo?.length ?? 0).toBeGreaterThan(0), { timeout: 3000 })
+    expect(calls(canvas).moveTo.length).toBeGreaterThan(0)
+  })
+
+  it('prevents page scroll for wheel gestures on the globe but not outside it', () => {
+    const { canvas } = renderGlobe({ width: 400, height: 400 })
+    expect(dispatch(canvas, 'wheel', { clientX: 200, clientY: 200 }).defaultPrevented).toBe(true)
+    expect(dispatch(canvas, 'wheel', { clientX: 2, clientY: 2 }).defaultPrevented).toBe(false)
+  })
+
+  it('locks body scroll while touching the globe and unlocks on touch end', () => {
+    const { canvas } = renderGlobe({ width: 400, height: 400 })
+    const start = dispatch(canvas, 'touchstart', { touches: [touch(200, 200)], changedTouches: [touch(200, 200)] })
+    expect(start.defaultPrevented).toBe(true)
+    expect(document.body.style.overflow).toBe('hidden')
+    expect(dispatch(canvas, 'touchmove', { touches: [touch(200, 200)], changedTouches: [touch(200, 200)] }).defaultPrevented).toBe(true)
+    dispatch(canvas, 'touchend', { changedTouches: [touch(200, 200)] })
+    expect(document.body.style.overflow).toBe('')
+  })
+
+  it('does not lock scroll when the touch starts outside the globe', () => {
+    const { canvas } = renderGlobe({ width: 400, height: 400 })
+    const start = dispatch(canvas, 'touchstart', { touches: [touch(2, 2)], changedTouches: [touch(2, 2)] })
+    expect(start.defaultPrevented).toBe(false)
+    expect(document.body.style.overflow).toBe('')
+    expect(dispatch(canvas, 'touchmove', { touches: [touch(2, 2)], changedTouches: [touch(2, 2)] }).defaultPrevented).toBe(false)
+  })
+
+  it('never leaves the page scroll-locked after unmount', () => {
+    const { canvas, unmount } = renderGlobe({ width: 400, height: 400 })
+    dispatch(canvas, 'touchstart', { touches: [touch(200, 200)], changedTouches: [touch(200, 200)] })
+    expect(document.body.style.overflow).toBe('hidden')
+    unmount()
+    expect(document.body.style.overflow).toBe('')
+    expect(document.body.style.overscrollBehavior).not.toBe('contain')
+  })
+
+  it('swallows a double-tap on the globe so the browser does not also zoom the page', () => {
+    const { canvas } = renderGlobe({ width: 400, height: 400 })
+    const tap = () => dispatch(canvas, 'touchend', { changedTouches: [touch(200, 200)] })
+    expect(tap().defaultPrevented).toBe(false)
+    expect(tap().defaultPrevented).toBe(true)
+  })
+
+  it('does not treat two distant taps as a double-tap', () => {
+    const { canvas } = renderGlobe({ width: 400, height: 400 })
+    dispatch(canvas, 'touchend', { changedTouches: [touch(150, 200)] })
+    expect(dispatch(canvas, 'touchend', { changedTouches: [touch(250, 200)] }).defaultPrevented).toBe(false)
+  })
+
+  it('does not treat a slow second tap as a double-tap', () => {
+    vi.useFakeTimers({ toFake: ['Date'] })
+    const { canvas } = renderGlobe({ width: 400, height: 400 })
+    dispatch(canvas, 'touchend', { changedTouches: [touch(200, 200)] })
+    vi.setSystemTime(Date.now() + 500)
+    expect(dispatch(canvas, 'touchend', { changedTouches: [touch(200, 200)] }).defaultPrevented).toBe(false)
+  })
+
+  it('ignores a double-tap outside the globe', () => {
+    const { canvas } = renderGlobe({ width: 400, height: 400 })
+    dispatch(canvas, 'touchend', { changedTouches: [touch(2, 2)] })
+    expect(dispatch(canvas, 'touchend', { changedTouches: [touch(2, 2)] }).defaultPrevented).toBe(false)
+  })
+
+  it('repaints at the right size when the browser restores a lost canvas context', async () => {
+    const { canvas } = renderGlobe({ width: 400, height: 400 })
+    const c = calls(canvas)
+    const before = c.setTransform.length
+    const clears = c.clearRect.length
+    dispatch(canvas, 'contextrestored')
+    expect(c.setTransform.length).toBe(before + 1)
+    expect(c.setTransform[c.setTransform.length - 1]).toEqual([2, 0, 0, 2, 0, 0])
+    await vi.waitFor(() => expect(c.clearRect.length).toBeGreaterThan(clears))
+  })
+
+  it('does not repaint while the tab is hidden', () => {
+    const { canvas } = renderGlobe({ width: 400, height: 400 })
+    const c = calls(canvas)
+    const before = c.setTransform.length
+    setVisibility('hidden')
+    dispatch(canvas, 'contextrestored')
+    expect(c.setTransform.length).toBe(before)
+  })
+})
+
 describe('<GlobeJourney /> sizing (mobile tab-restore regression)', () => {
   it('renders a canvas sized from the props when the container has no layout yet', () => {
     const { canvas } = renderGlobe({ width: 400, height: 400 })

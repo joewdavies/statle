@@ -8,7 +8,14 @@ const wrapper = ({ children }: { children: ReactNode }) => <LanguageProvider>{ch
 describe('useLanguage', () => {
   it('throws outside the provider', () => {
     vi.spyOn(console, 'error').mockImplementation(() => {})
-    expect(() => renderHook(() => useLanguage())).toThrow(/LanguageProvider/)
+    // React rethrows through window 'error'; swallow it so jsdom does not print it
+    const swallow = (e: ErrorEvent) => e.preventDefault()
+    window.addEventListener('error', swallow)
+    try {
+      expect(() => renderHook(() => useLanguage())).toThrow(/LanguageProvider/)
+    } finally {
+      window.removeEventListener('error', swallow)
+    }
   })
 
   it('restores a stored language and sets <html lang>', () => {
